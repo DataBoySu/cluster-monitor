@@ -8,6 +8,14 @@ rich>=13.0.0
 numpy>=1.24.0
 requests>=2.31.0
 
+# Optional: Particle visualization
+# pygame>=2.5.0
+
+# GPU-accelerated visualization (OpenGL-based)
+moderngl>=5.8.0
+glfw>=2.6.0
+PyGLM>=2.7.0
+
 # GPU libraries (optional - install based on your CUDA version)
 # Option 1: CuPy (recommended for CUDA 12.x)
 # cupy-cuda12x>=12.0.0

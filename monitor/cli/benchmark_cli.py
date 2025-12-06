@@ -26,7 +26,8 @@ console = Console()
 @click.option('--power-limit', type=int, default=0, help='Stop if power exceeds this in watts (0=no limit)')
 @click.option('--save-baseline', is_flag=True, help='Save results as baseline (auto-saved if completed)')
 @click.option('--compare-baseline', is_flag=True, help='Compare with existing baseline')
-def benchmark_cli(bench_type, mode, duration, matrix_size, particles, temp_limit, power_limit, save_baseline, compare_baseline):
+@click.option('--visualize', '-v', is_flag=True, help='Show particle visualization window (particles only, requires pygame)')
+def benchmark_cli(bench_type, mode, duration, matrix_size, particles, temp_limit, power_limit, save_baseline, compare_baseline, visualize):
     """Run GPU stress benchmark and display results in CLI."""
     from health_monitor import BANNER
     console.print(BANNER, style="bold cyan")
@@ -74,6 +75,13 @@ def benchmark_cli(bench_type, mode, duration, matrix_size, particles, temp_limit
     
     console.print(f"\n[bold green]Starting {bench_type.upper()} benchmark for {duration} seconds...[/bold green]")
     
+    if visualize and bench_type != 'particle':
+        console.print("[yellow]Note: Visualization only available for particle benchmarks, ignoring --visualize flag[/yellow]")
+        visualize = False
+    
+    if visualize:
+        console.print("[cyan]Visualization enabled - window will open during benchmark[/cyan]")
+    
     # Run benchmark with progress display
     with Progress(
         SpinnerColumn(),
@@ -85,7 +93,7 @@ def benchmark_cli(bench_type, mode, duration, matrix_size, particles, temp_limit
     ) as progress:
         task = progress.add_task(f"[cyan]{bench_type.upper()} Benchmark", total=100)
         
-        bench_thread = threading.Thread(target=bench.start, args=(config,))
+        bench_thread = threading.Thread(target=lambda: bench.start(config, visualize=visualize))
         bench_thread.start()
         
         while bench.running:

@@ -215,7 +215,7 @@ class GPUStressWorker:
         if max_balls_cap is not None:
             self._max_balls_cap = max_balls_cap
     
-    def update_split_enabled(self, enabled: bool):
+    def set_split_enabled(self, enabled: bool):
         """Enable or disable particle splitting."""
         self._split_enabled = enabled
     
