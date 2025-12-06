@@ -18,12 +18,18 @@ env/
 .vscode/
 *.swp
 
-# Data
+# Data and cache
 *.db
 metrics.db
+.features_cache
 
 # Logs
 *.log
+
+# Old/backup files
+*.old
+*.bak
+*.tmp
 
 # OS
 .DS_Store

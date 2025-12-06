@@ -35,8 +35,8 @@ class GPUStressWorker:
             return
         except ImportError:
             pass
-        except Exception as e:
-            print(f"cupy failed: {e}")
+        except Exception:
+            pass
         
         # Try torch
         try:
@@ -49,8 +49,8 @@ class GPUStressWorker:
                 return
         except ImportError:
             pass
-        except Exception as e:
-            print(f"torch failed: {e}")
+        except Exception:
+            pass
         
         # Fallback: passive monitoring
         self._method = 'passive'

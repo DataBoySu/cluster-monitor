@@ -11,6 +11,7 @@ import threading
 
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.responses import HTMLResponse, StreamingResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from monitor.collectors.gpu import GPUCollector
 from monitor.collectors.system import SystemCollector
@@ -20,6 +21,7 @@ from monitor import benchmark_router
 
 # Path to the templates directory, relative to this file
 TEMPLATE_DIR = Path(__file__).parent / "templates"
+STATIC_DIR = Path(__file__).parent / "static"
 
 def create_app(config: Dict[str, Any]) -> FastAPI:
     
@@ -28,6 +30,9 @@ def create_app(config: Dict[str, Any]) -> FastAPI:
         description="Real-time GPU cluster monitoring",
         version="1.0.0"
     )
+    
+    # Mount static files
+    app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
     
     storage = MetricsStorage(config['storage']['path'])
     alert_engine = AlertEngine(config.get('alerts', {}))
@@ -81,7 +86,23 @@ def create_app(config: Dict[str, Any]) -> FastAPI:
     @app.get("/api/processes")
     async def get_processes():
         collector = GPUCollector()
-        return {'processes': collector.collect_processes()}
+        gpus = collector.collect()
+        processes = collector.collect_processes()
+        
+        # Calculate total VRAM usage from processes
+        gpu_memory_stats = {}
+        for gpu in gpus:
+            if not gpu.get('error'):
+                gpu_memory_stats[gpu['index']] = {
+                    'total': gpu.get('memory_total', 0),
+                    'used': gpu.get('memory_used', 0),
+                    'free': gpu.get('memory_free', 0)
+                }
+        
+        return {
+            'processes': processes,
+            'gpu_memory': gpu_memory_stats
+        }
     
     @app.get("/api/system")
     async def get_system():
@@ -109,6 +130,28 @@ def create_app(config: Dict[str, Any]) -> FastAPI:
                 'cpu_percent', 'memory_percent', 'disk_percent'
             ]
         }
+    
+    @app.get("/api/features")
+    async def get_features():
+        """Get available features (cached)."""
+        from monitor.utils import get_features
+        return get_features()
+    
+    @app.post("/api/update/check")
+    async def check_update():
+        """Check for available updates."""
+        from monitor.utils import check_for_updates
+        return check_for_updates()
+    
+    @app.post("/api/update/install")
+    async def install_update():
+        """Install available update."""
+        from monitor.utils import perform_update
+        success = perform_update()
+        if success:
+            return {'status': 'success', 'message': 'Update installed. Restart application.'}
+        else:
+            return {'status': 'error', 'message': 'Update failed'}
     
     @app.get("/api/export/json")
     async def export_json(hours: int = 24):
