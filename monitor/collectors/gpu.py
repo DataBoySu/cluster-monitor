@@ -2,6 +2,8 @@
 
 import subprocess
 import os
+import csv
+import io
 from typing import List, Dict, Any
 
 try:
@@ -43,9 +45,12 @@ class GPUCollector:
             return self._collect_nvidia_smi()
     
     def collect_processes(self) -> List[Dict[str, Any]]:
-        """Get detailed process info for all GPUs."""
+        """Get detailed process info for all GPUs with utilization."""
+        # Try to get utilization data from nvidia-smi accounting mode
+        utilization_map = self._get_process_utilization()
+        
         if not self.nvml_initialized:
-            return self._collect_processes_nvidia_smi()
+            return self._collect_processes_nvidia_smi(utilization_map)
         
         processes = []
         try:
@@ -62,6 +67,7 @@ class GPUCollector:
                             'gpu_name': gpu_name,
                             'pid': proc.pid,
                             'gpu_memory_mb': proc.usedGpuMemory / (1024**2) if proc.usedGpuMemory else 0,
+                            'gpu_utilization': utilization_map.get(proc.pid, {}).get('gpu_util', None),
                             'name': 'Unknown',
                             'username': 'Unknown',
                         }
@@ -85,8 +91,46 @@ class GPUCollector:
         
         return processes
     
-    def _collect_processes_nvidia_smi(self) -> List[Dict[str, Any]]:
+    def _get_process_utilization(self) -> Dict[int, Dict[str, Any]]:
+        """Get per-process GPU utilization using nvidia-smi accounting mode.
+        
+        Note: This only works for CUDA/compute workloads, not graphics processes.
+        Requires accounting mode to be enabled: nvidia-smi --accounting-mode=1
+        """
+        utilization_map = {}
+        
+        try:
+            # Try to query accounted apps (requires accounting mode enabled)
+            result = subprocess.run(
+                ['nvidia-smi', '--query-accounted-apps=pid,gpu_util,mem_util',
+                 '--format=csv,noheader,nounits'],
+                capture_output=True, text=True, timeout=5
+            )
+            
+            if result.returncode == 0 and result.stdout.strip():
+                reader = csv.reader(io.StringIO(result.stdout))
+                for row in reader:
+                    if len(row) >= 2:
+                        try:
+                            pid = int(row[0].strip())
+                            gpu_util = float(row[1].strip()) if row[1].strip() != '[N/A]' else None
+                            utilization_map[pid] = {
+                                'gpu_util': gpu_util,
+                            }
+                        except (ValueError, IndexError):
+                            continue
+        except (subprocess.TimeoutExpired, FileNotFoundError, Exception) as e:
+            # Accounting mode not available or nvidia-smi failed
+            # This is expected for graphics workloads or when accounting is disabled
+            pass
+        
+        return utilization_map
+    
+    def _collect_processes_nvidia_smi(self, utilization_map: Dict[int, Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         """Fallback process collection via nvidia-smi."""
+        if utilization_map is None:
+            utilization_map = {}
+        
         try:
             result = subprocess.run(
                 ['nvidia-smi', '--query-compute-apps=gpu_uuid,pid,used_memory,process_name',
@@ -103,11 +147,13 @@ class GPUCollector:
                     continue
                 parts = [p.strip() for p in line.split(',')]
                 if len(parts) >= 4:
+                    pid = int(parts[1])
                     processes.append({
                         'gpu_index': 0,
-                        'pid': int(parts[1]),
+                        'pid': pid,
                         'gpu_memory_mb': float(parts[2]) if parts[2] != '[N/A]' else 0,
                         'name': parts[3],
+                        'gpu_utilization': utilization_map.get(pid, {}).get('gpu_util', None),
                     })
             return processes
         except Exception:
@@ -186,12 +232,15 @@ class GPUCollector:
                     
                 parts = [p.strip() for p in line.split(',')]
                 if len(parts) >= 7:
+                    mem_used = float(parts[3]) if parts[3] != '[N/A]' else 0
+                    mem_total = float(parts[4]) if parts[4] != '[N/A]' else 0
                     gpus.append({
                         'index': int(parts[0]),
                         'name': parts[1],
                         'utilization': int(parts[2]) if parts[2] != '[N/A]' else 0,
-                        'memory_used': float(parts[3]) if parts[3] != '[N/A]' else 0,
-                        'memory_total': float(parts[4]) if parts[4] != '[N/A]' else 0,
+                        'memory_used': mem_used,
+                        'memory_total': mem_total,
+                        'memory_free': mem_total - mem_used,
                         'temperature': int(parts[5]) if parts[5] != '[N/A]' else 0,
                         'power': float(parts[6]) if parts[6] != '[N/A]' else 0,
                     })

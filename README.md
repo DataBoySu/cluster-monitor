@@ -5,6 +5,7 @@ Real-time GPU and system monitoring with web dashboard and CLI interface. Featur
 ## Features
 
 ### Monitoring
+
 - Real-time GPU metrics (utilization, memory, temperature, power)
 - System metrics (CPU, memory, disk I/O)
 - Web dashboard with live charts
@@ -12,6 +13,7 @@ Real-time GPU and system monitoring with web dashboard and CLI interface. Featur
 - Historical data storage and alerting
 
 ### GPU Benchmarking
+
 - GEMM (matrix multiplication) stress test
 - Particle simulation workload
 - Auto-scaling stress test (dynamically increases load to 98% GPU utilization)
@@ -20,82 +22,74 @@ Real-time GPU and system monitoring with web dashboard and CLI interface. Featur
 
 ## Requirements
 
-### Core Monitoring (Always Available)
 - Python 3.8+
 - NVIDIA GPU with drivers installed
-- `nvidia-smi` command available
-
-### GPU Benchmarking (Optional)
-- CUDA Toolkit 12.0+ or compatible
-- One of:
-  - CuPy: `pip install cupy-cuda12x` (or appropriate CUDA version)
-  - PyTorch: `pip install torch --index-url https://download.pytorch.org/whl/cu121`
+- CUDA Toolkit 12.0+ (for benchmarking)
 
 ## Installation
 
-### 1. Clone Repository
-```bash
-git clone https://github.com/DataBoySu/cluster-monitor.git
-cd cluster-health-monitor
+### 1. Download
+
+Download the latest release ZIP from [Releases](https://github.com/DataBoySu/cluster-monitor/releases).
+
+Extract to your desired location:
+
+```powershell
+Expand-Archive cluster-health-monitor-v1.0.0.zip -DestinationPath C:\Tools\
+cd C:\Tools\cluster-health-monitor
 ```
 
-### 2. Create Virtual Environment
-```bash
-python -m venv .venv
+### 2. Run Setup
+
+```powershell
+.\setup.ps1
 ```
 
-Activate:
-- Windows: `.venv\Scripts\activate`
-- Linux/Mac: `source .venv/bin/activate`
+The setup script will:
 
-### 3. Install Dependencies
+- Check for NVIDIA drivers and CUDA
+- Create Python virtual environment
+- Install required dependencies
+- Prompt for optional GPU benchmark libraries (CuPy or PyTorch)
+- Verify installation
 
-**Basic Monitoring:**
-```bash
-pip install -r requirements.txt
-```
+### 3. Verify
 
-**With GPU Benchmarking (CuPy):**
-```bash
-pip install -r requirements.txt
-pip install cupy-cuda12x  # Adjust for your CUDA version
-```
-
-**With GPU Benchmarking (PyTorch):**
-```bash
-pip install -r requirements.txt
-pip install torch --index-url https://download.pytorch.org/whl/cu121
-```
-
-### 4. Verify Installation
-```bash
+```powershell
+.\venv\Scripts\Activate.ps1
 python health_monitor.py --help
 ```
 
 ## Usage
 
-### Web Dashboard (Recommended)
-```bash
-python health_monitor.py monitor --web
+### Web Dashboard (Default)
+
+```powershell
+python health_monitor.py
+# Change port: python health_monitor.py --port 3000
 ```
 
 Access at: http://localhost:8090
 
 Features:
+
 - Real-time GPU/system metrics
 - Interactive benchmark controls
 - Live performance charts
 - Historical data visualization
+- In-dashboard updates
 
 ### Terminal Dashboard
-```bash
-python health_monitor.py monitor
+
+```powershell
+python health_monitor.py cli
 ```
 
 Displays live metrics in terminal with auto-refresh.
 
 ### CLI Benchmark
-```bash
+
+```powershell
 # Quick 15-second test
 python health_monitor.py benchmark --mode quick
 
@@ -136,13 +130,15 @@ The Stress Test mode automatically increases workload intensity:
 4. Continues scaling up to 15 times or until 98% GPU utilization achieved
 
 Example progression:
-```
+
+```text
 100K particles → 200K → 400K → 800K → 1.2M → 1.8M → 2.2M → 2.6M (94% GPU util)
 ```
 
 ## Benchmark Types
 
 ### GEMM (Matrix Multiplication)
+
 Dense matrix multiplication for maximum compute stress. Measures TFLOPS.
 
 ```bash
@@ -150,6 +146,7 @@ python health_monitor.py benchmark --type gemm --mode stress-test
 ```
 
 ### Particle Simulation
+
 Vectorized particle physics simulation with collision detection. Measures steps/second.
 
 ```bash
@@ -178,33 +175,6 @@ storage:
   path: ./metrics.db
 ```
 
-## Project Structure
-
-```
-cluster-health-monitor/
-├── monitor/
-│   ├── benchmark/
-│   │   ├── config.py          # Benchmark configuration
-│   │   ├── storage.py         # Baseline storage (SQLite)
-│   │   ├── workloads.py       # GPU workloads (GEMM/Particle)
-│   │   └── runner.py          # Benchmark orchestration
-│   ├── collectors/
-│   │   ├── gpu.py             # GPU metrics via nvidia-smi
-│   │   ├── system.py          # CPU, memory, disk
-│   │   └── network.py         # Network info
-│   ├── storage/
-│   │   └── sqlite.py          # Metrics persistence
-│   ├── api/
-│   │   ├── server.py          # FastAPI web server
-│   │   └── templates/
-│   │       └── index.html     # Web dashboard
-│   └── cli/
-│       └── benchmark_cli.py   # CLI commands
-├── config.yaml                # Configuration
-├── requirements.txt           # Dependencies
-└── health_monitor.py          # Main entry point
-```
-
 ## API Endpoints
 
 When running web server (`--web`):
@@ -215,57 +185,36 @@ When running web server (`--web`):
 - `POST /api/benchmark/start` - Start benchmark
 - `GET /api/benchmark/status` - Benchmark progress
 - `POST /api/benchmark/stop` - Stop benchmark
-- `GET /api/benchmark/results` - Get results
-- `GET /api/benchmark/baseline` - Get baseline for GPU
+
+## Updates
+
+### CLI
+
+```powershell
+python health_monitor.py --update
+```
+
+### Web Dashboard
+
+Click the "Check for Updates" button in the dashboard.
 
 ## Troubleshooting
 
 ### "nvidia-smi not found"
-- Install NVIDIA drivers
-- Add nvidia-smi to PATH
-- Verify: `nvidia-smi` in terminal
+Install NVIDIA drivers from https://www.nvidia.com/download/index.aspx
 
-### "No CUDA libraries found"
-Benchmarking features disabled without CUDA libraries. Install CuPy or PyTorch.
+### "No CUDA Toolkit found"
+Download CUDA from https://developer.nvidia.com/cuda-downloads
+Re-run `.\setup.ps1` after installation.
 
 ### Web dashboard not loading data
-- Check terminal for errors
-- Verify port 8090 is available
-- Check firewall settings
+- Check port 8090 is available
 - Try: `http://127.0.0.1:8090`
+- Check firewall settings
 
-### Benchmark not scaling GPU to 98%
-- Increase max_scales in runner.py
-- Check GPU has available memory
-- Verify no other GPU workloads running
-- Try different benchmark type (GEMM vs Particle)
+### Benchmark features grayed out
 
-## Performance Tips
-
-1. **Close other GPU applications** during benchmarking
-2. **Adequate cooling** for stress tests
-3. **Monitor temperatures** - tests will stop at temp limit
-4. **Use Stress Test mode** to find maximum GPU performance
-5. **Run Extended mode** for stability validation
-
-## Development
-
-### Run Tests
-```bash
-pytest tests/
-```
-
-### Code Structure
-- Modular design: config, storage, workloads, runner separated
-- Clean API exports via `__init__.py`
-- Type hints throughout
-- Comprehensive error handling
-
-### Contributing
-1. Fork repository
-2. Create feature branch
-3. Add tests for new features
-4. Submit pull request
+GPU benchmark libraries not installed. Run setup script and select CuPy or PyTorch installation.
 
 ## License
 
@@ -279,6 +228,4 @@ MIT License - See LICENSE file
 
 ## Support
 
-- Issues: GitHub Issues
-- Documentation: This README
-- CUDA setup: https://developer.nvidia.com/cuda-downloads
+GitHub: https://github.com/DataBoySu/cluster-monitor

@@ -295,12 +295,40 @@ def _run_app(config_path, port, nodes, once, web_mode=False, cli_mode=False):
 
 @click.group(invoke_without_command=True)
 @click.option('--config', '-c', type=click.Path(), help='Configuration file path.')
+@click.option('--port', '-p', type=int, help='Web server port (default: 8090).')
+@click.option('--update', is_flag=True, help='Check for and install updates.')
 @click.pass_context
-def cli(ctx, config):
+def cli(ctx, config, port, update):
     """Cluster Health Monitor: Real-time GPU and system health monitoring."""
+    if update:
+        from monitor.utils import check_for_updates, perform_update
+        console.print("\n[cyan]Checking for updates...[/cyan]")
+        
+        status = check_for_updates()
+        
+        if status.get('error'):
+            console.print(f"[red]{status['error']}[/red]")
+            return
+        
+        if not status['available']:
+            console.print(f"[green]You have the latest version ({status['current']})[/green]")
+            return
+        
+        console.print(f"\n[yellow]Update available:[/yellow]")
+        console.print(f"  Current: {status['current']}")
+        console.print(f"  Latest: {status['latest']}")
+        
+        if click.confirm("\nDownload and install update?"):
+            console.print("\n[cyan]Downloading update...[/cyan]")
+            if perform_update():
+                console.print("[green]Update complete! Restart the application.[/green]")
+            else:
+                console.print("[red]Update failed. Try again later.[/red]")
+        return
+    
     ctx.obj = {'config_path': config}
     if ctx.invoked_subcommand is None:
-        _run_app(config, port=None, nodes=None, once=False, web_mode=True)
+        _run_app(config, port=port, nodes=None, once=False, web_mode=True)
 
 @cli.command()
 @click.option('--port', '-p', type=int, help='Web server port (overrides config).')
