@@ -1,8 +1,15 @@
 # Core dependencies (required for CLI)
-pynvml>=11.5.0           # NVIDIA GPU metrics via NVML
+nvidia-ml-py>=12.535.0   # NVIDIA GPU metrics via NVML (replaces deprecated pynvml)
 psutil>=5.9.0            # System metrics (CPU, RAM, disk)
 pyyaml>=6.0              # Configuration file parsing
 click>=8.1.0             # Command line interface
 rich>=13.0.0             # Terminal UI
 fastapi>=0.104.0
 uvicorn>=0.24.0
+
+# GPU Benchmark dependencies
+numpy>=1.24.0            # Array operations (required)
+# For active GPU stress testing, install ONE of:
+#   pip install cupy-cuda13x  (NVIDIA CUDA 13.x)
+#   pip install torch --index-url https://download.pytorch.org/whl/cu131
+# Without cupy/torch, benchmark runs in passive monitoring mode

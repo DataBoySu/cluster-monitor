@@ -2,13 +2,14 @@
 """Cluster Health Monitor - Real-time GPU cluster monitoring."""
 
 import asyncio
-import click
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, List
 
 import yaml
+import click
 from rich.console import Console
 from rich.live import Live
 from rich.table import Table
@@ -20,6 +21,7 @@ from monitor.collectors.system import SystemCollector
 from monitor.collectors.network import NetworkCollector
 from monitor.storage.sqlite import MetricsStorage
 from monitor.alerting.rules import AlertEngine
+from monitor.cli.benchmark_cli import benchmark_cli
 
 console = Console()
 
@@ -249,20 +251,12 @@ async def run_cli_monitor(config: dict):
                 await asyncio.sleep(5)
 
 
-@click.command()
-@click.option('--config', '-c', type=click.Path(), help='Configuration file path')
-@click.option('--web', is_flag=True, help='Start web dashboard')
-@click.option('--cli', is_flag=True, help='Start CLI dashboard')
-@click.option('--nodes', help='Comma-separated list of nodes to monitor')
-@click.option('--port', '-p', type=int, default=None, help='Web server port (default: from config or 8080)')
-@click.option('--once', is_flag=True, help='Collect metrics once and exit')
-def main(config, web, cli, nodes, port, once):
-    """Cluster Health Monitor - Real-time GPU cluster monitoring."""
-    
+def _run_app(config_path, port, nodes, once, web_mode=False, cli_mode=False):
+    """Helper to run main application logic."""
     console.print(BANNER, style="bold cyan")
     
     # Load configuration
-    cfg = load_config(config)
+    cfg = load_config(config_path)
     
     # CLI port overrides config only if explicitly specified
     if port is not None:
@@ -270,32 +264,58 @@ def main(config, web, cli, nodes, port, once):
     
     if nodes:
         cfg['cluster']['nodes'] = [{'hostname': n.strip()} for n in nodes.split(',')]
-    
+
     # Single collection mode
     if once:
         metrics = collect_metrics()
         console.print_json(data=metrics)
         return
-    
-    # Determine mode
-    if not web and not cli:
-        # Default to CLI if nothing specified
-        cli = True
-    
+
+    async def main():
+        if web_mode and cli_mode:
+            # Run both concurrently
+            console.print("[cyan]Starting both web server and CLI dashboard...[/cyan]")
+            web_task = asyncio.create_task(run_web_server(cfg))
+            cli_task = asyncio.create_task(run_cli_monitor(cfg))
+            await asyncio.gather(web_task, cli_task)
+        elif web_mode:
+            await run_web_server(cfg)
+        elif cli_mode:
+            await run_cli_monitor(cfg)
+        else:
+            # Default to CLI if no mode is specified on the root command
+            await run_cli_monitor(cfg)
+
     # Run
     try:
-        if web and cli:
-            # Run both (web in background)
-            console.print("[cyan]Starting both web server and CLI dashboard...[/cyan]")
-            # This would need proper async handling
-            asyncio.run(run_web_server(cfg))
-        elif web:
-            asyncio.run(run_web_server(cfg))
-        else:
-            asyncio.run(run_cli_monitor(cfg))
+        asyncio.run(main())
     except KeyboardInterrupt:
         console.print("\n[yellow]Shutting down...[/yellow]")
 
 
+@click.group(invoke_without_command=True)
+@click.option('--config', '-c', type=click.Path(), help='Configuration file path.')
+@click.pass_context
+def cli(ctx, config):
+    """Cluster Health Monitor: Real-time GPU and system health monitoring."""
+    ctx.obj = {'config_path': config}
+    if ctx.invoked_subcommand is None:
+        _run_app(config, port=None, nodes=None, once=False, web_mode=True)
+
+@cli.command()
+@click.option('--port', '-p', type=int, help='Web server port (overrides config).')
+@click.pass_context
+def web(ctx, port):
+    """Launch the web dashboard."""
+    _run_app(ctx.obj['config_path'], port, nodes=None, once=False, web_mode=True)
+
+@cli.command(name="cli")
+@click.pass_context
+def term(ctx):
+    """Launch the interactive terminal dashboard."""
+    _run_app(ctx.obj['config_path'], port=None, nodes=None, once=False, cli_mode=True)
+
+
 if __name__ == '__main__':
-    main()
+    cli.add_command(benchmark_cli)
+    cli()

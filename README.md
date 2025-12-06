@@ -1,76 +1,89 @@
 # Cluster Health Monitor
 
 A lightweight, real-time monitoring tool for NVIDIA GPUs. Track GPU utilization, memory, temperature, and power during ML training or any GPU workload.
+A real-time, local-first monitoring tool for GPU and system health, featuring both a terminal dashboard and a web interface.
 
 ## System Requirements
+![Web UI Screenshot](https://i.imgur.com/CjBgOfJ.png) _(placeholder)_
 
 ### Hardware
+## Features
 
 - NVIDIA GPU (GeForce, RTX, Quadro, Tesla, etc.)
 
 ### Software
+## Requirements
 
 - Windows 10/11 or Linux (Ubuntu 18.04+)
 - Python 3.8 or higher
 - NVIDIA Driver 450.0 or higher
+- Python 3.8+
+- NVIDIA GPU with drivers installed (for GPU monitoring).
+- NVIDIA CUDA Toolkit (for GPU benchmarking features).
 
 ### Verify Your Setup
+## Quick Setup
 
 Before installing, confirm your GPU is detected:
+1.  **Clone the repository:**
+    ```sh
+    git clone <your-repo-url>
+    cd cluster-health-monitor
+    ```
 
-```bash
-nvidia-smi
+2.  **Create a virtual environment (recommended):**
+    ```sh
+    python -m venv .venv
+    ```
+    Activate it:
+    -   Windows: `.\.venv\Scripts\activate`
+    -   macOS/Linux: `source .venv/bin/activate`
+
+3.  **Install dependencies:**
+    Install the core dependencies from `requirements.txt`.
+    ```sh
+    pip install -r requirements.txt
+    ```
+
+4.  **Install GPU Benchmarking Libraries (Optional):**
+    To enable the GPU benchmark tab, you must install either CuPy or PyTorch compatible with your system's CUDA version.
+    ```sh
+    # Example for CUDA 13.x
+    pip install cupy-cuda13x
+    ```
+
+## How to Run
+
+The application is controlled with simple, direct commands.
+
+### Command Overview
+
+| Command                               | Description                                             |
+| ------------------------------------- | ------------------------------------------------------- |
+| `python health_monitor.py`            | Starts the terminal dashboard (the default action).     |
+| `python health_monitor.py term`       | Explicitly starts the terminal dashboard.               |
+| `python health_monitor.py web`        | Starts the web interface.                               |
+| `python health_monitor.py benchmark`  | Runs a GPU benchmark from the command line.             |
+| `python health_monitor.py [cmd] --help` | Shows detailed help for any command.                    |
+
+### Examples
+
+**Launch the Web Dashboard:**
+This will start the web server, typically at `http://127.0.0.1:8090`.
+```sh
+python health_monitor.py web
 ```
 
-You should see your GPU listed with driver version. If this command fails, install NVIDIA drivers first.
-
-## Installation
-
-### Step 1: Clone the Repository
-
-```git
-git clone https://github.com/DataBoySu/cluster-monitor.git
-cd cluster-monitor
+**Launch the Terminal Dashboard:**
+This will launch the live-updating terminal interface.
+```sh
+python health_monitor.py term
 ```
 
-### Step 2: Create Virtual Environment
-
-Windows:
-
-```python
-python -m venv venv
-venv\Scripts\activate
-```
-
-Linux/macOS:
-
-```python
-python3 -m venv venv
-source venv/bin/activate
-```
-
-### Step 3: Install Dependencies
-
-```python
-pip install -r requirements.txt
-```
-
-### Step 4: Verify Installation
-
-```python
-python health_monitor.py --once
-```
-
-This should print your GPU information once and exit.
-
-## Usage
-
-### CLI Dashboard (Terminal)
-
-Live monitoring in your terminal with auto-refresh:
-
-```python
-python health_monitor.py --cli
+**Run a GPU Benchmark:**
+Execute a benchmark directly from the command line.
+```sh
+python health_monitor.py benchmark --type gemm --duration 60
 ```
 
 Press Ctrl+C to exit.
@@ -81,6 +94,11 @@ Print GPU info once and exit:
 
 ```python
 python health_monitor.py --once
+For a full list of commands and options, use `--help`:
+```sh
+python health_monitor.py --help
+python health_monitor.py monitor --help
+python health_monitor.py benchmark --help
 ```
 
 ### Web Dashboard (Optional)
