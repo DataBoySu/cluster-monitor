@@ -24,18 +24,21 @@ Professional GPU monitoring and stress testing tool with real-time visualization
 The tool supports three installation types:
 
 ### 1. MINIMAL (CLI only)
+
 - Command-line interface with rich output
 - Basic monitoring (click, rich, psutil)
 - Smallest installation (~10 MB)
 - **Use case**: Headless servers, minimal footprint
 
 ### 2. STANDARD (CLI + Web UI)
+
 - Everything in Minimal
 - Web dashboard with real-time charts
 - REST API endpoints
 - **Use case**: Remote monitoring, multiple users
 
 ### 3. FULL (Standard + Visualization + GPU)
+
 - Everything in Standard
 - Particle simulation visualization
 - GPU benchmarking support
@@ -74,7 +77,8 @@ The tool supports three installation types:
 ```powershell
 python health_monitor.py web
 ```
-Access at: http://localhost:8090
+
+Access at: <http://localhost:8090>
 
 **Terminal Interface** (All installations)
 
@@ -156,27 +160,27 @@ REST API endpoints (web mode):
 
 ## Troubleshooting
 
-**nvidia-smi not found**
+nvidia-smi not found
 
 - Install NVIDIA drivers: <https://www.nvidia.com/download/index.aspx>
 
-**CUDA not detected**
+CUDA not detected
 
 - Download CUDA Toolkit: <https://developer.nvidia.com/cuda-downloads>
 - Re-run `setup.ps1` after installation
 
-**Benchmark disabled / Simulation button grayed out**
+Benchmark disabled / Simulation button grayed out
 
 - GPU compute libraries not installed or not detected
 - Solution 1: Run `python health_monitor.py refresh` to update detection cache
 - Solution 2: Re-run `setup.ps1` and install CuPy or PyTorch
 
-**CuPy installation fails on CUDA 13.0**
+CuPy installation fails on CUDA 13.0
 
 - Use: `pip install "cupy-cuda12x>=13.0.0"`
 - CuPy 13.x supports CUDA 12.x and 13.0
 
-**Port already in use**
+Port already in use
 
 - Change port: `python health_monitor.py web --port 3000`
 
