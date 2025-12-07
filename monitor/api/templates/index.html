@@ -18,6 +18,7 @@
             </div>
             <div class="header-right">
                 <button class="update-btn" onclick="checkForUpdates()" id="update-btn">Check for Updates</button>
+                <button class="update-btn" onclick="shutdownServer()" id="shutdown-btn" style="background: var(--accent-red);">Exit</button>
                 <div id="status-badge" class="status-badge status-healthy">HEALTHY</div>
             </div>
         </header>
@@ -103,6 +104,7 @@
             </div>
         </div>
         
+        <!-- SIMULATION TAB -->
         <!-- EXPORT TAB -->
         <div id="export" class="tab-content">
             <div class="card">
@@ -196,8 +198,9 @@
                         </div>
                     </div>
                     
-                    <div style="display: flex; gap: 10px; align-items: center;">
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                         <button class="export-btn" onclick="startBenchmark()" id="start-bench-btn">Start Benchmark</button>
+                        <button class="export-btn" onclick="startSimulation()" id="start-sim-btn" title="Start particle simulation with visualization">Start Simulation</button>
                         <button class="export-btn secondary" onclick="stopBenchmark()" id="stop-bench-btn" style="display: none;">Stop</button>
                         <span id="iteration-counter" style="display: none; font-size: 1.2em; color: var(--accent-green); font-weight: bold; margin-left: 20px;"></span>
                     </div>
@@ -248,6 +251,11 @@
         </footer>
     </div>
     
-    <script src="/static/main.js"></script>
+    <!-- Load modules in correct order -->
+    <script src="/static/utils.js"></script>
+    <script src="/static/charts.js"></script>
+    <script src="/static/benchmark.js"></script>
+    <script src="/static/simulation.js"></script>
+    <script src="/static/main-new.js"></script>
 </body>
 </html>

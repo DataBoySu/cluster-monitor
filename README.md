@@ -1,161 +1,132 @@
-# Cluster Health Monitor
+# GPU Health Monitor
 
-Real-time GPU and system monitoring with web dashboard and CLI interface. Features intelligent GPU stress testing with auto-scaling workloads and performance baselines.
+Professional GPU monitoring and stress testing tool with real-time visualization and performance baselines.
 
 ## Features
 
-### Monitoring
-
-- Real-time GPU metrics (utilization, memory, temperature, power)
-- System metrics (CPU, memory, disk I/O)
-- Web dashboard with live charts
-- Terminal interface with auto-refresh
-- Historical data storage and alerting
-
-### GPU Benchmarking
-
-- GEMM (matrix multiplication) stress test
-- Particle simulation workload
-- Auto-scaling stress test (dynamically increases load to 98% GPU utilization)
-- Performance baseline tracking per GPU and benchmark type
-- Multiple test modes: Quick (15s), Standard (60s), Extended (180s), Stress Test, Custom
+- **Real-time Monitoring**: GPU utilization, memory, temperature, power, and system metrics
+- **Web Dashboard**: Interactive charts with live updates and historical data (optional)
+- **GPU Stress Testing**: Particle simulation with auto-scaling backend load
+- **Performance Baselines**: Track and compare GPU performance over time
+- **Visualization**: Real-time particle physics simulation with interactive controls (optional)
+- **Multiple Test Modes**: Quick, Standard, Extended, Stress Test, and Custom configurations
+- **Modular Installation**: Install only what you need (CLI-only, with Web UI, or Full)
 
 ## Requirements
 
 - Python 3.8+
-- NVIDIA GPU with drivers installed
-- CUDA Toolkit 12.0+ (for benchmarking)
+- NVIDIA GPU with drivers (optional - for GPU benchmarking)
+- CUDA Toolkit 12.0+ (optional - for GPU acceleration)
+- Windows 10/11 or Linux
 
-## Installation
+## Installation Options
 
-### 1. Download
+The tool supports three installation types:
 
-Download the latest release ZIP from [Releases](https://github.com/DataBoySu/cluster-monitor/releases).
+### 1. MINIMAL (CLI only)
+- Command-line interface with rich output
+- Basic monitoring (click, rich, psutil)
+- Smallest installation (~10 MB)
+- **Use case**: Headless servers, minimal footprint
 
-Extract to your desired location:
+### 2. STANDARD (CLI + Web UI)
+- Everything in Minimal
+- Web dashboard with real-time charts
+- REST API endpoints
+- **Use case**: Remote monitoring, multiple users
+
+### 3. FULL (Standard + Visualization + GPU)
+- Everything in Standard
+- Particle simulation visualization
+- GPU benchmarking support
+- **Use case**: Full-featured installation, development
+
+## Quick Start
+
+### Installation
+
+1. **Download** the latest release from [Releases](https://github.com/DataBoySu/cluster-monitor/releases)
+
+2. **Extract** and run setup:
+
+   ```powershell
+   Expand-Archive cluster-health-monitor.zip -DestinationPath C:\Tools\
+   cd C:\Tools\cluster-health-monitor
+   .\setup.ps1
+   ```
+
+3. **Select** installation type (1=Minimal, 2=Standard, 3=Full)
+
+4. **Launch**:
+
+   ```powershell
+   # For MINIMAL or STANDARD:
+   python health_monitor.py cli
+   
+   # For STANDARD or FULL:
+   python health_monitor.py web
+   ```
+
+### Usage
+
+**Web Dashboard** (Standard/Full installations)
 
 ```powershell
-Expand-Archive cluster-health-monitor-v1.0.0.zip -DestinationPath C:\Tools\
-cd C:\Tools\cluster-health-monitor
+python health_monitor.py web
 ```
-
-### 2. Run Setup
-
-```powershell
-.\setup.ps1
-```
-
-The setup script will:
-
-- Check for NVIDIA drivers and CUDA
-- Create Python virtual environment
-- Install required dependencies
-- Prompt for optional GPU benchmark libraries (CuPy or PyTorch)
-- Verify installation
-
-### 3. Verify
-
-```powershell
-.\venv\Scripts\Activate.ps1
-python health_monitor.py --help
-```
-
-## Usage
-
-### Web Dashboard (Default)
-
-```powershell
-python health_monitor.py
-# Change port: python health_monitor.py --port 3000
-```
-
 Access at: http://localhost:8090
 
-Features:
-
-- Real-time GPU/system metrics
-- Interactive benchmark controls
-- Live performance charts
-- Historical data visualization
-- In-dashboard updates
-
-### Terminal Dashboard
+**Terminal Interface** (All installations)
 
 ```powershell
 python health_monitor.py cli
 ```
 
-Displays live metrics in terminal with auto-refresh.
-
-### CLI Benchmark
+**Command-Line Benchmark** (Full installation with GPU libraries)
 
 ```powershell
-# Quick 15-second test
+# Quick 15s test
 python health_monitor.py benchmark --mode quick
 
-# Standard 60-second test  
-python health_monitor.py benchmark --mode standard
-
-# Stress test with auto-scaling (pushes GPU to 98% util)
-python health_monitor.py benchmark --mode stress-test --type particle
-
-# Extended 180-second burn-in
-python health_monitor.py benchmark --mode extended
-
-# Custom configuration
-python health_monitor.py benchmark --mode custom --duration 120 --temp-limit 85
+# Stress test with auto-scaling
+python health_monitor.py benchmark --mode stress-test
 ```
 
 ## Benchmark Modes
 
-| Mode | Duration | Workload | Auto-Scale | Use Case |
-|------|----------|----------|------------|----------|
-| Quick | 15s | Fixed | No | Quick baseline check |
-| Standard | 60s | Fixed | No | Standard benchmark |
-| Extended | 180s | Fixed | No | Long-term stability |
-| Stress Test | 60s | Dynamic | Yes | Maximum GPU load testing |
-| Custom | Variable | Fixed | Optional | User-defined parameters |
+| Mode | Duration | Description |
+|------|----------|-------------|
+| **Quick** | 15s | Fast baseline check with fixed workload |
+| **Standard** | 60s | Standard benchmark for consistent results |
+| **Extended** | 180s | Long-term stability and thermal testing |
+| **Stress Test** | 60s | Auto-scaling load targeting 98% GPU utilization |
+| **Custom** | Variable | User-defined parameters and limits |
 
-### Auto-Scaling Stress Test
+### Stress Test Auto-Scaling
 
-The Stress Test mode automatically increases workload intensity:
+The Stress Test mode dynamically increases backend particle load:
 
-1. Starts with baseline workload (2048x2048 GEMM or 100K particles)
-2. Every 2 seconds, checks GPU utilization
-3. Scales workload aggressively if GPU util < target:
-   - `<70% util`: 2.0x scaling
-   - `70-85% util`: 1.5x scaling  
-   - `85-93% util`: 1.2x scaling
-   - `>93% util`: Target reached
-4. Continues scaling up to 15 times or until 98% GPU utilization achieved
+- **Start**: 200,000 backend particles
+- **Increment**: +50,000 particles every 5 seconds
+- **Maximum**: 500,000 backend particles
+- **Target**: 98% GPU utilization
+- **Timeout**: 60 seconds
 
-Example progression:
+This provides progressive GPU loading while maintaining responsive visualization.
 
-```text
-100K particles → 200K → 400K → 800K → 1.2M → 1.8M → 2.2M → 2.6M (94% GPU util)
-```
+## Visualization
 
-## Benchmark Types
+Interactive particle simulation with:
 
-### GEMM (Matrix Multiplication)
-
-Dense matrix multiplication for maximum compute stress. Measures TFLOPS.
-
-```bash
-python health_monitor.py benchmark --type gemm --mode stress-test
-```
-
-### Particle Simulation
-
-Vectorized particle physics simulation with collision detection. Measures steps/second.
-
-```bash
-python health_monitor.py benchmark --type particle --mode stress-test
-```
+- **Real-time Physics**: GPU-accelerated particle collision and bouncing
+- **Interactive Controls**: Gravity, ball speed, splitting behavior
+- **Click Spawning**: Add particles dynamically during simulation
+- **FPS Overlay**: Monitor render performance
+- **GPU Metrics**: Live utilization display
 
 ## Configuration
 
-Edit `config.yaml`:
+Edit `config.yaml` for custom settings:
 
 ```yaml
 monitoring:
@@ -165,67 +136,50 @@ monitoring:
 alerts:
   gpu_temperature_warn: 80
   gpu_temperature_critical: 90
-  gpu_memory_usage_warn: 90
 
 web:
   host: 0.0.0.0
   port: 8090
-
-storage:
-  path: ./metrics.db
 ```
 
-## API Endpoints
+## API Reference
 
-When running web server (`--web`):
+REST API endpoints (web mode):
 
 - `GET /` - Web dashboard
-- `GET /api/status` - Current metrics
+- `GET /api/status` - Current GPU metrics
 - `GET /api/history` - Historical data
 - `POST /api/benchmark/start` - Start benchmark
 - `GET /api/benchmark/status` - Benchmark progress
 - `POST /api/benchmark/stop` - Stop benchmark
-
-## Updates
-
-### CLI
-
-```powershell
-python health_monitor.py --update
-```
-
-### Web Dashboard
-
-Click the "Check for Updates" button in the dashboard.
+- `GET /api/benchmark/baseline` - Retrieve saved baseline
 
 ## Troubleshooting
 
-### "nvidia-smi not found"
-Install NVIDIA drivers from https://www.nvidia.com/download/index.aspx
+**nvidia-smi not found**
 
-### "No CUDA Toolkit found"
-Download CUDA from https://developer.nvidia.com/cuda-downloads
-Re-run `.\setup.ps1` after installation.
+- Install NVIDIA drivers: <https://www.nvidia.com/download/index.aspx>
 
-### Web dashboard not loading data
-- Check port 8090 is available
-- Try: `http://127.0.0.1:8090`
-- Check firewall settings
+**CUDA not detected**
 
-### Benchmark features grayed out
+- Download CUDA Toolkit: <https://developer.nvidia.com/cuda-downloads>
+- Re-run `setup.ps1` after installation
 
-GPU benchmark libraries not installed. Run setup script and select CuPy or PyTorch installation.
+**Benchmark disabled / Simulation button grayed out**
+
+- GPU compute libraries not installed or not detected
+- Solution 1: Run `python health_monitor.py refresh` to update detection cache
+- Solution 2: Re-run `setup.ps1` and install CuPy or PyTorch
+
+**CuPy installation fails on CUDA 13.0**
+
+- Use: `pip install "cupy-cuda12x>=13.0.0"`
+- CuPy 13.x supports CUDA 12.x and 13.0
+
+**Port already in use**
+
+- Change port: `python health_monitor.py web --port 3000`
 
 ## License
 
 MIT License - See LICENSE file
-
-## Acknowledgments
-
-- Built with FastAPI, Rich, Chart.js
-- GPU compute via CuPy and PyTorch
-- Inspired by nvidia-smi and GPU monitoring tools
-
-## Support
-
-GitHub: https://github.com/DataBoySu/cluster-monitor

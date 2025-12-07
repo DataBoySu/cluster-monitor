@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Ball Simulation - Web Viewer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            overflow: hidden;
+        }
+        
+        #container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        #header {
+            background: #2a2a2a;
+            padding: 15px 20px;
+            border-bottom: 2px solid #00ff88;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        #header h1 {
+            font-size: 24px;
+            color: #00ff88;
+        }
+        
+        #stats {
+            display: flex;
+            gap: 30px;
+            font-size: 14px;
+        }
+        
+        .stat {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .stat-label {
+            color: #888;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+        
+        .stat-value {
+            color: #00ff88;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        #main {
+            flex: 1;
+            display: flex;
+            position: relative;
+        }
+        
+        #canvas-container {
+            flex: 1;
+            position: relative;
+            background: #0a0a0a;
+        }
+        
+        #simulation-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            cursor: crosshair;
+        }
+        
+        #controls {
+            width: 300px;
+            background: #2a2a2a;
+            padding: 20px;
+            overflow-y: auto;
+            border-left: 1px solid #444;
+        }
+        
+        .control-group {
+            margin-bottom: 25px;
+        }
+        
+        .control-group h3 {
+            color: #00ff88;
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        
+        .slider-control {
+            margin-bottom: 15px;
+        }
+        
+        .slider-control label {
+            display: block;
+            color: #aaa;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        
+        .slider-control input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #444;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .slider-control input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #00ff88;
+            cursor: pointer;
+        }
+        
+        .slider-value {
+            color: #00ff88;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .button {
+            width: 100%;
+            padding: 12px;
+            background: #00ff88;
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .button:hover {
+            background: #00dd77;
+        }
+        
+        .button:disabled {
+            background: #444;
+            color: #888;
+            cursor: not-allowed;
+        }
+        
+        .button.stop {
+            background: #ff4444;
+            color: #fff;
+        }
+        
+        .button.stop:hover {
+            background: #dd2222;
+        }
+        
+        #status {
+            padding: 10px;
+            background: #333;
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+        }
+        
+        #status.connected {
+            background: #004422;
+            color: #00ff88;
+        }
+        
+        #status.error {
+            background: #442200;
+            color: #ff8800;
+        }
+        
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        
+        .info-text {
+            color: #666;
+            font-size: 12px;
+            line-height: 1.6;
+            margin-top: 10px;
+        }
+        
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #333;
+        }
+        
+        .metric-label {
+            color: #999;
+        }
+        
+        .metric-value {
+            color: #00ff88;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="header">
+            <h1>🎱 3D Ball Physics Simulation</h1>
+            <div style="flex-grow: 1; text-align: center;">
+                <div id="workload-info" style="color: #00ff88; font-size: 0.95em; font-weight: 500;">
+                    <!-- Workload info will appear here -->
+                </div>
+                <div id="iteration-counter" style="display: none; color: #00ff88; font-size: 0.9em; margin-top: 5px;">
+                    <!-- Iteration counter will appear here -->
+                </div>
+            </div>
+            <div id="stats">
+                <div class="stat">
+                    <span class="stat-label">FPS</span>
+                    <span class="stat-value" id="fps">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">GPU Util</span>
+                    <span class="stat-value" id="gpu">0%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Particles</span>
+                    <span class="stat-value" id="particles">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Iterations</span>
+                    <span class="stat-value" id="iterations">0</span>
+                </div>
+            </div>
+        </div>
+        
+        <div id="main">
+            <div id="canvas-container">
+                <canvas id="simulation-canvas"></canvas>
+            </div>
+            
+            <div id="controls">
+                <!-- Baseline Information -->
+                <div class="control-group" id="sim-baseline-info" style="display: none;">
+                    <h3>Baseline (Simulation Mode)</h3>
+                    <div id="sim-baseline-details" style="font-size: 0.9em; line-height: 1.6;">
+                        <!-- Baseline content loaded via JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h3>Simulation Control</h3>
+                    <button id="startBtn" class="button">Start Simulation</button>
+                    <button id="stopBtn" class="button stop" style="display: none;">Stop Simulation</button>
+                </div>
+                
+                <div class="control-group">
+                    <h3>Physics Parameters</h3>
+                    
+                    <div class="slider-control">
+                        <label>Gravity: <span class="slider-value" id="gravityValue">500</span></label>
+                        <input type="range" id="gravity" min="0" max="1000" value="500" step="10">
+                    </div>
+                    
+                    <div class="slider-control">
+                        <label>Ball Speed: <span class="slider-value" id="speedValue">200</span></label>
+                        <input type="range" id="speed" min="0" max="500" value="200" step="10">
+                    </div>
+                    
+                    <div class="slider-control">
+                        <label>Initial Balls: <span class="slider-value" id="initialValue">20</span></label>
+                        <input type="range" id="initial" min="0" max="100" value="20" step="1">
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h3>ℹ️ Instructions</h3>
+                    <div class="info-text">
+                        • Click on canvas to spawn big balls<br>
+                        • Adjust sliders to change physics in real-time<br>
+                        • Watch FPS and GPU metrics above<br>
+                        • Particles interact with gravity and collisions
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="status">Disconnected</div>
+    </div>
+    
+    <script>
+        const canvas = document.getElementById('simulation-canvas');
+        const ctx = canvas.getContext('2d');
+        const statusDiv = document.getElementById('status');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        
+        let ws = null;
+        let isRunning = false;
+        let particles = [];
+        
+        // Resize canvas to fit container
+        function resizeCanvas() {
+            const container = document.getElementById('canvas-container');
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        
+        // Slider value updates
+        document.getElementById('gravity').addEventListener('input', (e) => {
+            document.getElementById('gravityValue').textContent = e.target.value;
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    type: 'update_params',
+                    gravity: parseInt(e.target.value)
+                }));
+            }
+        });
+        
+        document.getElementById('speed').addEventListener('input', (e) => {
+            document.getElementById('speedValue').textContent = e.target.value;
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    type: 'update_params',
+                    speed: parseInt(e.target.value)
+                }));
+            }
+        });
+        
+        document.getElementById('initial').addEventListener('input', (e) => {
+            document.getElementById('initialValue').textContent = e.target.value;
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    type: 'update_params',
+                    initial_balls: parseInt(e.target.value)
+                }));
+            }
+        });
+        
+        // Canvas click to spawn
+        canvas.addEventListener('click', (e) => {
+            if (!ws || ws.readyState !== WebSocket.OPEN) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width * 1000;
+            const y = (e.clientY - rect.top) / rect.height * 800;
+            
+            ws.send(JSON.stringify({
+                type: 'spawn',
+                x: x,
+                y: y,
+                count: 1
+            }));
+        });
+        
+        // Start simulation
+        startBtn.addEventListener('click', () => {
+            const wsUrl = `ws://${window.location.host}/ws/simulation`;
+            ws = new WebSocket(wsUrl);
+            
+            ws.onopen = () => {
+                statusDiv.textContent = 'Connected';
+                statusDiv.className = 'connected';
+                startBtn.style.display = 'none';
+                stopBtn.style.display = 'block';
+                isRunning = true;
+                
+                // Start simulation
+                ws.send(JSON.stringify({
+                    type: 'start',
+                    particles: 100000,
+                    backend: 1
+                }));
+            };
+            
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                
+                if (data.type === 'frame') {
+                    // Update stats
+                    document.getElementById('fps').textContent = data.fps.toFixed(1);
+                    document.getElementById('gpu').textContent = data.gpu + '%';
+                    document.getElementById('particles').textContent = data.active_particles.toLocaleString();
+                    document.getElementById('iterations').textContent = data.iterations.toLocaleString();
+                    
+                    // Render particles
+                    particles = data.particles;
+                    renderFrame();
+                }
+            };
+            
+            ws.onerror = (error) => {
+                statusDiv.textContent = 'Connection Error';
+                statusDiv.className = 'error';
+            };
+            
+            ws.onclose = () => {
+                statusDiv.textContent = 'Disconnected';
+                statusDiv.className = '';
+                startBtn.style.display = 'block';
+                stopBtn.style.display = 'none';
+                isRunning = false;
+            };
+        });
+        
+        // Stop simulation
+        stopBtn.addEventListener('click', () => {
+            if (ws) {
+                ws.send(JSON.stringify({ type: 'stop' }));
+                ws.close();
+            }
+        });
+        
+        // Render frame
+        function renderFrame() {
+            // Clear canvas
+            ctx.fillStyle = '#0a0a0a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Scale factor
+            const scaleX = canvas.width / 1000;
+            const scaleY = canvas.height / 800;
+            
+            // Draw particles
+            particles.forEach(p => {
+                const x = p.x * scaleX;
+                const y = p.y * scaleY;
+                const radius = p.radius * Math.min(scaleX, scaleY);
+                
+                // Draw glow if present
+                if (p.glow > 0) {
+                    const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius * 2);
+                    gradient.addColorStop(0, `rgba(${p.color[0]*255}, ${p.color[1]*255}, ${p.color[2]*255}, ${p.glow * 0.3})`);
+                    gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                    ctx.fillStyle = gradient;
+                    ctx.beginPath();
+                    ctx.arc(x, y, radius * 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                // Draw particle
+                ctx.fillStyle = `rgb(${p.color[0]*255}, ${p.color[1]*255}, ${p.color[2]*255})`;
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Draw highlight for big balls
+                if (p.mass > 100) {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                    ctx.beginPath();
+                    ctx.arc(x - radius * 0.3, y - radius * 0.3, radius * 0.3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+        }
+        
+        // Load baseline on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadSimulationBaseline();
+        });
+    </script>
+</body>
+</html>

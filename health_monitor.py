@@ -343,6 +343,69 @@ def term(ctx):
     """Launch the interactive terminal dashboard."""
     _run_app(ctx.obj['config_path'], port=None, nodes=None, once=False, cli_mode=True)
 
+@cli.command()
+def refresh():
+    """Refresh feature detection cache (run after installing GPU libraries)."""
+    from monitor.utils import detect_features
+    import os
+    from pathlib import Path
+    
+    cache_file = Path('.features_cache')
+    if cache_file.exists():
+        os.remove(cache_file)
+        console.print("[yellow]Removed old cache[/yellow]")
+    
+    # Run diagnostics first
+    console.print("\n[cyan]Running diagnostics...[/cyan]")
+    
+    # Test CuPy
+    try:
+        import cupy as cp
+        cp.cuda.Device(0).compute_capability
+        console.print("  CuPy: [green]OK[/green]")
+    except ImportError:
+        console.print("  CuPy: [yellow]Not installed[/yellow]")
+    except Exception as e:
+        console.print(f"  CuPy: [red]Error - {str(e)}[/red]")
+    
+    # Test PyTorch
+    try:
+        import torch
+        if torch.cuda.is_available():
+            console.print(f"  PyTorch: [green]OK (CUDA {torch.version.cuda})[/green]")
+        else:
+            console.print(f"  PyTorch: [red]Installed but CUDA not available[/red]")
+            console.print(f"           [dim]PyTorch version: {torch.__version__}[/dim]")
+    except ImportError:
+        console.print("  PyTorch: [yellow]Not installed[/yellow]")
+    except Exception as e:
+        console.print(f"  PyTorch: [red]Error - {str(e)}[/red]")
+    
+    console.print("\n[cyan]Detecting features...[/cyan]")
+    features = detect_features(force=True)
+    
+    console.print("\n[green]Feature Detection Results:[/green]")
+    console.print(f"  NVIDIA GPU: {'[green]Available[/green]' if features.get('nvidia_smi') else '[red]Not found[/red]'}")
+    console.print(f"  CuPy: {'[green]Available[/green]' if features.get('cupy') else '[yellow]Not installed[/yellow]'}")
+    console.print(f"  PyTorch: {'[green]Available[/green]' if features.get('torch') else '[yellow]Not installed[/yellow]'}")
+    console.print(f"  GPU Benchmark: {'[green]Enabled[/green]' if features.get('gpu_benchmark') else '[red]Disabled[/red]'}")
+    
+    if not features.get('gpu_benchmark'):
+        console.print("\n[yellow]GPU Benchmark is DISABLED because:[/yellow]")
+        if not features.get('cupy') and not features.get('torch'):
+            console.print("  [red]Neither CuPy nor PyTorch with CUDA is available[/red]")
+        console.print("\n[cyan]To fix:[/cyan]")
+        console.print("  1. Install a GPU library:")
+        console.print("     pip install \"cupy-cuda12x>=13.0.0\"")
+        console.print("     OR")
+        console.print("     pip install torch --index-url https://download.pytorch.org/whl/cu121")
+        console.print("  2. Run 'python health_monitor.py refresh' again")
+    else:
+        console.print("\n[green]All GPU features enabled![/green]")
+    
+    console.print("\n[cyan]Cache updated successfully![/cyan]\n")
+
+
 
 if __name__ == '__main__':
     cli.add_command(benchmark_cli)

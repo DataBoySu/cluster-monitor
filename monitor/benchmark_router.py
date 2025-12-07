@@ -25,7 +25,9 @@ async def start_benchmark(
     power_limit: int = 0,
     matrix_size: int = 2048,
     num_particles: int = 100000,
-    auto_scale: bool = False
+    auto_scale: bool = False,
+    visualize: bool = False,
+    backend_multiplier: int = 1
 ):
     global benchmark_thread
     with benchmark_lock:
@@ -42,16 +44,17 @@ async def start_benchmark(
             matrix_size=matrix_size,
             num_particles=num_particles,
             auto_scale=auto_scale,
-            target_gpu_util=98
+            target_gpu_util=98,
+            backend_multiplier=backend_multiplier
         )
         
         def run_benchmark():
-            benchmark_instance.start(bench_config)
+            benchmark_instance.start(bench_config, visualize=visualize)
         
         benchmark_thread = threading.Thread(target=run_benchmark)
         benchmark_thread.start()
         
-        return {'status': 'started', 'message': 'Benchmark started', 'config': bench_config.__dict__}
+        return {'status': 'started', 'message': 'Benchmark started' + (' with visualization' if visualize else ''), 'config': bench_config.__dict__}
 
 @router.get("/status")
 async def get_benchmark_status():
@@ -72,6 +75,6 @@ async def get_benchmark_results():
     return benchmark_instance.get_results() if benchmark_instance.results else {'status': 'no_results'}
 
 @router.get("/baseline")
-async def get_benchmark_baseline(benchmark_type: str = "gemm"):
-    baseline = benchmark_instance.get_baseline(benchmark_type)
+async def get_benchmark_baseline(benchmark_type: str = "gemm", run_mode: str = "benchmark"):
+    baseline = benchmark_instance.get_baseline(benchmark_type, run_mode)
     return baseline if baseline else {'status': 'no_baseline'}

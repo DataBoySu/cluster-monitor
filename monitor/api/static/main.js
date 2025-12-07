@@ -343,6 +343,8 @@ function selectBenchType(type) {
     // Show/hide type-specific settings in custom mode
     document.getElementById('gemm-settings').style.display = type === 'gemm' ? 'block' : 'none';
     document.getElementById('particle-settings').style.display = type === 'particle' ? 'block' : 'none';
+    
+    // Simulation button is always enabled
 }
 
 function selectMode(mode) {
@@ -438,6 +440,77 @@ async function stopBenchmark() {
         await fetch('/api/benchmark/stop', { method: 'POST' });
     } catch (error) {
         console.error('Error stopping benchmark:', error);
+    }
+}
+
+async function startSimulation() {
+    console.log('Start Simulation clicked');
+    console.log('Current benchmark type:', selectedBenchType);
+    console.log('Current mode:', selectedMode);
+    
+    // Check current benchmark type
+    const currentType = selectedBenchType;
+    let modeToUse;
+    
+    // If not on particle type, switch to it and use 'quick' mode
+    if (currentType !== 'particle') {
+        selectBenchType('particle');
+        modeToUse = 'quick';
+        selectMode('quick');
+    } else {
+        // Use the currently selected mode
+        modeToUse = selectedMode;
+    }
+    
+    const btn = document.getElementById('start-sim-btn');
+    const stopBtn = document.getElementById('stop-bench-btn');
+    btn.disabled = true;
+    btn.textContent = 'Opening Simulation...';
+    stopBtn.style.display = 'inline-block';
+    
+    document.getElementById('benchmark-progress').style.display = 'block';
+    document.getElementById('benchmark-live-charts').style.display = 'block';
+    document.getElementById('benchmark-results').innerHTML = '';
+    document.getElementById('bench-stop-reason').textContent = '';
+    document.getElementById('iteration-counter').style.display = 'inline';
+    document.getElementById('iteration-counter').textContent = 'Iteration #0';
+    
+    // Get duration and particles based on selected mode
+    let duration = 60;
+    let particles = 100000;
+    
+    if (modeToUse === 'quick') {
+        duration = 15;
+        particles = 50000;
+    } else if (modeToUse === 'standard') {
+        duration = 60;
+        particles = 100000;
+    } else if (modeToUse === 'extended') {
+        duration = 180;
+        particles = 100000;
+    } else if (modeToUse === 'stress-test') {
+        duration = 60;
+        particles = 200000;
+    } else if (modeToUse === 'custom') {
+        duration = parseInt(document.getElementById('custom-duration-val').value);
+        particles = Math.round(parseFloat(document.getElementById('custom-particles-val').value) * 1000000);
+    }
+    
+    // Build URL with params
+    let url = `/api/benchmark/start?benchmark_type=particle&visualize=true&duration=${duration}&num_particles=${particles}`;
+    
+    // Initialize live charts
+    initLiveCharts();
+    
+    try {
+        await fetch(url, { method: 'POST' });
+        btn.textContent = 'Simulation Running';
+        benchmarkPollInterval = setInterval(pollBenchmarkStatus, 500);
+    } catch (error) {
+        console.error('Error starting simulation:', error);
+        btn.disabled = false;
+        btn.textContent = 'Start Simulation';
+        stopBtn.style.display = 'none';
     }
 }
 
@@ -643,14 +716,6 @@ function displayBenchmarkResults(results) {
             <div class="metric-row"><span class="metric-label">Stop Reason</span><span class="metric-value">${results.stop_reason || 'N/A'}</span></div>
         </div>
         
-        <div class="gpu-card" style="margin-bottom: 15px;">
-            <h3 style="color: var(--accent-yellow); margin-bottom: 10px;">Scores</h3>
-            <div class="metric-row"><span class="metric-label">Stability</span><span class="metric-value">${scores.stability || 0}/100</span></div>
-            <div class="metric-row"><span class="metric-label">Thermal</span><span class="metric-value">${scores.thermal || 0}/100</span></div>
-            <div class="metric-row"><span class="metric-label">Performance</span><span class="metric-value">${scores.performance || 0}/100</span></div>
-            <div class="metric-row"><span class="metric-label">Overall</span><span class="metric-value" style="color: var(--accent-green); font-weight: bold;">${scores.overall || 0}/100</span></div>
-        </div>
-        
         <h3 style="color: var(--accent-green); margin: 20px 0 10px;">Metrics Summary</h3>
     `;
     
@@ -705,23 +770,23 @@ async function checkForUpdates() {
                 const result = await install.json();
                 
                 if (result.status === 'success') {
-                    btn.textContent = '✓ Restart App';
+                    btn.textContent = 'Restart App';
                     btn.classList.add('success');
                     btn.setAttribute('data-tooltip', 'Update installed - restart application');
                 } else {
-                    btn.textContent = '✗ Update Failed';
+                    btn.textContent = 'Update Failed';
                     btn.classList.add('error');
                     btn.setAttribute('data-tooltip', result.message);
                     btn.disabled = false;
                 }
             };
         } else if (data.error) {
-            btn.textContent = '✗ Check Failed';
+            btn.textContent = 'Check Failed';
             btn.classList.add('error');
             btn.setAttribute('data-tooltip', data.error);
             btn.disabled = false;
         } else {
-            btn.textContent = '✓ Latest Version';
+            btn.textContent = 'Latest Version';
             btn.classList.add('success');
             btn.setAttribute('data-tooltip', `Version ${data.current}`);
             setTimeout(() => {
@@ -732,7 +797,7 @@ async function checkForUpdates() {
             }, 3000);
         }
     } catch (error) {
-        btn.textContent = '✗ Network Error';
+        btn.textContent = 'Network Error';
         btn.classList.add('error');
         btn.setAttribute('data-tooltip', 'Could not connect to update server');
         btn.disabled = false;
@@ -767,13 +832,14 @@ async function loadFeatures() {
         const response = await fetch('/api/features');
         const features = await response.json();
         
+        const benchTab = document.querySelector('[data-tab="benchmark"]');
+        const startBtn = document.getElementById('start-bench-btn');
+        const startSimBtn = document.getElementById('start-sim-btn');
+        const typeButtons = document.querySelectorAll('.type-btn');
+        const modeButtons = document.querySelectorAll('.mode-btn');
+        
         // Disable benchmark controls if GPU benchmark not available
         if (!features.gpu_benchmark) {
-            const benchTab = document.querySelector('[data-tab="benchmark"]');
-            const startBtn = document.getElementById('start-bench-btn');
-            const typeButtons = document.querySelectorAll('.type-btn');
-            const modeButtons = document.querySelectorAll('.mode-btn');
-            
             if (benchTab) {
                 benchTab.classList.add('disabled');
                 benchTab.setAttribute('data-tooltip', 'Install CuPy or PyTorch for GPU benchmarking');
@@ -787,6 +853,13 @@ async function loadFeatures() {
                 startBtn.title = 'GPU benchmark libraries not installed';
             }
             
+            if (startSimBtn) {
+                startSimBtn.disabled = true;
+                startSimBtn.style.opacity = '0.5';
+                startSimBtn.style.cursor = 'not-allowed';
+                startSimBtn.title = 'Install CuPy or PyTorch for simulation';
+            }
+            
             typeButtons.forEach(btn => {
                 btn.disabled = true;
                 btn.style.opacity = '0.5';
@@ -798,6 +871,39 @@ async function loadFeatures() {
                 btn.style.opacity = '0.5';
                 btn.style.cursor = 'not-allowed';
             });
+        } else {
+            // ENABLE controls when GPU benchmark IS available
+            if (benchTab) {
+                benchTab.classList.remove('disabled');
+                benchTab.removeAttribute('data-tooltip');
+                benchTab.style.pointerEvents = '';
+            }
+            
+            if (startBtn) {
+                startBtn.disabled = false;
+                startBtn.style.opacity = '1';
+                startBtn.style.cursor = 'pointer';
+                startBtn.title = 'Start GPU benchmark';
+            }
+            
+            if (startSimBtn) {
+                startSimBtn.disabled = false;
+                startSimBtn.style.opacity = '1';
+                startSimBtn.style.cursor = 'pointer';
+                startSimBtn.title = 'Start particle simulation with visualization';
+            }
+            
+            typeButtons.forEach(btn => {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+            });
+            
+            modeButtons.forEach(btn => {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+            });
         }
     } catch (error) {
         console.error('Error loading features:', error);
@@ -808,3 +914,6 @@ fetchStatus();
 loadBaseline();
 loadFeatures();
 setInterval(tick, 1000);
+
+// Initialize benchmark type on load
+selectBenchType('gemm');

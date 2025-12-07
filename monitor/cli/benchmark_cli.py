@@ -26,7 +26,8 @@ console = Console()
 @click.option('--power-limit', type=int, default=0, help='Stop if power exceeds this in watts (0=no limit)')
 @click.option('--save-baseline', is_flag=True, help='Save results as baseline (auto-saved if completed)')
 @click.option('--compare-baseline', is_flag=True, help='Compare with existing baseline')
-def benchmark_cli(bench_type, mode, duration, matrix_size, particles, temp_limit, power_limit, save_baseline, compare_baseline):
+@click.option('--visualize', '-v', is_flag=True, help='Show particle visualization window (particles only, requires pygame)')
+def benchmark_cli(bench_type, mode, duration, matrix_size, particles, temp_limit, power_limit, save_baseline, compare_baseline, visualize):
     """Run GPU stress benchmark and display results in CLI."""
     from health_monitor import BANNER
     console.print(BANNER, style="bold cyan")
@@ -74,6 +75,13 @@ def benchmark_cli(bench_type, mode, duration, matrix_size, particles, temp_limit
     
     console.print(f"\n[bold green]Starting {bench_type.upper()} benchmark for {duration} seconds...[/bold green]")
     
+    if visualize and bench_type != 'particle':
+        console.print("[yellow]Note: Visualization only available for particle benchmarks, ignoring --visualize flag[/yellow]")
+        visualize = False
+    
+    if visualize:
+        console.print("[cyan]Visualization enabled - window will open during benchmark[/cyan]")
+    
     # Run benchmark with progress display
     with Progress(
         SpinnerColumn(),
@@ -85,13 +93,18 @@ def benchmark_cli(bench_type, mode, duration, matrix_size, particles, temp_limit
     ) as progress:
         task = progress.add_task(f"[cyan]{bench_type.upper()} Benchmark", total=100)
         
-        bench_thread = threading.Thread(target=bench.start, args=(config,))
+        bench_thread = threading.Thread(target=lambda: bench.start(config, visualize=visualize))
         bench_thread.start()
         
         while bench.running:
             status = bench.get_status()
-            progress.update(task, completed=status['progress'], 
-                          description=f"[cyan]{status.get('workload_type', bench_type)} - {status['iterations']} iterations")
+            fps = status.get('fps', 0.0)
+            gpu = status.get('gpu_util', 0)
+            workload = status.get('workload_type', bench_type)
+            iters = status['iterations']
+            
+            desc = f"[cyan]FPS:{fps:5.1f} GPU:{gpu:3.0f}%  {workload} - {iters} iterations"
+            progress.update(task, completed=status['progress'], description=desc)
             time.sleep(0.5)
         
         bench_thread.join()
@@ -101,6 +114,11 @@ def benchmark_cli(bench_type, mode, duration, matrix_size, particles, temp_limit
     
     if results.get('status') == 'failed':
         console.print(f"\n[red]Benchmark failed:[/red] {results.get('error', 'Unknown error')}")
+        return
+    
+    # Check if we have minimal results to display
+    if 'error' in results and 'duration_actual_sec' not in results:
+        console.print(f"\n[red]Benchmark error:[/red] {results.get('error', 'Unknown error')}")
         return
     
     console.print("\n[bold green]Benchmark Complete[/bold green]")
@@ -114,12 +132,15 @@ def benchmark_cli(bench_type, mode, duration, matrix_size, particles, temp_limit
         table.add_column("Δ", justify="right")
     
     table.add_row("Workload", results.get('workload_type', 'N/A'))
-    table.add_row("Duration", f"{results['duration_actual_sec']:.1f}s")
-    table.add_row("Iterations", f"{results['iterations_completed']:,}")
-    table.add_row("Avg Iteration Time", f"{results['avg_iteration_time_ms']:.2f}ms", 
-                  f"{baseline['avg_iteration_time_ms']:.2f}ms" if baseline else "",
-                  f"{((results['avg_iteration_time_ms'] - baseline['avg_iteration_time_ms']) / baseline['avg_iteration_time_ms'] * 100):+.1f}%" if baseline else "")
-    table.add_row("Iterations/sec", f"{results['iterations_per_second']:.1f}")
+    table.add_row("Duration", f"{results.get('duration_actual_sec', 0):.1f}s")
+    
+    # Only add detailed metrics if we have valid samples
+    if 'iterations_completed' in results:
+        table.add_row("Iterations", f"{results['iterations_completed']:,}")
+        table.add_row("Avg Iteration Time", f"{results.get('avg_iteration_time_ms', 0):.2f}ms", 
+                      f"{baseline.get('avg_iteration_time_ms', 0):.2f}ms" if baseline else "",
+                      f"{((results['avg_iteration_time_ms'] - baseline['avg_iteration_time_ms']) / baseline['avg_iteration_time_ms'] * 100):+.1f}%" if baseline and baseline.get('avg_iteration_time_ms') else "")
+        table.add_row("Iterations/sec", f"{results.get('iterations_per_second', 0):.1f}")
     
     perf = results.get('performance', {})
     if 'tflops' in perf:
@@ -132,18 +153,21 @@ def benchmark_cli(bench_type, mode, duration, matrix_size, particles, temp_limit
         table.add_row("Steps/sec", f"{perf['steps_per_second']:.1f}")
         table.add_row("Particles/sec", f"{perf['particles_updated_per_second']:,.0f}")
     
-    table.add_section()
-    table.add_row("GPU Utilization", f"{results['utilization']['avg']:.1f}% (min: {results['utilization']['min']}, max: {results['utilization']['max']})")
-    table.add_row("Temperature", f"{results['temperature_c']['avg']:.1f}°C (max: {results['temperature_c']['max']}°C)")
-    table.add_row("Power Draw", f"{results['power_w']['avg']:.1f}W (max: {results['power_w']['max']}W)")
-    table.add_row("Memory Used", f"{results['memory_used_mb']['avg']:.0f} MB")
+    # Only add GPU metrics if we have them
+    if 'utilization' in results:
+        table.add_section()
+        table.add_row("GPU Utilization", f"{results['utilization']['avg']:.1f}% (min: {results['utilization']['min']}, max: {results['utilization']['max']})")
+        table.add_row("Temperature", f"{results['temperature_c']['avg']:.1f}°C (max: {results['temperature_c']['max']}°C)")
+        table.add_row("Power Draw", f"{results['power_w']['avg']:.1f}W (max: {results['power_w']['max']}W)")
+        table.add_row("Memory Used", f"{results['memory_used_mb']['avg']:.0f} MB")
     
-    table.add_section()
-    scores = results.get('scores', {})
-    table.add_row("Stability Score", f"{scores.get('stability', 0)}/100")
-    table.add_row("Thermal Score", f"{scores.get('thermal', 0)}/100")
-    table.add_row("Performance Score", f"{scores.get('performance', 0)}/100")
-    table.add_row("[bold]Overall Score[/bold]", f"[bold]{scores.get('overall', 0)}/100[/bold]")
+    if 'scores' in results:
+        table.add_section()
+        scores = results.get('scores', {})
+        table.add_row("Stability Score", f"{scores.get('stability', 0)}/100")
+        table.add_row("Thermal Score", f"{scores.get('thermal', 0)}/100")
+        table.add_row("Performance Score", f"{scores.get('performance', 0)}/100")
+        table.add_row("Overall Score", f"{scores.get('overall', 0)}/100")
     
     console.print(table)
     

@@ -1,16 +1,28 @@
-# Core dependencies
-fastapi>=0.104.0
-uvicorn[standard]>=0.24.0
-psutil>=5.9.0
-pyyaml>=6.0
+# MINIMAL CORE - CLI only (no web UI)
 click>=8.1.0
 rich>=13.0.0
-numpy>=1.24.0
+psutil>=5.9.0
+pyyaml>=6.0
 requests>=2.31.0
 
-# GPU libraries (optional - install based on your CUDA version)
-# Option 1: CuPy (recommended for CUDA 12.x)
-# cupy-cuda12x>=12.0.0
+# WEB UI (optional - for web dashboard)
+# Uncomment these lines to enable web interface:
+# fastapi>=0.104.0
+# uvicorn[standard]>=0.24.0
+# websockets>=12.0
 
-# Option 2: PyTorch (install separately with correct CUDA version)
-# pip install torch --index-url https://download.pytorch.org/whl/cu121
+# VISUALIZATION (optional - for particle simulation)
+# Uncomment these lines to enable visualization:
+# pygame>=2.5.0
+# numpy>=1.24.0
+
+# GPU ACCELERATION (optional - for benchmarking)
+# Choose one based on your CUDA version:
+#
+# CuPy for CUDA 12.x (recommended):
+#   pip install cupy-cuda12x>=13.0.0
+#
+# PyTorch with CUDA 12.1:
+#   pip install torch --index-url https://download.pytorch.org/whl/cu121
+
+

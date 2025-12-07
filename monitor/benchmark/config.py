@@ -15,9 +15,10 @@ class BenchmarkConfig:
     power_limit_w: int = 0
     sample_interval_ms: int = 500
     matrix_size: int = 2048
-    num_particles: int = 100000
+    num_particles: int = 30000  # Reduced for better sustained performance
     auto_scale: bool = False
     target_gpu_util: int = 98
+    backend_multiplier: int = 1  # Multiplier for offscreen GPU computation stress (1-100)
     
     @classmethod
     def from_mode(cls, mode: str, benchmark_type: str = "gemm") -> 'BenchmarkConfig':

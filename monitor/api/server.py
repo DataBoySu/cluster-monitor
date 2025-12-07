@@ -9,7 +9,7 @@ import io
 import asyncio
 import threading
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, HTTPException, BackgroundTasks, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse, StreamingResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -18,6 +18,7 @@ from monitor.collectors.system import SystemCollector
 from monitor.storage.sqlite import MetricsStorage
 from monitor.alerting.rules import AlertEngine
 from monitor import benchmark_router
+from monitor.benchmark import runner as benchmark_runner, config as benchmark_config
 
 # Path to the templates directory, relative to this file
 TEMPLATE_DIR = Path(__file__).parent / "templates"
@@ -51,6 +52,107 @@ def create_app(config: Dict[str, Any]) -> FastAPI:
     @app.get("/", response_class=HTMLResponse)
     async def read_dashboard():
         return FileResponse(TEMPLATE_DIR / "index.html")
+    
+    @app.get("/simulation", response_class=HTMLResponse)
+    async def read_simulation():
+        return FileResponse(TEMPLATE_DIR / "simulation.html")
+    
+    @app.websocket("/ws/simulation")
+    async def websocket_simulation(websocket: WebSocket):
+        await websocket.accept()
+        sim_runner = None
+        sim_thread = None
+        
+        try:
+            while True:
+                data = await websocket.receive_json()
+                
+                if data['type'] == 'start':
+                    # Create benchmark configuration
+                    particle_count = data.get('particles', 100000)
+                    backend_mult = data.get('backend', 1)
+                    
+                    config = benchmark_config.BenchmarkConfig(
+                        benchmark_type='particle',
+                        duration_seconds=3600,  # Long duration, will be stopped manually
+                        sample_interval_ms=100,
+                        particle_count=particle_count,
+                        backend_multiplier=backend_mult
+                    )
+                    
+                    # Create benchmark runner
+                    sim_runner = benchmark_runner.get_benchmark_instance()
+                    
+                    # Start in background thread
+                    sim_thread = threading.Thread(
+                        target=sim_runner.run,
+                        args=(config, True),
+                        daemon=True
+                    )
+                    sim_thread.start()
+                    
+                    # Send frames in a loop
+                    while sim_runner.running:
+                        status = sim_runner.get_status()
+                        
+                        # Get particle data
+                        if sim_runner.stress_worker:
+                            positions, masses, colors, glows = sim_runner.stress_worker.get_particle_sample(max_samples=500)
+                            
+                            if positions is not None:
+                                particles_data = []
+                                for i in range(len(positions)):
+                                    particles_data.append({
+                                        'x': float(positions[i][0]),
+                                        'y': float(positions[i][1]),
+                                        'mass': float(masses[i]),
+                                        'color': [float(colors[i][0]), float(colors[i][1]), float(colors[i][2])],
+                                        'glow': float(glows[i]),
+                                        'radius': 36.0 if masses[i] > 100 else 8.0
+                                    })
+                                
+                                # Send frame
+                                await websocket.send_json({
+                                    'type': 'frame',
+                                    'fps': status.get('fps', 0),
+                                    'gpu': status.get('gpu_util', 0),
+                                    'active_particles': status.get('iterations', 0) if sim_runner.stress_worker else 0,
+                                    'iterations': status.get('iterations', 0),
+                                    'particles': particles_data
+                                })
+                        
+                        await asyncio.sleep(0.033)  # ~30 FPS update rate
+                
+                elif data['type'] == 'spawn' and sim_runner and sim_runner.stress_worker:
+                    # Spawn balls
+                    x = data.get('x', 500)
+                    y = data.get('y', 400)
+                    count = data.get('count', 1)
+                    sim_runner.stress_worker.spawn_big_balls(x, y, count)
+                
+                elif data['type'] == 'update_params' and sim_runner and sim_runner.stress_worker:
+                    # Update physics parameters
+                    sim_runner.stress_worker.update_physics_params(
+                        gravity_strength=data.get('gravity'),
+                        small_ball_speed=data.get('speed'),
+                        initial_balls=data.get('initial_balls')
+                    )
+                
+                elif data['type'] == 'stop':
+                    if sim_runner:
+                        sim_runner.running = False
+                    break
+        
+        except WebSocketDisconnect:
+            if sim_runner:
+                sim_runner.running = False
+        except Exception as e:
+            print(f"WebSocket error: {e}")
+            if sim_runner:
+                sim_runner.running = False
+        finally:
+            if sim_runner:
+                sim_runner.running = False
     
     @app.get("/api/status")
     async def get_status():
@@ -177,5 +279,26 @@ def create_app(config: Dict[str, Any]) -> FastAPI:
             media_type="text/csv",
             headers={"Content-Disposition": f"attachment; filename=metrics_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"}
         )
+    
+    @app.post("/api/shutdown")
+    async def shutdown_server():
+        """Gracefully shutdown the server."""
+        import os
+        import signal
+        
+        # Stop any running benchmark
+        benchmark_instance = benchmark_runner.get_benchmark_instance()
+        if benchmark_instance.running:
+            benchmark_instance.stop()
+            # Wait a bit for benchmark to stop
+            await asyncio.sleep(1)
+        
+        # Close storage
+        storage.close()
+        
+        # Send shutdown signal
+        os.kill(os.getpid(), signal.SIGTERM)
+        
+        return {"status": "shutting_down", "message": "Server is shutting down gracefully"}
     
     return app
