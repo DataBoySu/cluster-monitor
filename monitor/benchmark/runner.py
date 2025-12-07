@@ -109,25 +109,10 @@ class GPUBenchmark:
         self.start_time = time.time()
         self.completed_full = False
         
-        # Initialize visualizer if requested
         # Initialize visualizer if requested, prioritizing the optimized GL version
         visualizer = None
-        is_gl_visualizer = False
         if visualize and self.config.benchmark_type == "particle":
             try:
-                # Attempt to use the ultra-optimized OpenGL visualizer first
-                from .visualizer_gl import create_visualizer as create_gl_visualizer
-                visualizer = create_gl_visualizer(enabled=True, use_gl=True, num_particles=self.config.num_particles)
-                if visualizer and visualizer.is_available():
-                    is_gl_visualizer = True
-                    print("[Visualizer] Using high-performance OpenGL renderer.")
-                else: # Fallback to the standard pygame visualizer
-                    print("[Visualizer] OpenGL renderer failed, falling back to Pygame.")
-                    from .visualizer import create_visualizer
-                    visualizer = create_visualizer(enabled=True)
-            except Exception as e:
-                print(f"[Visualizer] Failed to initialize: {e}")
-                # Ensure fallback on any error
                 from .visualizer import create_visualizer
                 visualizer = create_visualizer(enabled=True)
                 if visualizer:
@@ -189,21 +174,10 @@ class GPUBenchmark:
                 if positions is not None:
                     influence_boundaries = self.stress_worker.get_influence_boundaries(
                         gravity_strength=slider_values['gravity'] # Use current slider value
-            # --- Visualization Logic ---
-            if visualizer and visualizer.running:
-                # Get UI control values (works for both visualizers)
-                if hasattr(visualizer, 'get_slider_values'):
-                    slider_values = visualizer.get_slider_values()
-                    self.stress_worker.update_physics_params(
-                        gravity_strength=slider_values.get('gravity'),
-                        small_ball_speed=slider_values.get('small_ball_speed'),
-                        initial_balls=int(slider_values.get('initial_balls', 1)),
-                        max_balls_cap=int(slider_values.get('max_balls_cap', 100000))
                     )
                     active_particles = int(self.stress_worker._active_count)
                     current_sample = self.samples[-1] if self.samples else {}
                     gpu_util = current_sample.get('utilization', 0)
-                    self.stress_worker.update_split_enabled(visualizer.get_split_enabled())
 
                     visualizer.render_frame(
                         positions=positions,
@@ -217,43 +191,6 @@ class GPUBenchmark:
                         gpu_util=gpu_util,
                         elapsed_time=elapsed
                     )
-                # Get latest metrics for display
-                gpu_util = self.samples[-1].get('utilization', 0) if self.samples else 0
-                active_particles = int(self.stress_worker._active_count)
-
-                # --- End of Visualization Block ---
-                if is_gl_visualizer:
-                    # --- High-performance OpenGL Path (render every frame) ---
-                    # This path is zero-copy and does not bottleneck the simulation.
-                    positions, masses, colors, glows = self.stress_worker.get_particle_sample(max_samples=self.config.num_particles)
-                    if positions is not None:
-                        visualizer.render_frame(
-                            positions=positions, masses=masses, colors=colors, glows=glows,
-                            influence_boundaries=self.stress_worker.get_influence_boundaries(gravity_strength=slider_values.get('gravity', 500)),
-                            total_particles=self.config.num_particles,
-                            active_particles=active_particles,
-                            fps=render_fps, gpu_util=gpu_util, elapsed_time=elapsed
-                        )
-                elif (elapsed - last_render_update_time >= render_interval):
-                    # --- Slower Pygame Path (rate-limited to ~60fps) ---
-                    last_render_update_time = elapsed
-                    
-                    # This is the expensive CPU-GPU transfer call, now done less often
-                    positions, masses, colors, glows = self.stress_worker.get_particle_sample(max_samples=2000)
-                    
-                    if positions is not None:
-                        visualizer.render_frame(
-                            positions=positions,
-                            masses=masses,
-                            colors=colors,
-                            glows=glows,
-                            influence_boundaries=self.stress_worker.get_influence_boundaries(gravity_strength=slider_values.get('gravity', 500)),
-                            total_particles=self.stress_worker._initial_particle_count,
-                            active_particles=active_particles,
-                            fps=render_fps,
-                            gpu_util=gpu_util,
-                            elapsed_time=elapsed
-                        )
 
             # Calculate render FPS based on actual render calls
             now = time.time()
