@@ -25,6 +25,7 @@ Professional GPU monitoring and stress testing tool with real-time visualization
 1. **Download** the latest release from [Releases](https://github.com/DataBoySu/cluster-monitor/releases)
 
 2. **Extract** and run setup:
+
    ```powershell
    Expand-Archive cluster-health-monitor.zip -DestinationPath C:\Tools\
    cd C:\Tools\cluster-health-monitor
@@ -32,24 +33,28 @@ Professional GPU monitoring and stress testing tool with real-time visualization
    ```
 
 3. **Launch** web dashboard:
+
    ```powershell
    python health_monitor.py web
-   ```
+   ```text
    Access at: http://localhost:8090
 
 ### Usage
 
 **Web Dashboard (Recommended)**
+
 ```powershell
 python health_monitor.py web
 ```
 
 **Terminal Interface**
+
 ```powershell
 python health_monitor.py cli
 ```
 
 **Command-Line Benchmark**
+
 ```powershell
 # Quick 15s test
 python health_monitor.py benchmark --mode quick
@@ -83,6 +88,7 @@ This provides progressive GPU loading while maintaining responsive visualization
 ## Visualization
 
 Interactive particle simulation with:
+
 - **Real-time Physics**: GPU-accelerated particle collision and bouncing
 - **Interactive Controls**: Gravity, ball speed, splitting behavior
 - **Click Spawning**: Add particles dynamically during simulation
@@ -122,17 +128,21 @@ REST API endpoints (web mode):
 ## Troubleshooting
 
 **nvidia-smi not found**
-- Install NVIDIA drivers: https://www.nvidia.com/download/index.aspx
+
+- Install NVIDIA drivers: <https://www.nvidia.com/download/index.aspx>
 
 **CUDA not detected**
-- Download CUDA Toolkit: https://developer.nvidia.com/cuda-downloads
+
+- Download CUDA Toolkit: <https://developer.nvidia.com/cuda-downloads>
 - Re-run `setup.ps1` after installation
 
 **Benchmark disabled**
+
 - GPU compute libraries not installed
 - Run `setup.ps1` and install CuPy or PyTorch when prompted
 
 **Port already in use**
+
 - Change port: `python health_monitor.py web --port 3000`
 
 ## License
