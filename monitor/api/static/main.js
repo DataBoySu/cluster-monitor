@@ -1,4 +1,9 @@
+// Canonical dashboard script: keep this file as `main.js`.
+// (Any legacy or duplicate files such as `main-new.js` were removed.)
+// Canonical dashboard script: keep this file as `main.js`.
+// (Any legacy or duplicate files such as `main-new.js` were removed.)
 let countdown = 5;
+let refreshInterval = null; // handle for the main auto-refresh interval
 let historyChart = null;
 // History chart state for zoom/highlight
 let historyOriginalLabels = [];
@@ -20,6 +25,291 @@ function ensureZoomPlugin() {
             console.debug('chartjs zoom plugin registered at runtime');
         }
     } catch (e) { console.debug('ensureZoomPlugin error', e); }
+}
+
+// Shutdown helper called by the Exit button in the header
+async function shutdownServer() {
+    try {
+        const ok = await showConfirmShutdownDialog();
+        if (!ok) return;
+        const btn = document.getElementById('shutdown-btn');
+        if (btn) { btn.disabled = true; btn.textContent = 'Shutting down...'; }
+
+        // Show a transient modal while we send the shutdown request
+        const modal = createShutdownModal('Sending shutdown request...');
+        // Attempt to POST shutdown. If the POST fails (server killed before responding)
+        // fall back to polling to detect that the server has gone away.
+        try {
+            const res = await fetch('/api/shutdown', { method: 'POST' });
+            if (!res.ok) {
+                const txt = await res.text().catch(() => res.statusText || 'Error');
+                modal.setText('Shutdown failed: ' + txt);
+                if (typeof showError === 'function') showError('Shutdown failed: ' + txt);
+                if (btn) { btn.disabled = false; btn.textContent = 'Exit'; }
+                setTimeout(() => modal.remove(), 4000);
+                return;
+            }
+
+            // Server accepted shutdown request — update modal then proceed
+            modal.setText('Server is shutting down...');
+            try { await waitMs(600); } catch (e) {}
+            try { modal.remove(); } catch (e) {}
+
+            try { showServerShutdownPage(); } catch (e) { console.debug('showServerShutdownPage error', e); }
+            const stopped = await waitForServerStop(60, 1000);
+            if (stopped) {
+                showServerStoppedPage(true);
+            } else {
+                showServerStoppedPage(false);
+            }
+            return;
+        } catch (postErr) {
+            // Network error when posting — server may have terminated before sending a response.
+            try { modal.setText('No response from server — waiting for shutdown...'); } catch (e) {}
+            // Poll to confirm server is down
+            const stopped = await waitForServerStop(60, 1000);
+            try { modal.remove(); } catch (e) {}
+            if (stopped) {
+                showServerStoppedPage(true);
+            } else {
+                // couldn't confirm; show message and re-enable Exit button
+                showServerStoppedPage(false);
+                if (btn) { btn.disabled = false; btn.textContent = 'Exit'; }
+            }
+            return;
+        }
+    } catch (e) {
+        // Final note: ensure Exit button uses server shutdown flow. (index.html already wired to shutdownServer())
+        if (typeof showError === 'function') showError('Error sending shutdown: ' + (e && e.message ? e.message : e));
+        const btn = document.getElementById('shutdown-btn');
+        if (btn) { btn.disabled = false; btn.textContent = 'Exit'; }
+    }
+}
+
+// Modal helper used for shutdown flow
+function createShutdownModal(initialText) {
+    const overlay = document.createElement('div');
+    overlay.style.position = 'fixed';
+    overlay.style.left = '0';
+    overlay.style.top = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.display = 'flex';
+    overlay.style.alignItems = 'center';
+    overlay.style.justifyContent = 'center';
+    overlay.style.background = 'rgba(0,0,0,0.45)';
+    overlay.style.zIndex = '10000';
+
+    const card = document.createElement('div');
+    card.style.background = 'var(--bg-secondary)';
+    card.style.color = 'var(--text-primary)';
+    card.style.padding = '18px 22px';
+    card.style.borderRadius = '10px';
+    card.style.boxShadow = '0 8px 24px rgba(0,0,0,0.4)';
+    card.style.minWidth = '280px';
+    card.style.textAlign = 'center';
+
+    const msg = document.createElement('div');
+    msg.textContent = initialText || '';
+    msg.style.marginBottom = '10px';
+
+    const spinner = document.createElement('div');
+    spinner.style.width = '28px';
+    spinner.style.height = '28px';
+    spinner.style.border = '4px solid rgba(255,255,255,0.15)';
+    spinner.style.borderTopColor = 'var(--accent-blue)';
+    spinner.style.borderRadius = '50%';
+    spinner.style.margin = '0 auto';
+    spinner.style.animation = 'spin 1s linear infinite';
+
+    card.appendChild(msg);
+    card.appendChild(spinner);
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+
+    // Add simple keyframes if not present
+    if (!document.getElementById('shutdown-spin-style')) {
+        const style = document.createElement('style');
+        style.id = 'shutdown-spin-style';
+        style.textContent = '@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}';
+        document.head.appendChild(style);
+    }
+
+    return {
+        setText: (t) => { msg.textContent = t; },
+        remove: () => { try { if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay); } catch (e) {} }
+    };
+}
+
+// Custom confirmation dialog for shutdown (returns Promise<boolean>)
+function showConfirmShutdownDialog() {
+    return new Promise(resolve => {
+        const overlay = document.createElement('div');
+        overlay.style.position = 'fixed';
+        overlay.style.left = '0';
+        overlay.style.top = '0';
+        overlay.style.width = '100%';
+        overlay.style.height = '100%';
+        overlay.style.display = 'flex';
+        overlay.style.alignItems = 'center';
+        overlay.style.justifyContent = 'center';
+        overlay.style.background = 'rgba(0,0,0,0.45)';
+        overlay.style.zIndex = '10000';
+
+        const card = document.createElement('div');
+        card.style.background = 'var(--bg-secondary)';
+        card.style.color = 'var(--text-primary)';
+        card.style.padding = '18px 22px';
+        card.style.borderRadius = '10px';
+        card.style.boxShadow = '0 8px 24px rgba(0,0,0,0.4)';
+        card.style.minWidth = '320px';
+        card.style.textAlign = 'center';
+
+        const title = document.createElement('div');
+        title.textContent = 'Confirm Shutdown';
+        title.style.fontWeight = '700';
+        title.style.marginBottom = '8px';
+
+        const msg = document.createElement('div');
+        msg.textContent = 'Are you sure you want to shutdown the server? This will stop the process.';
+        msg.style.marginBottom = '14px';
+        msg.style.color = 'var(--text-secondary)';
+
+        const actions = document.createElement('div');
+        actions.style.display = 'flex';
+        actions.style.justifyContent = 'center';
+        actions.style.gap = '10px';
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.style.padding = '8px 12px';
+        cancelBtn.style.borderRadius = '6px';
+        cancelBtn.style.border = '1px solid var(--border-color)';
+        cancelBtn.style.background = 'transparent';
+        cancelBtn.style.color = 'var(--text-primary)';
+        cancelBtn.onclick = () => { try { overlay.remove(); } catch (e){}; resolve(false); };
+
+        const shutdownBtn = document.createElement('button');
+        shutdownBtn.textContent = 'Shutdown Server';
+        shutdownBtn.style.padding = '8px 12px';
+        shutdownBtn.style.borderRadius = '6px';
+        shutdownBtn.style.border = 'none';
+        shutdownBtn.style.background = 'var(--accent-red)';
+        shutdownBtn.style.color = '#fff';
+        shutdownBtn.onclick = () => { try { overlay.remove(); } catch (e){}; resolve(true); };
+
+        actions.appendChild(cancelBtn);
+        actions.appendChild(shutdownBtn);
+
+        card.appendChild(title);
+        card.appendChild(msg);
+        card.appendChild(actions);
+        overlay.appendChild(card);
+        document.body.appendChild(overlay);
+    });
+}
+
+// Show a full-page server shutdown message (used after server accepts the shutdown)
+function showServerShutdownPage() {
+    // Stop periodic refresh and benchmark polling
+    try { if (refreshInterval) clearInterval(refreshInterval); } catch (e) {}
+    try { if (benchmarkPollInterval) clearInterval(benchmarkPollInterval); } catch (e) {}
+    try { if (typeof stopBenchmark === 'function') stopBenchmark(); } catch (e) {}
+
+    document.documentElement.style.height = '100%';
+    document.body.style.margin = '0';
+    document.body.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:var(--bg-primary);color:var(--text-primary);font-family:Roboto,Segoe UI,Arial,sans-serif;">
+            <div style="text-align:center;max-width:720px;padding:24px;">
+                <h1 style="font-size:34px;margin-bottom:12px;">Server Shutting Down</h1>
+                <p style="color:var(--text-secondary);margin-bottom:18px;">The server has accepted the shutdown request and is terminating. You can close this window or keep it open to see when the server stops responding.</p>
+                <p style="color:var(--text-secondary);margin-bottom:24px;">If you started this server in a terminal, it will stop shortly.</p>
+                <div style="display:flex;gap:8px;justify-content:center;">
+                    <button onclick="location.reload()" style="padding:8px 14px;border-radius:6px;border:none;background:var(--accent-blue);color:#fff;cursor:pointer;">Refresh</button>
+                    <button onclick="window.close()" style="padding:8px 14px;border-radius:6px;border:1px solid var(--border-color);background:transparent;color:var(--text-primary);cursor:pointer;">Close Window</button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Wait until the server stops responding to /api/status or until timeout.
+// timeoutSeconds: total seconds to wait; intervalMs: poll interval in ms.
+async function waitForServerStop(timeoutSeconds = 60, intervalMs = 1000) {
+    const attempts = Math.max(1, Math.ceil((timeoutSeconds * 1000) / intervalMs));
+    for (let i = 0; i < attempts; i++) {
+        try {
+            // short fetch with small timeout via AbortController
+            const controller = new AbortController();
+            const to = setTimeout(() => controller.abort(), Math.min(intervalMs, 2000));
+            const resp = await fetch('/api/status', { signal: controller.signal });
+            clearTimeout(to);
+            // If we got a valid response, server still up — wait and retry
+            if (!resp.ok) {
+                // treat non-ok as server error; continue polling because shutdown may return 5xx then stop
+            }
+        } catch (e) {
+            // fetch threw — likely network error / server went away
+            return true;
+        }
+        // wait before next attempt
+        await waitMs(intervalMs);
+    }
+    return false;
+}
+
+// Show final page when server is confirmed stopped (or timed out waiting)
+function showServerStoppedPage(serverStopped = true) {
+    try {
+        try { if (refreshInterval) clearInterval(refreshInterval); } catch (e) {}
+        try { if (benchmarkPollInterval) clearInterval(benchmarkPollInterval); } catch (e) {}
+        try { if (typeof stopBenchmark === 'function') stopBenchmark(); } catch (e) {}
+
+        document.documentElement.style.height = '100%';
+        document.body.style.margin = '0';
+        document.body.innerHTML = `
+            <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:var(--bg-primary);color:var(--text-primary);font-family:Roboto,Segoe UI,Arial,sans-serif;">
+                <div style="text-align:center;max-width:720px;padding:24px;">
+                    <h1 style="font-size:48px;margin-bottom:12px;">Server Shut down</h1>
+                    <p style="color:var(--text-secondary);font-size:18px;margin-bottom:18px;">${serverStopped ? 'It is now safe to close this window.' : 'Server appears unreachable. You can close this window or try refreshing later.'}</p>
+                    <div style="display:flex;gap:8px;justify-content:center;">
+                        <button onclick="location.reload()" style="padding:10px 16px;border-radius:6px;border:none;background:var(--accent-blue);color:#fff;cursor:pointer;">Refresh</button>
+                        <button onclick="window.close()" style="padding:10px 16px;border-radius:6px;border:1px solid var(--border-color);background:transparent;color:var(--text-primary);cursor:pointer;">Close Window</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    } catch (e) { console.debug('showServerStoppedPage error', e); }
+}
+
+// Show client-side shutdown sequence (do NOT kill the server process).
+function showShutdownSequence() {
+    try {
+        // Stop periodic refresh and benchmark polling
+        try { if (refreshInterval) clearInterval(refreshInterval); } catch (e) {}
+        try { if (benchmarkPollInterval) clearInterval(benchmarkPollInterval); } catch (e) {}
+
+        // Attempt to stop any running benchmark gracefully via existing handler
+        try { if (typeof stopBenchmark === 'function') stopBenchmark(); } catch (e) {}
+
+        // Replace entire body with shutdown message (client-only)
+        document.documentElement.style.height = '100%';
+        document.body.style.margin = '0';
+        document.body.innerHTML = `
+            <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:var(--bg-primary);color:var(--text-primary);font-family:Roboto,Segoe UI,Arial,sans-serif;">
+                <div style="text-align:center;max-width:720px;padding:24px;">
+                    <h1 style="font-size:32px;margin-bottom:12px;">Dashboard Closed</h1>
+                    <p style="color:var(--text-secondary);margin-bottom:18px;">The web dashboard has been closed in this browser tab. You can safely close this tab or navigate away.</p>
+                    <div style="display:flex;gap:8px;justify-content:center;">
+                        <button onclick="location.reload()" style="padding:8px 14px;border-radius:6px;border:none;background:var(--accent-blue);color:#fff;cursor:pointer;">Reopen Dashboard</button>
+                        <button onclick="window.close()" style="padding:8px 14px;border-radius:6px;border:1px solid var(--border-color);background:transparent;color:var(--text-primary);cursor:pointer;">Close Window</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    } catch (e) {
+        console.debug('showShutdownSequence failed', e);
+    }
 }
 
 function zoomIn() { adjustZoom(1.5); }
@@ -940,7 +1230,7 @@ async function loadFeatures() {
 fetchStatus();
 loadBaseline();
 loadFeatures();
-setInterval(tick, 1000);
+refreshInterval = setInterval(tick, 1000);
 
 // Initialize benchmark type on load
 selectBenchType('gemm');
