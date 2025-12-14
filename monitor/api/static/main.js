@@ -1,5 +1,57 @@
 let countdown = 5;
 let historyChart = null;
+// History chart state for zoom/highlight
+let historyOriginalLabels = [];
+let historyOriginalData = [];
+let historyVisibleStart = 0;
+let historyVisibleEnd = 0;
+let historyDayStarts = []; // indices where each day starts
+let historySelectedDay = null; // index into historyDayStarts
+
+function ensureZoomPlugin() {
+    try {
+        if (typeof Chart === 'undefined') return;
+        // check registry for a plugin with id 'zoom'
+        const regs = (Chart && Chart.registry && Chart.registry.plugins && Chart.registry.plugins.items) ? Chart.registry.plugins.items : null;
+        if (regs && regs.some(p => p && p.id === 'zoom')) return;
+        const candidate = window['chartjsPluginZoom'] || window['ChartZoom'] || window['chartjs-plugin-zoom'];
+        if (candidate) {
+            Chart.register(candidate);
+            console.debug('chartjs zoom plugin registered at runtime');
+        }
+    } catch (e) { console.debug('ensureZoomPlugin error', e); }
+}
+
+function zoomIn() { adjustZoom(1.5); }
+function zoomOut() { adjustZoom(1/1.5); }
+function resetZoom() { historyVisibleStart = 0; historyVisibleEnd = historyOriginalLabels.length-1; renderHistoryView(); }
+
+function adjustZoom(factor) {
+    const len = historyOriginalLabels.length;
+    if (!len) return;
+    const curLen = historyVisibleEnd - historyVisibleStart + 1;
+    let newLen = Math.max(10, Math.round(curLen / factor));
+    if (newLen >= len) { resetZoom(); return; }
+    const center = Math.floor((historyVisibleStart + historyVisibleEnd)/2);
+    let start = Math.max(0, center - Math.floor(newLen/2));
+    let end = Math.min(len-1, start + newLen -1);
+    if (end - start + 1 < newLen) start = Math.max(0, end - newLen +1);
+    historyVisibleStart = start; historyVisibleEnd = end; renderHistoryView();
+}
+
+function highlightSelectedDay(val) {
+    const idx = val === '' ? null : parseInt(val);
+    historySelectedDay = isNaN(idx) ? null : idx;
+    renderHistoryView();
+}
+
+function renderHistoryView(){
+    if (!historyChart) return;
+    // With time-scale charts we keep the full dataset on the chart and let
+    // the zoom/pan plugin control the visible window. For highlight changes
+    // simply update the chart to redraw overlays.
+    historyChart.update('none');
+}
 
 // Tab switching
 document.querySelectorAll('.tab').forEach(tab => {
@@ -50,14 +102,16 @@ async function fetchStatus() {
 function updateDashboard(data) {
     console.log('Updating dashboard with:', data);
     const badge = document.getElementById('status-badge');
-    badge.className = 'status-badge status-' + data.status;
-    badge.textContent = data.status.toUpperCase();
-    
-    // Add tooltip with alert count
+    // Display 'warning' state from server as 'idle' in UI while leaving alerts untouched
+    const displayStatus = (data.status === 'warning') ? 'idle' : (data.status || 'unknown');
+    badge.className = 'status-badge status-' + displayStatus;
+    badge.textContent = displayStatus.toUpperCase();
+
+    // Add tooltip with alert count (keep original alert logic based on server status)
     const alertCount = data.alerts ? data.alerts.length : 0;
     if (data.status === 'warning' && alertCount > 0) {
         badge.setAttribute('data-tooltip', `${alertCount} active alert${alertCount > 1 ? 's' : ''}`);
-    } else if (data.status === 'info') {
+    } else if (displayStatus === 'info') {
         badge.setAttribute('data-tooltip', 'System information available');
     } else {
         badge.setAttribute('data-tooltip', 'All systems operational');
@@ -123,13 +177,22 @@ function updateDashboard(data) {
 async function loadHistory() {
     const metric = document.getElementById('metric-select').value;
     const hours = document.getElementById('hours-select').value;
-    
+
     try {
+        // allow 'lifetime' to be requested; server may handle it
         const historyResponse = await fetch(`/api/history?metric=${metric}&hours=${hours}`);
-        const historyData = await historyResponse.json();
-        
+        let historyData = await historyResponse.json();
+        // If user requested 'lifetime' but server returned empty, try a large numeric fallback
+        if (hours === 'lifetime' && (!historyData || !historyData.data || historyData.data.length === 0)) {
+            try {
+                const fallbackHours = 24 * 365 * 5; // 5 years
+                const resp2 = await fetch(`/api/history?metric=${metric}&hours=${fallbackHours}`);
+                if (resp2.ok) historyData = await resp2.json();
+            } catch (e) { /* ignore fallback errors */ }
+        }
+
         const ctx = document.getElementById('historyChart').getContext('2d');
-        
+        ensureZoomPlugin();
         if (historyChart) historyChart.destroy();
 
         const getUnit = (metric) => {
@@ -139,76 +202,140 @@ async function loadHistory() {
             if (metric.includes('power')) return 'W';
             return '';
         }
-
         const unit = getUnit(metric);
 
+        // Prepare labels (timestamps) and datapoints
+        const points = (historyData.data || []).map(d => ({ t: new Date(d.timestamp).getTime(), y: d.value }));
+        const labels = (historyData.data || []).map(d => new Date(d.timestamp).getTime());
+
+        // Determine if multi-day range
+        const firstTs = points.length ? points[0].t : Date.now();
+        const lastTs = points.length ? points[points.length-1].t : Date.now();
+        const rangeHours = (lastTs - firstTs) / (1000*60*60);
+        const multiDay = rangeHours >= 24;
+
+        // y axis options
         const yAxisOptions = {
             ticks: { color: '#a0a0a0' },
             grid: { color: '#4a4a4a' },
             beginAtZero: true,
-            title: {
-                display: true,
-                text: unit,
-                color: '#a0a0a0',
-                font: {
-                    size: 14,
-                    weight: 'bold'
-                }
+            title: { display: true, text: unit, color: '#a0a0a0', font: { size: 14, weight: 'bold' } }
+        };
+        if (metric.includes('utilization') || metric.includes('percent')) yAxisOptions.suggestedMax = 100;
+        if (metric.includes('temperature')) yAxisOptions.suggestedMax = 100;
+
+        // Build plugin to draw alternating day bands for multi-day ranges
+        // compute day boundaries once so click/highlight can map to days
+        const dayStarts = [];
+        let prevDay = null;
+        for (let i = 0; i < labels.length; i++) {
+            const d = new Date(labels[i]);
+            const day = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
+            if (day !== prevDay) { dayStarts.push(i); prevDay = day; }
+        }
+
+        const dayBandPlugin = {
+            id: 'dayBands',
+            beforeDatasetsDraw: function(chart) {
+                if (!multiDay) return;
+                try {
+                    const xScale = chart.scales.x;
+                    const ctx = chart.ctx;
+                    const dataLen = historyOriginalLabels.length;
+                    if (dataLen === 0) return;
+                    for (let j = 0; j < dayStarts.length; j++) {
+                        const startIdx = dayStarts[j];
+                        const endIdx = (j+1 < dayStarts.length) ? dayStarts[j+1]-1 : dataLen-1;
+                        const startTs = historyOriginalLabels[startIdx];
+                        const endTs = historyOriginalLabels[endIdx];
+                        const left = xScale.getPixelForValue(startTs);
+                        const right = xScale.getPixelForValue(endTs + 1);
+                        const bandColor = (j % 2 === 0) ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.03)';
+                        ctx.save(); ctx.fillStyle = bandColor; ctx.fillRect(left, chart.chartArea.top, Math.max(1, right-left), chart.chartArea.bottom - chart.chartArea.top); ctx.restore();
+                    }
+                } catch(e) { console.debug('dayBandPlugin error', e); }
             }
         };
 
-        if (metric.includes('utilization') || metric.includes('percent')) {
-            yAxisOptions.suggestedMax = 100;
-        }
-        if (metric.includes('temperature')) {
-            yAxisOptions.suggestedMax = 100;
-        }
+        // store originals for zooming / highlighting
+        historyOriginalLabels = labels.slice();
+        historyOriginalData = points.map(p => p.y).slice();
+        historyDayStarts = dayStarts.slice();
+        historyVisibleStart = 0;
+        historyVisibleEnd = historyOriginalLabels.length - 1;
 
-        if (metric.startsWith('gpu_') && metric.includes('_memory_used')) {
-            const statusResponse = await fetch('/api/status');
-            const statusData = await statusResponse.json();
-            const gpuIndex = parseInt(metric.split('_')[1]);
-            const gpu = statusData.metrics.gpus[gpuIndex];
-            if (gpu && gpu.memory_total) {
-                yAxisOptions.max = gpu.memory_total;
+        // plugin: highlight selected day (uses historySelectedDay and historyDayStarts)
+        const highlightPlugin = {
+            id: 'highlightDay',
+            beforeDatasetsDraw: function(chart) {
+                if (historySelectedDay === null) return;
+                try {
+                    const xScale = chart.scales.x;
+                    const ctx = chart.ctx;
+                    const len = historyOriginalLabels.length;
+                    const sel = historySelectedDay;
+                    if (sel < 0 || sel >= historyDayStarts.length) return;
+                    const globalStartIdx = historyDayStarts[sel];
+                    const globalEndIdx = (sel+1 < historyDayStarts.length) ? historyDayStarts[sel+1]-1 : len-1;
+                    const globalStartTs = historyOriginalLabels[globalStartIdx];
+                    const globalEndTs = historyOriginalLabels[globalEndIdx];
+                    const left = xScale.getPixelForValue(globalStartTs);
+                    const right = xScale.getPixelForValue(globalEndTs + 1);
+                    // check overlap with chart area
+                    if (right < chart.chartArea.left || left > chart.chartArea.right) return;
+                    ctx.save(); ctx.fillStyle = 'rgba(0,160,255,0.12)'; ctx.fillRect(left, chart.chartArea.top, Math.max(1, right-left), chart.chartArea.bottom - chart.chartArea.top); ctx.restore();
+                } catch(e) { console.debug('highlightPlugin error', e); }
             }
-        }
-        
+        };
+
         historyChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: historyData.data.map(d => new Date(d.timestamp).toLocaleTimeString()),
                 datasets: [{
                     label: document.getElementById('metric-select').selectedOptions[0].text,
-                    data: historyData.data.map(d => d.value),
+                    data: points.map(p => ({ x: p.t, y: p.y })),
                     borderColor: '#76b900',
-                    backgroundColor: 'rgba(118, 185, 0, 0.1)',
+                    backgroundColor: 'rgba(118, 185, 0, 0.08)',
                     fill: true,
-                    tension: 0.3
+                    tension: 0.3,
+                    pointRadius: 2
                 }]
             },
             options: {
                 responsive: true,
-                plugins: { 
-                    legend: { 
-                        display: true,
-                        labels: { 
-                            color: '#f0f0f0',
-                            font: {
-                                size: 14
-                            }
-                        } 
-                    } 
+                interaction: { mode: 'nearest', intersect: false },
+                plugins: {
+                    legend: { display: true, labels: { color: '#f0f0f0', font: { size: 14 } } },
+                    zoom: { pan: { enabled: true, mode: 'x' }, zoom: { wheel: { enabled: true }, pinch: { enabled: true }, drag: { enabled: false }, mode: 'x' } }
                 },
                 scales: {
-                    x: { 
-                        ticks: { color: '#a0a0a0', maxTicksLimit: 10 }, 
-                        grid: { color: '#4a4a4a' } 
+                    x: {
+                        type: 'time',
+                        time: { tooltipFormat: 'MMM d, yyyy HH:mm' },
+                        ticks: { color: '#a0a0a0', maxRotation: 0, autoSkip: true },
+                        grid: { color: '#4a4a4a' }
                     },
                     y: yAxisOptions
-                }
+                },
+                plugins: [dayBandPlugin, highlightPlugin]
             }
         });
+        // add click handler to highlight the day/hour of the nearest datapoint
+        const canvas = document.getElementById('historyChart');
+        canvas.onclick = function(evt) {
+            try {
+                const pointsFound = historyChart.getElementsAtEventForMode(evt, 'nearest', { intersect: false }, true);
+                if (!pointsFound || pointsFound.length === 0) return;
+                const idx = pointsFound[0].index; // index into dataset.data
+                // find day index for idx
+                let sel = 0;
+                for (let j = 0; j < historyDayStarts.length; j++) {
+                    if (historyDayStarts[j] <= idx) sel = j; else break;
+                }
+                historySelectedDay = sel;
+                historyChart.update('none');
+            } catch (e) { console.debug('click highlight failed', e); }
+        };
     } catch (error) {
         console.error('Error loading history:', error);
     }
@@ -548,81 +675,76 @@ async function pollBenchmarkStatus() {
         ]);
         const status = await statusRes.json();
         const samplesData = await samplesRes.json();
-        
-        document.getElementById('bench-progress-bar').style.width = status.progress + '%';
-        document.getElementById('bench-percent').textContent = status.progress + '%';
+
+        document.getElementById('bench-progress-bar').style.width = (status.progress || 0) + '%';
+        document.getElementById('bench-percent').textContent = (status.progress || 0) + '%';
         document.getElementById('iteration-counter').textContent = 'Iteration #' + (status.iterations || 0);
         document.getElementById('workload-info').textContent = 'Workload: ' + (status.workload_type || 'N/A');
         document.getElementById('bench-workload').textContent = status.workload_type || '';
-        
+
         // Update live charts with samples
-        if (samplesData.samples && benchCharts.utilization) {
+        if (samplesData && samplesData.samples && benchCharts.utilization) {
             const samples = samplesData.samples;
             const labels = samples.map(s => s.elapsed_sec + 's');
-            
+
             benchCharts.utilization.data.labels = labels;
             benchCharts.utilization.data.datasets[0].data = samples.map(s => s.utilization || 0);
             benchCharts.utilization.update('none');
-            
+
             benchCharts.temperature.data.labels = labels;
             benchCharts.temperature.data.datasets[0].data = samples.map(s => s.temperature_c || 0);
             benchCharts.temperature.update('none');
-            
+
             benchCharts.memory.data.labels = labels;
             benchCharts.memory.data.datasets[0].data = samples.map(s => s.memory_used_mb || 0);
             benchCharts.memory.update('none');
-            
+
             benchCharts.power.data.labels = labels;
             benchCharts.power.data.datasets[0].data = samples.map(s => s.power_w || 0);
             benchCharts.power.update('none');
         }
-        
+
         if (!status.running) {
             clearInterval(benchmarkPollInterval);
             document.getElementById('start-bench-btn').disabled = false;
             document.getElementById('start-bench-btn').textContent = 'Start Benchmark';
             document.getElementById('stop-bench-btn').style.display = 'none';
-                // Prefer the fancy renderer if available to maintain consistent styling
-                if (typeof window !== 'undefined' && typeof window.renderFancyBenchmarkResults === 'function') {
-                    try { window.renderFancyBenchmarkResults(results); return; } catch (e) { console.debug('renderFancyBenchmarkResults failed', e); }
-                }
 
-                // Fallback to previous plain rendering if fancy renderer isn't available
-                if (!results || results.status === 'no_results') {
-                    document.getElementById('benchmark-results').innerHTML = '<p style="color: var(--text-secondary);">No results available</p>';
-                    return;
-                }
+            // fetch results and render
+            try {
+                const res = await fetch('/api/benchmark/results');
+                if (res.ok) {
+                    const results = await res.json();
+                    if (typeof window !== 'undefined' && typeof window.renderFancyBenchmarkResults === 'function') {
+                        try { window.renderFancyBenchmarkResults(results); return; } catch (e) { console.debug('renderFancyBenchmarkResults failed', e); }
+                    }
 
-                // Minimal fallback: show key metrics in structured blocks
-                const r = results;
-                const html = `
-                    <div class="gpu-card"><h3 style="color: var(--accent-green);">Benchmark Results</h3>
-                        <div class="metric-row"><span class="metric-label">Average TFLOPS</span><span class="metric-value">${(r.avg_tflops || r.performance && r.performance.tflops || 0).toFixed(2)}</span></div>
-                        <div class="metric-row"><span class="metric-label">Peak TFLOPS</span><span class="metric-value">${(r.peak_tflops || r.performance && r.performance.peak_tflops || 0).toFixed(2)}</span></div>
-                        <div class="metric-row"><span class="metric-label">Avg Temperature</span><span class="metric-value">${(r.avg_temperature || 0).toFixed(1)}°C</span></div>
-                        <div class="metric-row"><span class="metric-label">Avg GPU Utilization</span><span class="metric-value">${(r.avg_gpu_utilization || 0).toFixed(1)}%</span></div>
-                        <div class="metric-row"><span class="metric-label">Avg Memory Usage</span><span class="metric-value">${(r.avg_memory_usage || 0).toFixed(1)}%</span></div>
-                        <div class="metric-row"><span class="metric-label">Avg Power Draw</span><span class="metric-value">${(r.avg_power_draw || 0).toFixed(1)}W</span></div>
-                        <div class="metric-row"><span class="metric-label">Duration</span><span class="metric-value">${(r.duration || 0).toFixed(1)}s</span></div>
-                        <div class="metric-row"><span class="metric-label">Iterations</span><span class="metric-value">${r.total_iterations || r.iterations_completed || 0}</span></div>
-                    </div>
-                `;
-                document.getElementById('benchmark-results').innerHTML = html;
-                <div class="gpu-card" style="margin-bottom: 10px;">
-                    <div class="gpu-header">
-                        <span class="gpu-name">${m.label}</span>
-                    </div>
-                    <div class="metric-row"><span class="metric-label">Min</span><span class="metric-value">${data.min} ${m.unit}</span></div>
-                    <div class="metric-row"><span class="metric-label">Avg</span><span class="metric-value">${data.avg} ${m.unit}</span></div>
-                    <div class="metric-row"><span class="metric-label">Max</span><span class="metric-value">${data.max} ${m.unit}</span></div>
-                </div>
-            `;
+                    // fallback rendering
+                    const r = results || {};
+                    const html = `
+                        <div class="gpu-card"><h3 style="color: var(--accent-green);">Benchmark Results</h3>
+                            <div class="metric-row"><span class="metric-label">Average TFLOPS</span><span class="metric-value">${(r.avg_tflops || (r.performance && r.performance.tflops) || 0).toFixed(2)}</span></div>
+                            <div class="metric-row"><span class="metric-label">Peak TFLOPS</span><span class="metric-value">${(r.peak_tflops || (r.performance && r.performance.peak_tflops) || 0).toFixed(2)}</span></div>
+                            <div class="metric-row"><span class="metric-label">Avg Temperature</span><span class="metric-value">${(r.avg_temperature || 0).toFixed(1)}°C</span></div>
+                            <div class="metric-row"><span class="metric-label">Avg GPU Utilization</span><span class="metric-value">${(r.avg_gpu_utilization || 0).toFixed(1)}%</span></div>
+                            <div class="metric-row"><span class="metric-label">Avg Memory Usage</span><span class="metric-value">${(r.avg_memory_usage || 0).toFixed(1)}%</span></div>
+                            <div class="metric-row"><span class="metric-label">Avg Power Draw</span><span class="metric-value">${(r.avg_power_draw || 0).toFixed(1)}W</span></div>
+                            <div class="metric-row"><span class="metric-label">Duration</span><span class="metric-value">${(r.duration || 0).toFixed(1)}s</span></div>
+                            <div class="metric-row"><span class="metric-label">Iterations</span><span class="metric-value">${r.total_iterations || r.iterations_completed || 0}</span></div>
+                        </div>
+                    `;
+                    document.getElementById('benchmark-results').innerHTML = html;
+                } else {
+                    document.getElementById('benchmark-results').innerHTML = '<p style="color: var(--text-secondary);">Failed to load results</p>';
+                }
+            } catch (e) {
+                console.error('Error fetching benchmark results:', e);
+            }
         }
-    });
-    
-    html += `<p style="color: var(--text-secondary); margin-top: 15px; font-size: 0.9em;">Benchmark completed at ${new Date(results.timestamp).toLocaleString()}</p>`;
-    
-    document.getElementById('benchmark-results').innerHTML = html;
+    } catch (error) {
+        console.error('Error polling benchmark status:', error);
+        try { clearInterval(benchmarkPollInterval); } catch(e){}
+    }
 }
 
 async function checkForUpdates() {

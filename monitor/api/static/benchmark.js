@@ -28,25 +28,7 @@ function initBackendDropdown(){
     try { window.selectedBackend = window.selectedBackend || 'auto'; } catch(e){}
 }
 
-function updateSliderValue(type) { /* no-op */ }
-
-async function startBenchmark() { window.showError && window.showError('Benchmarking is disabled in this build'); }
-async function stopBenchmark() { /* no-op */ }
-async function pollBenchmarkStatus() { /* no-op */ }
-
-function displayBenchmarkResults(results) {
-    // simple no-op renderer to avoid raw text output
-    try {
-        const resultsDiv = document.getElementById('benchmark-results');
-        if (resultsDiv) {
-            resultsDiv.innerHTML = '<div class="gpu-card" style="margin-bottom:12px;"><div style="color:var(--text-secondary)">Benchmark results are disabled.</div></div>';
-        }
-    } catch(e){}
-}
-
-if (typeof window !== 'undefined') {
-    try { window.renderFancyBenchmarkResults = displayBenchmarkResults; } catch(e) { console.debug('export renderFancyBenchmarkResults failed', e); }
-}
+function updateSliderValue(type) { /* placeholder kept for compatibility */ }
 
 function exportData(format) {
     if (format === 'json') {

@@ -393,3 +393,14 @@ footer {
 @media (max-width: 680px) {
     .result-card.lg { grid-column: span 1; flex-direction:column; }
 }
+
+/* Chart control buttons */
+.chart-btn {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    cursor: pointer;
+}
+.chart-btn:hover { background: var(--bg-secondary); }

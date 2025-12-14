@@ -4,10 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cluster Health Monitor</title>
+    <!-- favicon: prefer dev/icon.png if provided, fall back to /static/icon.png -->
+    <link rel="icon" href="/static/dev/icon.png">
+    <link rel="icon" href="/static/icon.png">
     <link rel="stylesheet" href="/static/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
     <link rel="stylesheet" href="/static/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* Sliding error window */
         #error-window {
@@ -114,8 +118,11 @@
                         <option value="6">Last 6 hours</option>
                         <option value="24">Last 24 hours</option>
                         <option value="168">Last 7 days</option>
+                        <option value="720">Last 30 days</option>
+                        <option value="lifetime">Lifetime</option>
                     </select>
                     <button onclick="loadHistory()">Refresh</button>
+                    <div style="display:inline-flex; gap:8px; align-items:center; margin-left:8px;"></div>
                 </div>
                 <canvas id="historyChart" height="100"></canvas>
             </div>
@@ -257,8 +264,8 @@
                     </div>
                     
                         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                            <button class="export-btn" onclick="startBenchmark()" id="start-bench-btn" disabled data-tooltip="Not implemented">Start Benchmark</button>
-                            <button class="export-btn" onclick="startSimulation()" id="start-sim-btn" title="Start particle simulation with visualization" disabled data-tooltip="Not implemented">Start Simulation</button>
+                            <button class="export-btn" onclick="startBenchmark()" id="start-bench-btn" data-tooltip="Not implemented">Start Benchmark</button>
+                                <button class="export-btn" onclick="startSimulation()" id="start-sim-btn" title="Start particle simulation with visualization" data-tooltip="Not implemented">Start Simulation</button>
                         <button class="export-btn secondary" onclick="stopBenchmark()" id="stop-bench-btn" style="display: none;">Stop</button>
                         <span id="iteration-counter" style="display: none; font-size: 1.2em; color: var(--accent-green); font-weight: bold; margin-left: 20px;"></span>
                     </div>
@@ -323,7 +330,7 @@
     <script src="/static/charts.js"></script>
     <script src="/static/benchmark.js"></script>
     <script src="/static/simulation.js"></script>
-    <script src="/static/main-new.js"></script>
+    <script src="/static/main.js"></script>
     <script>
         (function(){
             function pad(n){ return String(n).padStart(2,'0'); }
