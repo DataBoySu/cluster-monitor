@@ -154,6 +154,14 @@ REST API endpoints (web mode):
 - `GET /` - Web dashboard
 - `GET /api/status` - Current GPU metrics
 - `GET /api/history` - Historical data
+
+### Admin mode
+
+If you need the web dashboard to perform privileged actions (terminate processes, restart services), start the server with the `--admin` flag. This signals the application that it should enable administrative actions and the dashboard will show admin controls.
+
+```powershell
+python health_monitor.py web --port 8890 --admin
+```
 - `POST /api/benchmark/start` - Start benchmark
 - `GET /api/benchmark/status` - Benchmark progress
 - `POST /api/benchmark/stop` - Stop benchmark

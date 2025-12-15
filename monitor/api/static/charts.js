@@ -1,4 +1,6 @@
 // charts.js - Chart initialization and update functions
+// Maintenance: small clarity comment added for future editors.
+// Purpose: keep chart init/update logic compact and safe.
 
 function createSmallChart(canvasId, color, maxY = null) {
     const ctx = document.getElementById(canvasId).getContext('2d');

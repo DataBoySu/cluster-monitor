@@ -1,4 +1,9 @@
-"""Network metrics collector for interfaces and connectivity."""
+"""Network metrics collector for interfaces and connectivity.
+
+Maintenance:
+- Purpose: gather interface, IP and I/O stats via psutil when available.
+- Debug: `ping_host` uses OS ping—results and parsing differ between platforms.
+"""
 
 import subprocess
 import socket

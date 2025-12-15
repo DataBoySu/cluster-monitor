@@ -1,4 +1,10 @@
 """Feature detection and caching system."""
+"""Feature detection utilities for optional dependencies.
+
+Maintenance:
+- Purpose: centralize detection of optional libraries (CuPy, PyTorch, NVML).
+- Debug: use these helpers from startup to conditionally enable features.
+"""
 
 import json
 import os

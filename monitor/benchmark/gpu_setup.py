@@ -1,4 +1,10 @@
-"""GPU array initialization for particle simulation."""
+"""GPU array initialization for particle simulation.
+
+Maintenance:
+- Purpose: allocate and initialize arrays/tensors required by particle workloads.
+- Debug: keep allocations centralized—large `n` values allocate GPU memory. If
+    you see OOM errors, reduce `n` or ensure proper device selection before calling.
+"""
 
 
 def setup_cupy_arrays(n, cp):

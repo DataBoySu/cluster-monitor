@@ -1,4 +1,12 @@
-"""Utility functions for particle sampling and visualization."""
+"""Utility functions for particle sampling and visualization.
+
+Maintenance:
+- Purpose: sampling helpers for building a reduced particle set to send
+    over WebSocket for visualization. Keep CPU transfers minimal to avoid
+    blocking the main benchmark loop.
+- Debug: if visualization stalls, check for large CPU transfers from GPU
+    arrays (calls to `.get()`); reduce `max_samples` to limit overhead.
+"""
 
 import numpy as np
 

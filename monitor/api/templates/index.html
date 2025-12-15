@@ -4,10 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cluster Health Monitor</title>
+    <!-- favicon: prefer dev/icon.png if provided, fall back to /static/icon.png -->
+    <link rel="icon" href="/static/dev/icon.png">
+    <link rel="icon" href="/static/icon.png">
     <link rel="stylesheet" href="/static/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
     <link rel="stylesheet" href="/static/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Toasts are provided by /static/toast.js (right-side popouts).
+           This space intentionally left minimal; visuals are handled in toast.js. */
+    </style>
 </head>
 <body>
     <div class="container">
@@ -17,17 +25,18 @@
                 <span style="font-size: 0.8em; opacity: 0.8;">Auto-refresh: <span id="countdown">5</span>s</span>
             </div>
             <div class="header-right">
-                <button class="update-btn" onclick="checkForUpdates()" id="update-btn">Check for Updates</button>
-                <button class="update-btn" onclick="shutdownServer()" id="shutdown-btn" style="background: var(--accent-red);">Exit</button>
+                <button class="update-btn" onclick="checkForUpdates()" id="update-btn" data-tooltip="Check latest release on GitHub">Check for Updates</button>
+                <button class="update-btn" onclick="shutdownServer()" id="shutdown-btn" data-tooltip="Shut down the server" style="background: var(--accent-red);">Exit</button>
                 <div id="status-badge" class="status-badge status-healthy">HEALTHY</div>
             </div>
         </header>
+            <!-- Toasts are rendered by /static/toast.js -->
         
         <div class="tabs">
             <div class="tab active" data-tab="home">Home</div>
             <div class="tab" data-tab="history">History</div>
             <div class="tab" data-tab="processes">Processes</div>
-            <div class="tab" data-tab="benchmark">Benchmark</div>
+                <div class="tab" data-tab="benchmark">Benchmark</div>
             <div class="tab" data-tab="export">Export</div>
         </div>
         
@@ -66,8 +75,11 @@
                         <option value="6">Last 6 hours</option>
                         <option value="24">Last 24 hours</option>
                         <option value="168">Last 7 days</option>
+                        <option value="720">Last 30 days</option>
+                        <option value="lifetime">Lifetime</option>
                     </select>
                     <button onclick="loadHistory()">Refresh</button>
+                    <div style="display:inline-flex; gap:8px; align-items:center; margin-left:8px;"></div>
                 </div>
                 <canvas id="historyChart" height="100"></canvas>
             </div>
@@ -93,8 +105,8 @@
                             <th>PID</th>
                             <th>Process</th>
                             <th>GPU</th>
-                            <th>GPU Util %</th>
                             <th>User</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="process-list">
@@ -130,7 +142,17 @@
             <div class="card">
                 <h2>GPU Benchmark</h2>
                 <p style="margin-bottom: 10px; color: var(--text-secondary);">Stress test using matrix multiplication workload. Faster GPUs complete more iterations.</p>
-                <p id="workload-info" style="margin-bottom: 20px; color: var(--accent-blue); font-size: 0.9em;"></p>
+                <p id="workload-info" style="margin-bottom: 8px; color: var(--accent-blue); font-size: 0.9em;"></p>
+                <label style="display: inline-flex; align-items: center; gap:8px; margin-bottom: 20px;">
+                    <span style="font-size:0.9em; color: var(--text-secondary);">Backend</span>
+                    <select id="benchmark-backend-select" onchange="onBackendChange(this.value)" disabled style="padding:6px; border-radius:6px; background:var(--bg-secondary); color:var(--text-primary);">
+                            <option value="disabled" selected>Not implemented</option>
+                            <option value="auto">Auto</option>
+                            <option value="cupy">CuPy</option>
+                            <option value="torch">PyTorch</option>
+                        </select>
+                    <span style="margin-left:8px; color:var(--text-secondary); font-size:0.85em;">Feature disabled</span>
+                </label>
                 
                 <div id="baseline-info" style="display: none; background: var(--bg-tertiary); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid var(--accent-green);">
                     <h4 style="color: var(--accent-green); margin-bottom: 10px;">Baseline Saved</h4>
@@ -198,9 +220,9 @@
                         </div>
                     </div>
                     
-                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                        <button class="export-btn" onclick="startBenchmark()" id="start-bench-btn">Start Benchmark</button>
-                        <button class="export-btn" onclick="startSimulation()" id="start-sim-btn" title="Start particle simulation with visualization">Start Simulation</button>
+                        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                            <button class="export-btn" onclick="startBenchmark()" id="start-bench-btn" data-tooltip="Not implemented">Start Benchmark</button>
+                                <button class="export-btn" onclick="startSimulation()" id="start-sim-btn" title="Start particle simulation with visualization" data-tooltip="Not implemented">Start Simulation</button>
                         <button class="export-btn secondary" onclick="stopBenchmark()" id="stop-bench-btn" style="display: none;">Stop</button>
                         <span id="iteration-counter" style="display: none; font-size: 1.2em; color: var(--accent-green); font-weight: bold; margin-left: 20px;"></span>
                     </div>
@@ -252,11 +274,21 @@
     </div>
     
     <!-- Load modules in correct order -->
+    <script>
+        // Ensure global selectedBackend exists before other static scripts run
+        window.selectedBackend = window.selectedBackend || 'auto';
+        // Called by inline select onchange to immediately update global and preview
+        window.onBackendChange = function(val){
+            try { window.selectedBackend = val || 'auto'; } catch(e){}
+            try { if (typeof updateWorkloadPreview === 'function') updateWorkloadPreview(); } catch(e){}
+        };
+    </script>
     <script src="/static/utils.js"></script>
     <script src="/static/charts.js"></script>
     <script src="/static/benchmark.js"></script>
     <script src="/static/simulation.js"></script>
-    <script src="/static/main-new.js"></script>
+    <script src="/static/toast.js"></script>
+    <script src="/static/main.js"></script>
     <script>
         (function(){
             function pad(n){ return String(n).padStart(2,'0'); }
@@ -278,6 +310,8 @@
             // The UI will update the "Last update" only when the client
             // receives fresh metrics from the server and calls this.
             window.setLastUpdate = setLastUpdate;
+
+            // Notifications handled by /static/toast.js (window.showToast/showError/showSuccess/showWarn)
         })();
     </script>
 </body>

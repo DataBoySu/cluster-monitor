@@ -1,4 +1,10 @@
-"""Backend stress multiplier for GPU workloads."""
+"""Backend stress multiplier for GPU workloads.
+
+Maintenance:
+ - Keeps imports lightweight at module import time.
+ - Manages offscreen/backend arrays used to increase
+     effective particle counts for GPU stress testing.
+"""
 
 from . import gpu_setup
 

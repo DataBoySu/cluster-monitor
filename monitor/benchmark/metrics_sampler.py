@@ -1,4 +1,11 @@
-"""GPU metrics sampling and monitoring."""
+"""GPU metrics sampling and monitoring.
+
+Maintenance:
+- Purpose: sample GPU utilization periodically using `nvidia-smi` and keep a
+    thread-safe current value for the benchmark runner/UI.
+- Debug: nvidia-smi may fail or be slow; this sampler tracks consecutive
+    errors and uses a short `sample_interval` (tuneable) to avoid CPU spin.
+"""
 
 import time
 import subprocess

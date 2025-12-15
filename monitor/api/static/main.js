@@ -1,5 +1,365 @@
+// Canonical dashboard script: keep this file as `main.js`.
+// (Any legacy or duplicate files such as `main-new.js` were removed.)
+// Canonical dashboard script: keep this file as `main.js`.
+// (Any legacy or duplicate files such as `main-new.js` were removed.)
 let countdown = 5;
+let refreshInterval = null; // handle for the main auto-refresh interval
 let historyChart = null;
+// History chart state for zoom/highlight
+let historyOriginalLabels = [];
+let historyOriginalData = [];
+let historyVisibleStart = 0;
+let historyVisibleEnd = 0;
+let historyDayStarts = []; // indices where each day starts
+let historySelectedDay = null; // index into historyDayStarts
+
+function ensureZoomPlugin() {
+    try {
+        if (typeof Chart === 'undefined') return;
+        // check registry for a plugin with id 'zoom'
+        const regs = (Chart && Chart.registry && Chart.registry.plugins && Chart.registry.plugins.items) ? Chart.registry.plugins.items : null;
+        if (regs && regs.some(p => p && p.id === 'zoom')) return;
+        const candidate = window['chartjsPluginZoom'] || window['ChartZoom'] || window['chartjs-plugin-zoom'];
+        if (candidate) {
+            Chart.register(candidate);
+            console.debug('chartjs zoom plugin registered at runtime');
+        }
+    } catch (e) { console.debug('ensureZoomPlugin error', e); }
+}
+
+// Notifications are provided by /static/toast.js (loaded before main.js)
+
+function showRestartSuccessPage() {
+    try {
+        // stop intervals
+        try { if (refreshInterval) clearInterval(refreshInterval); } catch (e) {}
+        try { if (benchmarkPollInterval) clearInterval(benchmarkPollInterval); } catch (e) {}
+
+        document.documentElement.style.height = '100%';
+        document.body.style.margin = '0';
+        document.body.innerHTML = `
+            <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#062b00;color:#d1fae5;font-family:Roboto,Segoe UI,Arial,sans-serif;">
+                <div style="text-align:center;max-width:720px;padding:24px;">
+                    <h1 style="font-size:38px;margin-bottom:12px;color:#bbf7d0;">Server restarted successfully</h1>
+                    <p style="color:#bbf7d0;margin-bottom:18px;">The server restart was initiated with elevated privileges. If the UI does not reconnect automatically, refresh this page after a few seconds.</p>
+                    <div style="display:flex;gap:8px;justify-content:center;">
+                        <button onclick="location.reload()" style="padding:10px 16px;border-radius:6px;border:none;background:#0b6623;color:#fff;cursor:pointer;">Refresh</button>
+                        <button onclick="window.close()" style="padding:10px 16px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:#d1fae5;cursor:pointer;">Close Window</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    } catch (e) { console.debug('showRestartSuccessPage error', e); }
+}
+
+// Shutdown helper called by the Exit button in the header
+async function shutdownServer() {
+    try {
+        const ok = await showConfirmShutdownDialog();
+        if (!ok) return;
+        const btn = document.getElementById('shutdown-btn');
+        if (btn) { btn.disabled = true; btn.textContent = 'Shutting down...'; }
+
+        // Show a transient modal while we send the shutdown request
+        const modal = createShutdownModal('Sending shutdown request...');
+        // Attempt to POST shutdown. If the POST fails (server killed before responding)
+        // fall back to polling to detect that the server has gone away.
+        try {
+            const res = await fetch('/api/shutdown', { method: 'POST' });
+            if (!res.ok) {
+                const txt = await res.text().catch(() => res.statusText || 'Error');
+                modal.setText('Shutdown failed: ' + txt);
+                if (typeof showError === 'function') showError('Shutdown failed: ' + txt);
+                if (btn) { btn.disabled = false; btn.textContent = 'Exit'; }
+                setTimeout(() => modal.remove(), 4000);
+                return;
+            }
+
+            // Server accepted shutdown request — update modal then proceed
+            modal.setText('Server is shutting down...');
+            try { await waitMs(600); } catch (e) {}
+            try { modal.remove(); } catch (e) {}
+
+            try { showServerShutdownPage(); } catch (e) { console.debug('showServerShutdownPage error', e); }
+            const stopped = await waitForServerStop(60, 1000);
+            if (stopped) {
+                showServerStoppedPage(true);
+            } else {
+                showServerStoppedPage(false);
+            }
+            return;
+        } catch (postErr) {
+            // Network error when posting — server may have terminated before sending a response.
+            // Immediately proceed to the final page rather than showing an intermediate "waiting" message.
+            try { modal.remove(); } catch (e) {}
+            // Show final stopped page (assume server is stopping/has stopped)
+            try { showServerStoppedPage(true); } catch (e) { console.debug('showServerStoppedPage error', e); }
+            return;
+        }
+    } catch (e) {
+        // Final note: ensure Exit button uses server shutdown flow. (index.html already wired to shutdownServer())
+        if (typeof showError === 'function') showError('Error sending shutdown: ' + (e && e.message ? e.message : e));
+        const btn = document.getElementById('shutdown-btn');
+        if (btn) { btn.disabled = false; btn.textContent = 'Exit'; }
+    }
+}
+
+// Modal helper used for shutdown flow
+function createShutdownModal(initialText) {
+    const overlay = document.createElement('div');
+    overlay.style.position = 'fixed';
+    overlay.style.left = '0';
+    overlay.style.top = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.display = 'flex';
+    overlay.style.alignItems = 'center';
+    overlay.style.justifyContent = 'center';
+    overlay.style.background = 'rgba(0,0,0,0.45)';
+    overlay.style.zIndex = '10000';
+
+    const card = document.createElement('div');
+    card.style.background = 'var(--bg-secondary)';
+    card.style.color = 'var(--text-primary)';
+    card.style.padding = '18px 22px';
+    card.style.borderRadius = '10px';
+    card.style.boxShadow = '0 8px 24px rgba(0,0,0,0.4)';
+    card.style.minWidth = '280px';
+    card.style.textAlign = 'center';
+
+    const msg = document.createElement('div');
+    msg.textContent = initialText || '';
+    msg.style.marginBottom = '10px';
+
+    const spinner = document.createElement('div');
+    spinner.style.width = '28px';
+    spinner.style.height = '28px';
+    spinner.style.border = '4px solid rgba(255,255,255,0.15)';
+    spinner.style.borderTopColor = 'var(--accent-blue)';
+    spinner.style.borderRadius = '50%';
+    spinner.style.margin = '0 auto';
+    spinner.style.animation = 'spin 1s linear infinite';
+
+    card.appendChild(msg);
+    card.appendChild(spinner);
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+
+    // Add simple keyframes if not present
+    if (!document.getElementById('shutdown-spin-style')) {
+        const style = document.createElement('style');
+        style.id = 'shutdown-spin-style';
+        style.textContent = '@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}';
+        document.head.appendChild(style);
+    }
+
+    return {
+        setText: (t) => { msg.textContent = t; },
+        remove: () => { try { if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay); } catch (e) {} }
+    };
+}
+
+// Custom confirmation dialog for shutdown (returns Promise<boolean>)
+function showConfirmShutdownDialog() {
+    return new Promise(resolve => {
+        const overlay = document.createElement('div');
+        overlay.style.position = 'fixed';
+        overlay.style.left = '0';
+        overlay.style.top = '0';
+        overlay.style.width = '100%';
+        overlay.style.height = '100%';
+        overlay.style.display = 'flex';
+        overlay.style.alignItems = 'center';
+        overlay.style.justifyContent = 'center';
+        overlay.style.background = 'rgba(0,0,0,0.45)';
+        overlay.style.zIndex = '10000';
+
+        const card = document.createElement('div');
+        card.style.background = 'var(--bg-secondary)';
+        card.style.color = 'var(--text-primary)';
+        card.style.padding = '18px 22px';
+        card.style.borderRadius = '10px';
+        card.style.boxShadow = '0 8px 24px rgba(0,0,0,0.4)';
+        card.style.minWidth = '320px';
+        card.style.textAlign = 'center';
+
+        const title = document.createElement('div');
+        title.textContent = 'Confirm Shutdown';
+        title.style.fontWeight = '700';
+        title.style.marginBottom = '8px';
+
+        const msg = document.createElement('div');
+        msg.textContent = 'Are you sure you want to shutdown the server? This will stop the process.';
+        msg.style.marginBottom = '14px';
+        msg.style.color = 'var(--text-secondary)';
+
+        const actions = document.createElement('div');
+        actions.style.display = 'flex';
+        actions.style.justifyContent = 'center';
+        actions.style.gap = '10px';
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.style.padding = '8px 12px';
+        cancelBtn.style.borderRadius = '6px';
+        cancelBtn.style.border = '1px solid var(--border-color)';
+        cancelBtn.style.background = 'transparent';
+        cancelBtn.style.color = 'var(--text-primary)';
+        cancelBtn.onclick = () => { try { overlay.remove(); } catch (e){}; resolve(false); };
+
+        const shutdownBtn = document.createElement('button');
+        shutdownBtn.textContent = 'Shutdown Server';
+        shutdownBtn.style.padding = '8px 12px';
+        shutdownBtn.style.borderRadius = '6px';
+        shutdownBtn.style.border = 'none';
+        shutdownBtn.style.background = 'var(--accent-red)';
+        shutdownBtn.style.color = '#fff';
+        shutdownBtn.onclick = () => { try { overlay.remove(); } catch (e){}; resolve(true); };
+
+        actions.appendChild(cancelBtn);
+        actions.appendChild(shutdownBtn);
+
+        card.appendChild(title);
+        card.appendChild(msg);
+        card.appendChild(actions);
+        overlay.appendChild(card);
+        document.body.appendChild(overlay);
+    });
+}
+
+// Show a full-page server shutdown message (used after server accepts the shutdown)
+function showServerShutdownPage() {
+    // Stop periodic refresh and benchmark polling
+    try { if (refreshInterval) clearInterval(refreshInterval); } catch (e) {}
+    try { if (benchmarkPollInterval) clearInterval(benchmarkPollInterval); } catch (e) {}
+    try { if (typeof stopBenchmark === 'function') stopBenchmark(); } catch (e) {}
+
+    document.documentElement.style.height = '100%';
+    document.body.style.margin = '0';
+    document.body.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:var(--bg-primary);color:var(--text-primary);font-family:Roboto,Segoe UI,Arial,sans-serif;">
+            <div style="text-align:center;max-width:720px;padding:24px;">
+                <h1 style="font-size:34px;margin-bottom:12px;">Server Shutting Down</h1>
+                <p style="color:var(--text-secondary);margin-bottom:18px;">The server has accepted the shutdown request and is terminating. You can close this window or keep it open to see when the server stops responding.</p>
+                <p style="color:var(--text-secondary);margin-bottom:24px;">If you started this server in a terminal, it will stop shortly.</p>
+                <div style="display:flex;gap:8px;justify-content:center;">
+                    <button onclick="location.reload()" style="padding:8px 14px;border-radius:6px;border:none;background:var(--accent-blue);color:#fff;cursor:pointer;">Refresh</button>
+                    <button onclick="window.close()" style="padding:8px 14px;border-radius:6px;border:1px solid var(--border-color);background:transparent;color:var(--text-primary);cursor:pointer;">Close Window</button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Wait until the server stops responding to /api/status or until timeout.
+// timeoutSeconds: total seconds to wait; intervalMs: poll interval in ms.
+async function waitForServerStop(timeoutSeconds = 60, intervalMs = 1000) {
+    const attempts = Math.max(1, Math.ceil((timeoutSeconds * 1000) / intervalMs));
+    for (let i = 0; i < attempts; i++) {
+        try {
+            // short fetch with small timeout via AbortController
+            const controller = new AbortController();
+            const to = setTimeout(() => controller.abort(), Math.min(intervalMs, 2000));
+            const resp = await fetch('/api/status', { signal: controller.signal });
+            clearTimeout(to);
+            // If we got a valid response, server still up — wait and retry
+            if (!resp.ok) {
+                // treat non-ok as server error; continue polling because shutdown may return 5xx then stop
+            }
+        } catch (e) {
+            // fetch threw — likely network error / server went away
+            return true;
+        }
+        // wait before next attempt
+        await waitMs(intervalMs);
+    }
+    return false;
+}
+
+// Show final page when server is confirmed stopped (or timed out waiting)
+function showServerStoppedPage(serverStopped = true) {
+    try {
+        try { if (refreshInterval) clearInterval(refreshInterval); } catch (e) {}
+        try { if (benchmarkPollInterval) clearInterval(benchmarkPollInterval); } catch (e) {}
+        try { if (typeof stopBenchmark === 'function') stopBenchmark(); } catch (e) {}
+
+        document.documentElement.style.height = '100%';
+        document.body.style.margin = '0';
+        document.body.innerHTML = `
+            <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:var(--bg-primary);color:var(--text-primary);font-family:Roboto,Segoe UI,Arial,sans-serif;">
+                <div style="text-align:center;max-width:720px;padding:24px;">
+                    <h1 style="font-size:48px;margin-bottom:12px;">Server Shut down</h1>
+                    <p style="color:var(--text-secondary);font-size:18px;margin-bottom:18px;">${serverStopped ? 'It is now safe to close this window.' : 'Server appears unreachable. You can close this window or try refreshing later.'}</p>
+                    <div style="display:flex;gap:8px;justify-content:center;">
+                        <button onclick="location.reload()" style="padding:10px 16px;border-radius:6px;border:none;background:var(--accent-blue);color:#fff;cursor:pointer;">Refresh</button>
+                        <button onclick="window.close()" style="padding:10px 16px;border-radius:6px;border:1px solid var(--border-color);background:transparent;color:var(--text-primary);cursor:pointer;">Close Window</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    } catch (e) { console.debug('showServerStoppedPage error', e); }
+}
+
+// Show client-side shutdown sequence (do NOT kill the server process).
+function showShutdownSequence() {
+    try {
+        // Stop periodic refresh and benchmark polling
+        try { if (refreshInterval) clearInterval(refreshInterval); } catch (e) {}
+        try { if (benchmarkPollInterval) clearInterval(benchmarkPollInterval); } catch (e) {}
+
+        // Attempt to stop any running benchmark gracefully via existing handler
+        try { if (typeof stopBenchmark === 'function') stopBenchmark(); } catch (e) {}
+
+        // Replace entire body with shutdown message (client-only)
+        document.documentElement.style.height = '100%';
+        document.body.style.margin = '0';
+        document.body.innerHTML = `
+            <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:var(--bg-primary);color:var(--text-primary);font-family:Roboto,Segoe UI,Arial,sans-serif;">
+                <div style="text-align:center;max-width:720px;padding:24px;">
+                    <h1 style="font-size:32px;margin-bottom:12px;">Dashboard Closed</h1>
+                    <p style="color:var(--text-secondary);margin-bottom:18px;">The web dashboard has been closed in this browser tab. You can safely close this tab or navigate away.</p>
+                    <div style="display:flex;gap:8px;justify-content:center;">
+                        <button onclick="location.reload()" style="padding:8px 14px;border-radius:6px;border:none;background:var(--accent-blue);color:#fff;cursor:pointer;">Reopen Dashboard</button>
+                        <button onclick="window.close()" style="padding:8px 14px;border-radius:6px;border:1px solid var(--border-color);background:transparent;color:var(--text-primary);cursor:pointer;">Close Window</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    } catch (e) {
+        console.debug('showShutdownSequence failed', e);
+    }
+}
+
+function zoomIn() { adjustZoom(1.5); }
+function zoomOut() { adjustZoom(1/1.5); }
+function resetZoom() { historyVisibleStart = 0; historyVisibleEnd = historyOriginalLabels.length-1; renderHistoryView(); }
+
+function adjustZoom(factor) {
+    const len = historyOriginalLabels.length;
+    if (!len) return;
+    const curLen = historyVisibleEnd - historyVisibleStart + 1;
+    let newLen = Math.max(10, Math.round(curLen / factor));
+    if (newLen >= len) { resetZoom(); return; }
+    const center = Math.floor((historyVisibleStart + historyVisibleEnd)/2);
+    let start = Math.max(0, center - Math.floor(newLen/2));
+    let end = Math.min(len-1, start + newLen -1);
+    if (end - start + 1 < newLen) start = Math.max(0, end - newLen +1);
+    historyVisibleStart = start; historyVisibleEnd = end; renderHistoryView();
+}
+
+function highlightSelectedDay(val) {
+    const idx = val === '' ? null : parseInt(val);
+    historySelectedDay = isNaN(idx) ? null : idx;
+    renderHistoryView();
+}
+
+function renderHistoryView(){
+    if (!historyChart) return;
+    // With time-scale charts we keep the full dataset on the chart and let
+    // the zoom/pan plugin control the visible window. For highlight changes
+    // simply update the chart to redraw overlays.
+    historyChart.update('none');
+}
 
 // Tab switching
 document.querySelectorAll('.tab').forEach(tab => {
@@ -50,14 +410,16 @@ async function fetchStatus() {
 function updateDashboard(data) {
     console.log('Updating dashboard with:', data);
     const badge = document.getElementById('status-badge');
-    badge.className = 'status-badge status-' + data.status;
-    badge.textContent = data.status.toUpperCase();
-    
-    // Add tooltip with alert count
+    // Display 'warning' state from server as 'idle' in UI while leaving alerts untouched
+    const displayStatus = (data.status === 'warning') ? 'idle' : (data.status || 'unknown');
+    badge.className = 'status-badge status-' + displayStatus;
+    badge.textContent = displayStatus.toUpperCase();
+
+    // Add tooltip with alert count (keep original alert logic based on server status)
     const alertCount = data.alerts ? data.alerts.length : 0;
     if (data.status === 'warning' && alertCount > 0) {
         badge.setAttribute('data-tooltip', `${alertCount} active alert${alertCount > 1 ? 's' : ''}`);
-    } else if (data.status === 'info') {
+    } else if (displayStatus === 'info') {
         badge.setAttribute('data-tooltip', 'System information available');
     } else {
         badge.setAttribute('data-tooltip', 'All systems operational');
@@ -123,13 +485,22 @@ function updateDashboard(data) {
 async function loadHistory() {
     const metric = document.getElementById('metric-select').value;
     const hours = document.getElementById('hours-select').value;
-    
+
     try {
+        // allow 'lifetime' to be requested; server may handle it
         const historyResponse = await fetch(`/api/history?metric=${metric}&hours=${hours}`);
-        const historyData = await historyResponse.json();
-        
+        let historyData = await historyResponse.json();
+        // If user requested 'lifetime' but server returned empty, try a large numeric fallback
+        if (hours === 'lifetime' && (!historyData || !historyData.data || historyData.data.length === 0)) {
+            try {
+                const fallbackHours = 24 * 365 * 5; // 5 years
+                const resp2 = await fetch(`/api/history?metric=${metric}&hours=${fallbackHours}`);
+                if (resp2.ok) historyData = await resp2.json();
+            } catch (e) { /* ignore fallback errors */ }
+        }
+
         const ctx = document.getElementById('historyChart').getContext('2d');
-        
+        ensureZoomPlugin();
         if (historyChart) historyChart.destroy();
 
         const getUnit = (metric) => {
@@ -139,76 +510,140 @@ async function loadHistory() {
             if (metric.includes('power')) return 'W';
             return '';
         }
-
         const unit = getUnit(metric);
 
+        // Prepare labels (timestamps) and datapoints
+        const points = (historyData.data || []).map(d => ({ t: new Date(d.timestamp).getTime(), y: d.value }));
+        const labels = (historyData.data || []).map(d => new Date(d.timestamp).getTime());
+
+        // Determine if multi-day range
+        const firstTs = points.length ? points[0].t : Date.now();
+        const lastTs = points.length ? points[points.length-1].t : Date.now();
+        const rangeHours = (lastTs - firstTs) / (1000*60*60);
+        const multiDay = rangeHours >= 24;
+
+        // y axis options
         const yAxisOptions = {
             ticks: { color: '#a0a0a0' },
             grid: { color: '#4a4a4a' },
             beginAtZero: true,
-            title: {
-                display: true,
-                text: unit,
-                color: '#a0a0a0',
-                font: {
-                    size: 14,
-                    weight: 'bold'
-                }
+            title: { display: true, text: unit, color: '#a0a0a0', font: { size: 14, weight: 'bold' } }
+        };
+        if (metric.includes('utilization') || metric.includes('percent')) yAxisOptions.suggestedMax = 100;
+        if (metric.includes('temperature')) yAxisOptions.suggestedMax = 100;
+
+        // Build plugin to draw alternating day bands for multi-day ranges
+        // compute day boundaries once so click/highlight can map to days
+        const dayStarts = [];
+        let prevDay = null;
+        for (let i = 0; i < labels.length; i++) {
+            const d = new Date(labels[i]);
+            const day = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
+            if (day !== prevDay) { dayStarts.push(i); prevDay = day; }
+        }
+
+        const dayBandPlugin = {
+            id: 'dayBands',
+            beforeDatasetsDraw: function(chart) {
+                if (!multiDay) return;
+                try {
+                    const xScale = chart.scales.x;
+                    const ctx = chart.ctx;
+                    const dataLen = historyOriginalLabels.length;
+                    if (dataLen === 0) return;
+                    for (let j = 0; j < dayStarts.length; j++) {
+                        const startIdx = dayStarts[j];
+                        const endIdx = (j+1 < dayStarts.length) ? dayStarts[j+1]-1 : dataLen-1;
+                        const startTs = historyOriginalLabels[startIdx];
+                        const endTs = historyOriginalLabels[endIdx];
+                        const left = xScale.getPixelForValue(startTs);
+                        const right = xScale.getPixelForValue(endTs + 1);
+                        const bandColor = (j % 2 === 0) ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.03)';
+                        ctx.save(); ctx.fillStyle = bandColor; ctx.fillRect(left, chart.chartArea.top, Math.max(1, right-left), chart.chartArea.bottom - chart.chartArea.top); ctx.restore();
+                    }
+                } catch(e) { console.debug('dayBandPlugin error', e); }
             }
         };
 
-        if (metric.includes('utilization') || metric.includes('percent')) {
-            yAxisOptions.suggestedMax = 100;
-        }
-        if (metric.includes('temperature')) {
-            yAxisOptions.suggestedMax = 100;
-        }
+        // store originals for zooming / highlighting
+        historyOriginalLabels = labels.slice();
+        historyOriginalData = points.map(p => p.y).slice();
+        historyDayStarts = dayStarts.slice();
+        historyVisibleStart = 0;
+        historyVisibleEnd = historyOriginalLabels.length - 1;
 
-        if (metric.startsWith('gpu_') && metric.includes('_memory_used')) {
-            const statusResponse = await fetch('/api/status');
-            const statusData = await statusResponse.json();
-            const gpuIndex = parseInt(metric.split('_')[1]);
-            const gpu = statusData.metrics.gpus[gpuIndex];
-            if (gpu && gpu.memory_total) {
-                yAxisOptions.max = gpu.memory_total;
+        // plugin: highlight selected day (uses historySelectedDay and historyDayStarts)
+        const highlightPlugin = {
+            id: 'highlightDay',
+            beforeDatasetsDraw: function(chart) {
+                if (historySelectedDay === null) return;
+                try {
+                    const xScale = chart.scales.x;
+                    const ctx = chart.ctx;
+                    const len = historyOriginalLabels.length;
+                    const sel = historySelectedDay;
+                    if (sel < 0 || sel >= historyDayStarts.length) return;
+                    const globalStartIdx = historyDayStarts[sel];
+                    const globalEndIdx = (sel+1 < historyDayStarts.length) ? historyDayStarts[sel+1]-1 : len-1;
+                    const globalStartTs = historyOriginalLabels[globalStartIdx];
+                    const globalEndTs = historyOriginalLabels[globalEndIdx];
+                    const left = xScale.getPixelForValue(globalStartTs);
+                    const right = xScale.getPixelForValue(globalEndTs + 1);
+                    // check overlap with chart area
+                    if (right < chart.chartArea.left || left > chart.chartArea.right) return;
+                    ctx.save(); ctx.fillStyle = 'rgba(0,160,255,0.12)'; ctx.fillRect(left, chart.chartArea.top, Math.max(1, right-left), chart.chartArea.bottom - chart.chartArea.top); ctx.restore();
+                } catch(e) { console.debug('highlightPlugin error', e); }
             }
-        }
-        
+        };
+
         historyChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: historyData.data.map(d => new Date(d.timestamp).toLocaleTimeString()),
                 datasets: [{
                     label: document.getElementById('metric-select').selectedOptions[0].text,
-                    data: historyData.data.map(d => d.value),
+                    data: points.map(p => ({ x: p.t, y: p.y })),
                     borderColor: '#76b900',
-                    backgroundColor: 'rgba(118, 185, 0, 0.1)',
+                    backgroundColor: 'rgba(118, 185, 0, 0.08)',
                     fill: true,
-                    tension: 0.3
+                    tension: 0.3,
+                    pointRadius: 2
                 }]
             },
             options: {
                 responsive: true,
-                plugins: { 
-                    legend: { 
-                        display: true,
-                        labels: { 
-                            color: '#f0f0f0',
-                            font: {
-                                size: 14
-                            }
-                        } 
-                    } 
+                interaction: { mode: 'nearest', intersect: false },
+                plugins: {
+                    legend: { display: true, labels: { color: '#f0f0f0', font: { size: 14 } } },
+                    zoom: { pan: { enabled: true, mode: 'x' }, zoom: { wheel: { enabled: true }, pinch: { enabled: true }, drag: { enabled: false }, mode: 'x' } }
                 },
                 scales: {
-                    x: { 
-                        ticks: { color: '#a0a0a0', maxTicksLimit: 10 }, 
-                        grid: { color: '#4a4a4a' } 
+                    x: {
+                        type: 'time',
+                        time: { tooltipFormat: 'MMM d, yyyy HH:mm' },
+                        ticks: { color: '#a0a0a0', maxRotation: 0, autoSkip: true },
+                        grid: { color: '#4a4a4a' }
                     },
                     y: yAxisOptions
-                }
+                },
+                plugins: [dayBandPlugin, highlightPlugin]
             }
         });
+        // add click handler to highlight the day/hour of the nearest datapoint
+        const canvas = document.getElementById('historyChart');
+        canvas.onclick = function(evt) {
+            try {
+                const pointsFound = historyChart.getElementsAtEventForMode(evt, 'nearest', { intersect: false }, true);
+                if (!pointsFound || pointsFound.length === 0) return;
+                const idx = pointsFound[0].index; // index into dataset.data
+                // find day index for idx
+                let sel = 0;
+                for (let j = 0; j < historyDayStarts.length; j++) {
+                    if (historyDayStarts[j] <= idx) sel = j; else break;
+                }
+                historySelectedDay = sel;
+                historyChart.update('none');
+            } catch (e) { console.debug('click highlight failed', e); }
+        };
     } catch (error) {
         console.error('Error loading history:', error);
     }
@@ -216,6 +651,10 @@ async function loadHistory() {
 
 async function loadProcesses() {
     try {
+        const tbody = document.getElementById('process-list');
+        // show loading state while we fetch latest processes
+        tbody.innerHTML = '<tr><td colspan="5" style="color: var(--text-secondary);">Loading processes…</td></tr>';
+
         const response = await fetch('/api/processes');
         const data = await response.json();
         
@@ -246,39 +685,26 @@ async function loadProcesses() {
             }
         }
         
-        const tbody = document.getElementById('process-list');
         if (!data.processes || data.processes.length === 0) {
             tbody.innerHTML = '<tr><td colspan="5" style="color: var(--text-secondary);">No GPU processes running</td></tr>';
         } else {
-            // Check if any process has utilization data
-            const hasUtilData = data.processes.some(p => p.gpu_utilization !== null && p.gpu_utilization !== undefined);
-            
-            // Sort by GPU memory usage (descending)
-            const sorted = data.processes.sort((a, b) => (b.gpu_memory_mb || 0) - (a.gpu_memory_mb || 0));
-            
+            // Sort by GPU utilization (descending). Fall back to gpu_utilization_percent or 0.
+            const sorted = (data.processes || []).slice().sort((a, b) => {
+                const au = Number(a.gpu_utilization ?? a.gpu_utilization_percent ?? 0) || 0;
+                const bu = Number(b.gpu_utilization ?? b.gpu_utilization_percent ?? 0) || 0;
+                return bu - au;
+            });
+
             tbody.innerHTML = sorted.map(p => {
-                let utilDisplay;
-                if (p.gpu_utilization !== null && p.gpu_utilization !== undefined) {
-                    utilDisplay = `${p.gpu_utilization.toFixed(1)}%`;
-                } else if (hasUtilData) {
-                    // Some processes have data, this one doesn't
-                    utilDisplay = '<span style="opacity: 0.5;">N/A</span>';
-                } else {
-                    // No processes have data - show helpful message on first row only
-                    if (sorted.indexOf(p) === 0) {
-                        utilDisplay = '<span style="opacity: 0.5;" title="Per-process GPU utilization requires:\n1. CUDA/compute workloads (not graphics)\n2. Accounting mode enabled\n3. Supported GPU hardware">Not available</span>';
-                    } else {
-                        utilDisplay = '<span style="opacity: 0.5;">—</span>';
-                    }
-                }
-                
+                const userDisplay = p.username || p.user || 'N/A';
+                const pid = p.pid;
                 return `
                     <tr>
-                        <td>${p.pid}</td>
+                        <td>${pid}</td>
                         <td>${p.name || 'N/A'}</td>
                         <td>GPU ${p.gpu_index}</td>
-                        <td>${utilDisplay}</td>
-                        <td>${p.username || 'N/A'}</td>
+                        <td>${userDisplay}</td>
+                        <td><button id="terminate-${pid}" onclick="terminateProcess(${pid})" style="padding:6px 10px;border-radius:6px;border:none;background:var(--accent-red);color:#fff;cursor:pointer;">Terminate</button></td>
                     </tr>
                 `;
             }).join('');
@@ -293,6 +719,37 @@ async function loadProcesses() {
 function exportData(format) {
     const hours = document.getElementById('export-hours').value;
     window.location.href = `/api/export/${format}?hours=${hours}`;
+}
+
+// Terminate a process by PID via server endpoint
+async function terminateProcess(pid) {
+    try {
+        // Directly send terminate request (no confirm). Disable button while in-flight.
+        const btn = document.getElementById(`terminate-${pid}`);
+        if (btn) { btn.disabled = true; btn.textContent = 'Terminating...'; }
+
+        const resp = await fetch('/api/processes/terminate', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pid })
+        });
+        const data = await resp.json().catch(() => ({}));
+        if (resp.ok && (data.status === 'terminated' || data.status === 'killed')) {
+            if (typeof showSuccess === 'function') showSuccess('Process terminated');
+            if (btn) { btn.textContent = 'Terminated'; }
+            try { const row = document.getElementById(`terminate-${pid}`).closest('tr'); if (row) { row.style.opacity = '0.6'; } } catch(e){}
+        } else if (data.status === 'not_found') {
+            if (typeof showError === 'function') showError('Process not found');
+            if (btn) { btn.disabled = false; btn.textContent = 'Terminate'; }
+        } else {
+            const msg = data.error || data.status || 'Error';
+            if (typeof showError === 'function') showError('Terminate failed: ' + msg);
+            if (btn) { btn.disabled = false; btn.textContent = 'Terminate'; }
+        }
+    } catch (e) {
+        if (typeof showError === 'function') showError('Terminate error: ' + (e && e.message ? e.message : e));
+        const btn = document.getElementById(`terminate-${pid}`);
+        if (btn) { btn.disabled = false; btn.textContent = 'Terminate'; }
+    }
 }
 
 // Benchmark functions
@@ -344,7 +801,21 @@ function selectBenchType(type) {
     document.getElementById('gemm-settings').style.display = type === 'gemm' ? 'block' : 'none';
     document.getElementById('particle-settings').style.display = type === 'particle' ? 'block' : 'none';
     
-    // Simulation button is always enabled
+    // Update simulation button enabled state depending on mode
+    const startSimBtn = document.getElementById('start-sim-btn');
+    if (startSimBtn) {
+        if (selectedMode === 'stress-test' || selectedMode === 'custom') {
+            startSimBtn.disabled = true;
+            startSimBtn.title = 'Simulation disabled for stress-test and custom modes';
+            startSimBtn.style.opacity = '0.5';
+            startSimBtn.style.cursor = 'not-allowed';
+        } else {
+            startSimBtn.disabled = false;
+            startSimBtn.title = '';
+            startSimBtn.style.opacity = '';
+            startSimBtn.style.cursor = '';
+        }
+    }
 }
 
 function selectMode(mode) {
@@ -363,6 +834,22 @@ function selectMode(mode) {
         'custom': 'Custom configuration - set your own duration, limits, and workload parameters'
     };
     document.getElementById('mode-description').textContent = descriptions[mode] || '';
+
+    // When in stress-test or custom modes the Simulation view is not supported
+    const simBtn = document.getElementById('start-sim-btn');
+    if (simBtn) {
+        if (mode === 'stress-test' || mode === 'custom') {
+            simBtn.disabled = true;
+            simBtn.title = 'Simulation disabled for stress-test and custom modes';
+            simBtn.style.opacity = '0.5';
+            simBtn.style.cursor = 'not-allowed';
+        } else {
+            simBtn.disabled = false;
+            simBtn.title = '';
+            simBtn.style.opacity = '';
+            simBtn.style.cursor = '';
+        }
+    }
 }
 
 function updateSliderValue(type) {
@@ -548,203 +1035,76 @@ async function pollBenchmarkStatus() {
         ]);
         const status = await statusRes.json();
         const samplesData = await samplesRes.json();
-        
-        document.getElementById('bench-progress-bar').style.width = status.progress + '%';
-        document.getElementById('bench-percent').textContent = status.progress + '%';
+
+        document.getElementById('bench-progress-bar').style.width = (status.progress || 0) + '%';
+        document.getElementById('bench-percent').textContent = (status.progress || 0) + '%';
         document.getElementById('iteration-counter').textContent = 'Iteration #' + (status.iterations || 0);
         document.getElementById('workload-info').textContent = 'Workload: ' + (status.workload_type || 'N/A');
         document.getElementById('bench-workload').textContent = status.workload_type || '';
-        
+
         // Update live charts with samples
-        if (samplesData.samples && benchCharts.utilization) {
+        if (samplesData && samplesData.samples && benchCharts.utilization) {
             const samples = samplesData.samples;
             const labels = samples.map(s => s.elapsed_sec + 's');
-            
+
             benchCharts.utilization.data.labels = labels;
             benchCharts.utilization.data.datasets[0].data = samples.map(s => s.utilization || 0);
             benchCharts.utilization.update('none');
-            
+
             benchCharts.temperature.data.labels = labels;
             benchCharts.temperature.data.datasets[0].data = samples.map(s => s.temperature_c || 0);
             benchCharts.temperature.update('none');
-            
+
             benchCharts.memory.data.labels = labels;
             benchCharts.memory.data.datasets[0].data = samples.map(s => s.memory_used_mb || 0);
             benchCharts.memory.update('none');
-            
+
             benchCharts.power.data.labels = labels;
             benchCharts.power.data.datasets[0].data = samples.map(s => s.power_w || 0);
             benchCharts.power.update('none');
         }
-        
+
         if (!status.running) {
             clearInterval(benchmarkPollInterval);
             document.getElementById('start-bench-btn').disabled = false;
             document.getElementById('start-bench-btn').textContent = 'Start Benchmark';
             document.getElementById('stop-bench-btn').style.display = 'none';
-            document.getElementById('bench-status').textContent = 'Completed';
-            
-            const resultsResponse = await fetch('/api/benchmark/results');
-            const results = await resultsResponse.json();
-            displayBenchmarkResults(results);
-            
-            // Reload baseline if saved
-            loadBaseline();
+
+            // fetch results and render
+            try {
+                const res = await fetch('/api/benchmark/results');
+                if (res.ok) {
+                    const results = await res.json();
+                    if (typeof window !== 'undefined' && typeof window.renderFancyBenchmarkResults === 'function') {
+                        try { window.renderFancyBenchmarkResults(results); return; } catch (e) { console.debug('renderFancyBenchmarkResults failed', e); }
+                    }
+
+                    // fallback rendering
+                    const r = results || {};
+                    const html = `
+                        <div class="gpu-card"><h3 style="color: var(--accent-green);">Benchmark Results</h3>
+                            <div class="metric-row"><span class="metric-label">Average TFLOPS</span><span class="metric-value">${(r.avg_tflops || (r.performance && r.performance.tflops) || 0).toFixed(2)}</span></div>
+                            <div class="metric-row"><span class="metric-label">Peak TFLOPS</span><span class="metric-value">${(r.peak_tflops || (r.performance && r.performance.peak_tflops) || 0).toFixed(2)}</span></div>
+                            <div class="metric-row"><span class="metric-label">Avg Temperature</span><span class="metric-value">${(r.avg_temperature || 0).toFixed(1)}°C</span></div>
+                            <div class="metric-row"><span class="metric-label">Avg GPU Utilization</span><span class="metric-value">${(r.avg_gpu_utilization || 0).toFixed(1)}%</span></div>
+                            <div class="metric-row"><span class="metric-label">Avg Memory Usage</span><span class="metric-value">${(r.avg_memory_usage || 0).toFixed(1)}%</span></div>
+                            <div class="metric-row"><span class="metric-label">Avg Power Draw</span><span class="metric-value">${(r.avg_power_draw || 0).toFixed(1)}W</span></div>
+                            <div class="metric-row"><span class="metric-label">Duration</span><span class="metric-value">${(r.duration || 0).toFixed(1)}s</span></div>
+                            <div class="metric-row"><span class="metric-label">Iterations</span><span class="metric-value">${r.total_iterations || r.iterations_completed || 0}</span></div>
+                        </div>
+                    `;
+                    document.getElementById('benchmark-results').innerHTML = html;
+                } else {
+                    document.getElementById('benchmark-results').innerHTML = '<p style="color: var(--text-secondary);">Failed to load results</p>';
+                }
+            } catch (e) {
+                console.error('Error fetching benchmark results:', e);
+            }
         }
     } catch (error) {
-        console.error('Error polling benchmark:', error);
+        console.error('Error polling benchmark status:', error);
+        try { clearInterval(benchmarkPollInterval); } catch(e){}
     }
-}
-
-function displayBenchmarkResults(results) {
-    if (!results || results.status === 'no_results') {
-        document.getElementById('benchmark-results').innerHTML = '<p style="color: var(--text-secondary);">No results available</p>';
-        return;
-    }
-    
-    const gpuInfo = results.gpu_info || {};
-    const config = results.config || {};
-    const scores = results.scores || {};
-    const baseline = results.baseline;
-    const perf = results.performance || {};
-    
-    // Show stop reason if benchmark was stopped early
-    if (results.stop_reason && results.stop_reason !== 'Duration completed') {
-        document.getElementById('bench-stop-reason').textContent = 'Stopped: ' + results.stop_reason;
-    }
-    
-    // Baseline comparison
-    let baselineComparison = '';
-    if (baseline) {
-        const iterDiff = results.iterations_completed - baseline.iterations_completed;
-        const iterPct = ((iterDiff / baseline.iterations_completed) * 100).toFixed(1);
-        const iterColor = iterDiff >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
-        baselineComparison = `
-            <div class="gpu-card" style="margin-bottom: 15px; border-left: 4px solid var(--accent-blue);">
-                <h3 style="color: var(--accent-blue); margin-bottom: 10px;">vs Baseline</h3>
-                <div class="metric-row">
-                    <span class="metric-label">Iterations</span>
-                    <span class="metric-value" style="color: ${iterColor};">${iterDiff >= 0 ? '+' : ''}${iterDiff} (${iterPct}%)</span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-label">Baseline Iterations</span>
-                    <span class="metric-value">${baseline.iterations_completed}</span>
-                </div>
-            </div>
-        `;
-    }
-    
-    // Performance results section - varies by benchmark type
-    let perfMetrics = '';
-    if (results.benchmark_type === 'gemm' || perf.tflops !== undefined) {
-        perfMetrics = `
-            <div>
-                <span style="font-size: 2.5em; font-weight: bold;">${perf.tflops || 0}</span>
-                <span style="font-size: 1em;"> TFLOPS</span>
-            </div>
-            <div>
-                <span style="font-size: 1.5em; font-weight: bold;">${perf.gflops || 0}</span>
-                <span style="font-size: 0.9em;"> GFLOPS</span>
-            </div>
-            <div>
-                <span style="font-size: 1.5em; font-weight: bold;">${results.iterations_completed || 0}</span>
-                <span style="font-size: 0.9em;"> iterations</span>
-            </div>
-        `;
-    } else if (results.benchmark_type === 'particle' || perf.steps_per_second !== undefined) {
-        const particlesPerSec = perf.particles_updated_per_second || 0;
-        const formattedParticles = particlesPerSec >= 1e9 
-            ? (particlesPerSec / 1e9).toFixed(2) + 'B'
-            : particlesPerSec >= 1e6 
-                ? (particlesPerSec / 1e6).toFixed(2) + 'M'
-                : particlesPerSec.toLocaleString();
-        perfMetrics = `
-            <div>
-                <span style="font-size: 2.5em; font-weight: bold;">${(perf.steps_per_second || 0).toLocaleString()}</span>
-                <span style="font-size: 1em;"> steps/sec</span>
-            </div>
-            <div>
-                <span style="font-size: 1.5em; font-weight: bold;">${formattedParticles}</span>
-                <span style="font-size: 0.9em;"> particles/sec</span>
-            </div>
-            <div>
-                <span style="font-size: 1.5em; font-weight: bold;">${(perf.total_steps || 0).toLocaleString()}</span>
-                <span style="font-size: 0.9em;"> total steps</span>
-            </div>
-        `;
-    } else {
-        perfMetrics = `
-            <div>
-                <span style="font-size: 2.5em; font-weight: bold;">${results.iterations_completed || 0}</span>
-                <span style="font-size: 1em;"> iterations</span>
-            </div>
-            <div>
-                <span style="font-size: 1.5em; font-weight: bold;">${results.avg_iteration_time_ms || 0}</span>
-                <span style="font-size: 0.9em;"> ms/iter</span>
-            </div>
-            <div>
-                <span style="font-size: 1.5em; font-weight: bold;">${results.iterations_per_second || 0}</span>
-                <span style="font-size: 0.9em;"> iter/sec</span>
-            </div>
-        `;
-    }
-    
-    let html = `
-        <div class="gpu-card" style="margin-bottom: 15px;">
-            <h3 style="color: var(--accent-green); margin-bottom: 10px;">GPU Info</h3>
-            <div class="metric-row"><span class="metric-label">Name</span><span class="metric-value">${gpuInfo.name || 'N/A'}</span></div>
-            <div class="metric-row"><span class="metric-label">Memory</span><span class="metric-value">${gpuInfo.memory_total_mb ? Math.round(gpuInfo.memory_total_mb) + ' MB' : 'N/A'}</span></div>
-            <div class="metric-row"><span class="metric-label">Driver</span><span class="metric-value">${gpuInfo.driver_version || 'N/A'}</span></div>
-        </div>
-        
-        <div class="gpu-card" style="margin-bottom: 15px; background: var(--accent-green); color: #000;">
-            <h3 style="margin-bottom: 5px;">Performance Results</h3>
-            <div style="display: flex; gap: 30px; align-items: center; flex-wrap: wrap;">
-                ${perfMetrics}
-            </div>
-            ${results.saved_as_baseline ? '<p style="margin-top: 10px; font-size: 0.9em;">Saved as new baseline</p>' : ''}
-        </div>
-        
-        ${baselineComparison}
-        
-        <div class="gpu-card" style="margin-bottom: 15px;">
-            <h3 style="color: var(--accent-blue); margin-bottom: 10px;">Test Config</h3>
-            <div class="metric-row"><span class="metric-label">Workload</span><span class="metric-value">${results.workload_type || 'N/A'}</span></div>
-            <div class="metric-row"><span class="metric-label">Mode</span><span class="metric-value">${config.mode || 'N/A'}</span></div>
-            <div class="metric-row"><span class="metric-label">Type</span><span class="metric-value">${config.benchmark_type || 'N/A'}</span></div>
-            <div class="metric-row"><span class="metric-label">Duration</span><span class="metric-value">${results.duration_actual_sec || 0}s / ${config.duration_seconds || 0}s</span></div>
-            <div class="metric-row"><span class="metric-label">Stop Reason</span><span class="metric-value">${results.stop_reason || 'N/A'}</span></div>
-        </div>
-        
-        <h3 style="color: var(--accent-green); margin: 20px 0 10px;">Metrics Summary</h3>
-    `;
-    
-    const metrics = [
-        { key: 'utilization', label: 'Utilization', unit: '%' },
-        { key: 'temperature_c', label: 'Temperature', unit: 'C' },
-        { key: 'memory_used_mb', label: 'Memory Used', unit: 'MB' },
-        { key: 'power_w', label: 'Power Draw', unit: 'W' }
-    ];
-    
-    metrics.forEach(m => {
-        const data = results[m.key];
-        if (data) {
-            html += `
-                <div class="gpu-card" style="margin-bottom: 10px;">
-                    <div class="gpu-header">
-                        <span class="gpu-name">${m.label}</span>
-                    </div>
-                    <div class="metric-row"><span class="metric-label">Min</span><span class="metric-value">${data.min} ${m.unit}</span></div>
-                    <div class="metric-row"><span class="metric-label">Avg</span><span class="metric-value">${data.avg} ${m.unit}</span></div>
-                    <div class="metric-row"><span class="metric-label">Max</span><span class="metric-value">${data.max} ${m.unit}</span></div>
-                </div>
-            `;
-        }
-    });
-    
-    html += `<p style="color: var(--text-secondary); margin-top: 15px; font-size: 0.9em;">Benchmark completed at ${new Date(results.timestamp).toLocaleString()}</p>`;
-    
-    document.getElementById('benchmark-results').innerHTML = html;
 }
 
 async function checkForUpdates() {
@@ -752,43 +1112,70 @@ async function checkForUpdates() {
     btn.disabled = true;
     btn.textContent = 'Checking...';
     btn.removeAttribute('data-tooltip');
-    
+    const GITHUB_REPO = 'DataBoySu/cluster-monitor';
+
+    function parseVersion(text) {
+        if (!text) return '0.0.0';
+        const m = /v?(\d+\.\d+\.\d+)/.exec(text);
+        return m ? m[1] : text.trim();
+    }
+
+    function compareVer(a, b) {
+        const pa = a.split('.').map(n => parseInt(n)||0);
+        const pb = b.split('.').map(n => parseInt(n)||0);
+        for (let i=0;i<3;i++){
+            if ((pa[i]||0) > (pb[i]||0)) return 1;
+            if ((pa[i]||0) < (pb[i]||0)) return -1;
+        }
+        return 0;
+    }
+
     try {
-        const response = await fetch('/api/update/check', { method: 'POST' });
-        const data = await response.json();
-        
-        if (data.available) {
-            btn.textContent = `Update: ${data.latest}`;
+        // Read current version from footer (rendered server-side as {{VERSION}})
+        let currentText = '';
+        try { currentText = document.querySelector('footer').textContent || ''; } catch(e){}
+        const currentVersion = parseVersion(currentText);
+
+        const apiUrl = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
+        const resp = await fetch(apiUrl, { headers: { Accept: 'application/vnd.github.v3+json' } });
+        if (!resp.ok) throw new Error('GitHub API error: ' + resp.status);
+        const json = await resp.json();
+        const latestTag = parseVersion(json.tag_name || json.name || '0.0.0');
+
+        const cmp = compareVer(latestTag, currentVersion);
+        if (cmp > 0) {
+            btn.textContent = `Update: ${latestTag}`;
             btn.classList.remove('success', 'error');
             btn.disabled = false;
-            btn.setAttribute('data-tooltip', `Current: ${data.current} → Latest: ${data.latest}`);
-            
+            btn.setAttribute('data-tooltip', `Current: ${currentVersion} → Latest: ${latestTag}`);
+
             btn.onclick = async () => {
                 btn.textContent = 'Installing...';
                 btn.disabled = true;
-                const install = await fetch('/api/update/install', { method: 'POST' });
-                const result = await install.json();
-                
-                if (result.status === 'success') {
-                    btn.textContent = 'Restart App';
-                    btn.classList.add('success');
-                    btn.setAttribute('data-tooltip', 'Update installed - restart application');
-                } else {
-                    btn.textContent = 'Update Failed';
+                try {
+                    const install = await fetch('/api/update/install', { method: 'POST' });
+                    const result = await install.json();
+                    if (result.status === 'success') {
+                        btn.textContent = 'Restart App';
+                        btn.classList.add('success');
+                        btn.setAttribute('data-tooltip', 'Update installed - restart application');
+                    } else {
+                        btn.textContent = 'Update Failed';
+                        btn.classList.add('error');
+                        btn.setAttribute('data-tooltip', result.message || 'Failed to install');
+                        btn.disabled = false;
+                    }
+                } catch (e) {
+                    btn.textContent = 'Install Error';
                     btn.classList.add('error');
-                    btn.setAttribute('data-tooltip', result.message);
+                    btn.setAttribute('data-tooltip', e && e.message ? e.message : 'Install failed');
                     btn.disabled = false;
                 }
             };
-        } else if (data.error) {
-            btn.textContent = 'Check Failed';
-            btn.classList.add('error');
-            btn.setAttribute('data-tooltip', data.error);
-            btn.disabled = false;
         } else {
             btn.textContent = 'Latest Version';
             btn.classList.add('success');
-            btn.setAttribute('data-tooltip', `Version ${data.current}`);
+            btn.setAttribute('data-tooltip', `Version ${currentVersion}`);
             setTimeout(() => {
                 btn.textContent = 'Check for Updates';
                 btn.classList.remove('success');
@@ -799,7 +1186,7 @@ async function checkForUpdates() {
     } catch (error) {
         btn.textContent = 'Network Error';
         btn.classList.add('error');
-        btn.setAttribute('data-tooltip', 'Could not connect to update server');
+        btn.setAttribute('data-tooltip', 'Could not check GitHub releases');
         btn.disabled = false;
     }
 }
@@ -913,7 +1300,47 @@ async function loadFeatures() {
 fetchStatus();
 loadBaseline();
 loadFeatures();
-setInterval(tick, 1000);
+refreshInterval = setInterval(tick, 1000);
 
 // Initialize benchmark type on load
 selectBenchType('gemm');
+
+// Inject Restart as Admin button next to the Update button (no confirmation required)
+try {
+    const updateBtn = document.getElementById('update-btn');
+    if (updateBtn && !document.getElementById('restart-elevated-btn')) {
+        const btn = document.createElement('button');
+        btn.id = 'restart-elevated-btn';
+        btn.textContent = 'ADMIN';
+        btn.style.padding = '8px 12px';
+        btn.style.borderRadius = '6px';
+        btn.style.border = '2px solid #76b900';
+        btn.style.background = '#0b0b0b';
+        btn.style.color = '#76b900';
+        btn.style.cursor = 'pointer';
+        btn.style.marginRight = '8px';
+        btn.title = 'Restart the server with elevated privileges (UAC prompt)';
+
+        btn.onclick = async function() {
+            try {
+                // Detection-only: query server for elevation status and show minimal toast
+                const resp = await fetch('/api/is_elevated');
+                if (!resp.ok) { window.showToast('', { level: 'red' }); return; }
+                const json = await resp.json().catch(() => ({}));
+                const elevated = Boolean(json && (json.elevated || json.started_with_flag));
+                if (elevated) {
+                    window.showSuccess('Running with admin');
+                } else {
+                    // Give the user concise instruction to start server with admin
+                    const cmd = "python health_monitor.py web --admin";
+                    window.showToast(`Run with admin: ${cmd}`, { level: 'yellow', duration: 12000 });
+                }
+            } catch (e) {
+                window.showToast('', { level: 'red' });
+            }
+        };
+
+        // insert to the left of updateBtn
+        updateBtn.parentNode.insertBefore(btn, updateBtn);
+    }
+} catch (e) { console.debug('inject restart button error', e); }

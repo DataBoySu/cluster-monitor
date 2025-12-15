@@ -1,4 +1,8 @@
-"""Baseline storage for benchmark results."""
+"""Baseline storage for benchmark results.
+Maintenance:
+- Purpose: store baseline benchmark results to compare future runs.
+- Debug: check the storage backend (SQLite file) if baseline reads/writes fail.
+"""
 
 import json
 import sqlite3

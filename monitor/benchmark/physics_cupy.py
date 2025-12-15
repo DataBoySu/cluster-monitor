@@ -183,8 +183,10 @@ def run_particle_physics_cupy(gpu_arrays, params, cp):
             collision_matrix = (dist_matrix < ri + rj) & (dist_matrix > 0.1)
             
             collision_i, collision_j = cp.where(collision_matrix)
-            collision_i = collision_i[collision_i < collision_j]
-            collision_j = collision_j[collision_i < collision_j]
+            # Keep only unique pairs where i < j to avoid double-processing
+            mask = collision_i < collision_j
+            collision_i = collision_i[mask]
+            collision_j = collision_j[mask]
             
             if len(collision_i) > 0:
                 # Get collision parameters
@@ -229,6 +231,8 @@ def run_particle_physics_cupy(gpu_arrays, params, cp):
                 cp.add.at(vy_act, collision_j, impulse_j_y)
                 
                 # Copy big ball colors to small balls on collision (VECTORIZED - GPU only)
+                # Note: ensure CuPy arrays are on the same device and shapes align;
+                # mismatched shapes will raise an exception during advanced indexing.
                 big_balls_array = mass_act >= 100.0
                 small_i = ~big_balls_array[collision_i] & big_balls_array[collision_j]
                 small_j = ~big_balls_array[collision_j] & big_balls_array[collision_i]

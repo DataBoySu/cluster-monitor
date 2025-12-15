@@ -164,6 +164,7 @@ async function loadHistory() {
         });
     } catch (error) {
         console.error('Error loading history:', error);
+        if (window.showError) window.showError(error && error.message ? error.message : String(error));
     }
 }
 
@@ -240,5 +241,86 @@ async function loadProcesses() {
         console.error('Error loading processes:', error);
         document.getElementById('process-list').innerHTML = 
             '<tr><td colspan="5" style="color: var(--accent-red);">Error loading processes</td></tr>';
+        if (window.showError) window.showError(error && error.message ? error.message : String(error));
+    }
+}
+
+// Load server-detected features and update UI accordingly
+async function loadFeatures() {
+    try {
+        const resp = await fetch('/api/features');
+        if (!resp.ok) return;
+        const features = await resp.json();
+        const backendSelect = document.getElementById('benchmark-backend-select');
+        if (!backendSelect) return;
+
+        // Enable all by default then disable unsupported
+        Array.from(backendSelect.options).forEach(opt => { opt.disabled = false; });
+
+        if (!features.cupy) {
+            const opt = Array.from(backendSelect.options).find(o => o.value === 'cupy');
+            if (opt) { opt.disabled = true; opt.title = 'CuPy not available on server'; }
+        }
+        if (!features.torch) {
+            const opt = Array.from(backendSelect.options).find(o => o.value === 'torch');
+            if (opt) { opt.disabled = true; opt.title = 'PyTorch (CUDA) not available on server'; }
+        }
+
+        // If neither cupy nor torch available, set default to Auto (client will show no GPU backends)
+        if (!features.cupy && !features.torch) {
+            backendSelect.value = 'auto';
+        }
+    } catch (e) {
+        console.debug('loadFeatures failed', e);
+    }
+}
+
+// Check GitHub releases for updates to the UI/backend project
+async function checkForUpdates() {
+    try {
+        // Read current version from footer text
+        const footer = document.querySelector('footer p');
+        let current = null;
+        if (footer) {
+            const m = footer.textContent.match(/v?(\d+\.\d+\.\d+)/);
+            if (m) current = m[1];
+        }
+
+        const apiUrl = 'https://api.github.com/repos/DataBoySu/cluster-monitor/releases/latest';
+        const resp = await fetch(apiUrl, { headers: { 'Accept': 'application/vnd.github.v3+json' } });
+        if (!resp.ok) {
+            const txt = await resp.text();
+            if (window.showError) window.showError('Update check failed: ' + resp.status + ' ' + txt);
+            return;
+        }
+
+        const data = await resp.json();
+        const latestTag = data.tag_name || data.name || data.tag || '';
+        const latestMatch = (latestTag || '').match(/v?(\d+\.\d+\.\d+)/);
+        const latest = latestMatch ? latestMatch[1] : null;
+
+        if (!current || !latest) {
+            if (window.showSuccess) window.showSuccess('Latest release: ' + (latestTag || 'unknown'));
+            return;
+        }
+
+        function cmpVer(a, b){
+            const pa = a.split('.').map(n=>parseInt(n||'0'));
+            const pb = b.split('.').map(n=>parseInt(n||'0'));
+            for(let i=0;i<3;i++){ if ((pa[i]||0) < (pb[i]||0)) return -1; if ((pa[i]||0) > (pb[i]||0)) return 1; }
+            return 0;
+        }
+
+        const comp = cmpVer(current, latest);
+        if (comp < 0) {
+            // newer available
+            const url = data.html_url || ('https://github.com/DataBoySu/cluster-monitor/releases');
+            if (window.showError) window.showError('Update available: ' + latest + ' — ' + url, 20000);
+        } else {
+            if (window.showSuccess) window.showSuccess('You are up-to-date (' + current + ')');
+        }
+    } catch (e) {
+        console.debug('checkForUpdates failed', e);
+        if (window.showError) window.showError('Update check error: ' + (e && e.message ? e.message : String(e)));
     }
 }

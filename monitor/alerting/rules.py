@@ -1,4 +1,11 @@
-"""Alert rules engine for evaluating metrics against thresholds."""
+"""Alert rules engine for evaluating metrics against thresholds.
+
+Maintenance:
+- Purpose: encapsulate alert logic for GPU and system metrics.
+- Debug: if alerts are not firing, verify metric keys (e.g., 'gpus', 'temperature')
+    and the configuration passed to the engine. Alerts are returned as a list
+    of dictionaries and not persisted by this module.
+"""
 
 from datetime import datetime
 from typing import Dict, Any, List

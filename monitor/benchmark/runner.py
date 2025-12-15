@@ -1,4 +1,12 @@
-"""GPU benchmark orchestration and metrics collection."""
+"""GPU benchmark orchestration and metrics collection.
+
+Maintenance:
+- Purpose: coordinate benchmark execution, collect samples and expose runtime
+    status to the API/UI. This is the central orchestration class for stress
+    tests and particle simulations.
+- Debug: use `get_status()`, `get_samples()` and `get_results()` to inspect
+    runtime state; long-running threads indicate worker shutdown or join issues.
+"""
 
 import time
 from typing import Dict, Any, List, Optional
@@ -51,6 +59,13 @@ class GPUBenchmark:
         current_iteration = self.stress_worker.iterations if self.stress_worker else 0
         is_running = getattr(self, 'running', False)
         
+        # Determine backend in use: prefer explicit worker method, else configured preference
+        backend_in_use = None
+        try:
+            backend_in_use = self.stress_worker._method if self.stress_worker and hasattr(self.stress_worker, '_method') else None
+        except Exception:
+            backend_in_use = None
+
         return {
             'status': 'running' if is_running else 'idle',  # Add status field for web UI
             'running': is_running,
@@ -66,6 +81,7 @@ class GPUBenchmark:
             'gpu_util': gpu_util,
             'results': self.results if not is_running else None,  # Include results when idle
             'stop_reason': self.stop_reason if not is_running else None,
+            'backend': backend_in_use or (getattr(self, 'config', None).preferred_backend if getattr(self, 'config', None) else 'auto')
         }
     
     def get_samples(self) -> list:

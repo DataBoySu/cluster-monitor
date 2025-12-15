@@ -1,4 +1,10 @@
-"""UI component rendering for particle visualizer."""
+"""UI component rendering for particle visualizer.
+
+Maintenance:
+- Purpose: helper routines used by the visualizer to render overlays.
+- Debug: keep drawing code separated from simulation logic; modify rendering
+    parameters here when adjusting overlay layout.
+"""
 
 
 def draw_stats(screen, font, window_size, stats_data):

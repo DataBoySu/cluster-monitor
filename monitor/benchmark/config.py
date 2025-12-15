@@ -19,6 +19,7 @@ class BenchmarkConfig:
     auto_scale: bool = False
     target_gpu_util: int = 98
     backend_multiplier: int = 1  # Multiplier for offscreen GPU computation stress (1-100)
+    preferred_backend: str = 'auto'  # 'auto', 'cupy', 'torch', or 'cpu'
     
     @classmethod
     def from_mode(cls, mode: str, benchmark_type: str = "gemm") -> 'BenchmarkConfig':

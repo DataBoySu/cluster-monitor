@@ -1,4 +1,10 @@
 """SQLite storage for metrics history."""
+"""SQLite storage backend for metrics.
+
+Maintenance:
+- Purpose: persistent storage of collected metrics. Schema is created lazily.
+- Debug: check `metrics.db` (path from config) and inspect `metrics` table.
+"""
 
 import json
 import sqlite3

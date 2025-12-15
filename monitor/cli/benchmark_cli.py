@@ -1,4 +1,10 @@
-"""CLI command for running GPU benchmarks."""
+"""CLI entry for benchmark utilities.
+
+Maintenance:
+- Purpose: provide a small CLI wrapper for running benchmarks from terminal.
+- Debug: use `--help` to see available options; the CLI calls into
+    `monitor.benchmark` modules and forwards configuration.
+"""
 
 import click
 import time

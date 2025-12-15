@@ -2,6 +2,11 @@
 
 Renders a sampled subset of particles for visual feedback during benchmarking.
 GPU computes millions, screen renders thousands for smooth 60 FPS display.
+    
+        Maintenance:
+        - Purpose: provide a simple, non-GPU visualizer for environments without
+            ModernGL or for debugging rendering issues.
+        - Debug: keep visualization code slow-path and isolated from core logic.
 """
 
 import time
@@ -75,6 +80,9 @@ class ParticleVisualizer:
     def _init_pygame(self):
         """Initialize pygame (optional dependency)."""
         try:
+            # Suppress known deprecation warning from pkg_resources used by pygame internals
+            import warnings
+            warnings.filterwarnings("ignore", category=UserWarning, message="pkg_resources is deprecated.*")
             import pygame
             import os
             # Set SDL video driver for Windows to allow background thread display

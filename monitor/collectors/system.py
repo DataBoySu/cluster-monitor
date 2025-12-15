@@ -1,4 +1,11 @@
-"""System metrics collector for CPU, memory, disk."""
+"""System metrics collector for CPU, memory, disk.
+
+Maintenance:
+- Purpose: expose system-level metrics via psutil when available.
+- Debug: if `psutil` is unavailable, the collector will provide best-effort values
+    and include a warning in the returned metrics. For Windows, some fields may be
+    less accurate.
+"""
 
 import os
 import platform

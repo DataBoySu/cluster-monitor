@@ -95,13 +95,37 @@ async function startSimulation() {
     }
     
     // Build URL with params - use actual mode and only enable auto-scaling for stress-test
+    // Update preview from user selection immediately
+    try { if (typeof updateWorkloadPreview === 'function') updateWorkloadPreview(); } catch(e){ console.debug('updateWorkloadPreview failed', e); }
+
     let url = `/api/benchmark/start?benchmark_type=particle&visualize=true&mode=${modeToUse}&auto_scale=${autoScale}&duration=${duration}&num_particles=${particles}&backend_multiplier=${backendMultiplier}`;
+    // Append preferred backend (safe read) if user selected one
+    function getSelectedBackendSafe(){
+        try{
+            const el = document.getElementById('benchmark-backend-select');
+            if (el && el.value && el.value !== 'auto') return el.value;
+            if (typeof selectedBackend !== 'undefined' && selectedBackend && selectedBackend !== 'auto') return selectedBackend;
+        } catch(e){}
+        return 'auto';
+    }
+    const sb = getSelectedBackendSafe();
+    if (sb && sb !== 'auto') url += '&preferred_backend=' + encodeURIComponent(sb);
     
     // Initialize live charts
     initLiveCharts();
     
     try {
-        await fetch(url, { method: 'POST' });
+        const resp = await fetch(url, { method: 'POST' });
+        try {
+            const body = await resp.json();
+            const cfg = body && body.config ? body.config : null;
+            if (cfg) {
+                const backend = cfg.preferred_backend || (document.getElementById('benchmark-backend-select') && document.getElementById('benchmark-backend-select').value) || 'auto';
+                const workloadElement = document.getElementById('workload-info');
+                if (workloadElement) workloadElement.textContent = `Workload: Bounce Simulation (${cfg.num_particles.toLocaleString()} particles, ${backend})`;
+            }
+        } catch(e){ console.debug('start simulation response parse failed', e); }
+
         btn.textContent = 'Simulation Running';
         benchmarkPollInterval = setInterval(pollBenchmarkStatus, 500);
     } catch (error) {

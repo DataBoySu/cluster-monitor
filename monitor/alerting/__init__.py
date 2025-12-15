@@ -1,4 +1,7 @@
-"""Monitor alerting package."""
+"""Alerting helpers for monitor.
+
+Re-export the alert engine for convenient imports.
+"""
 
 from .rules import AlertEngine
 

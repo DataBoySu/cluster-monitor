@@ -255,6 +255,8 @@ def run_particle_physics_torch(gpu_arrays, params, torch):
             small_j = (~big_balls_array[collision_j]) & big_balls_array[collision_i]
             
             # Copy big ball color to small ball permanently (VECTORIZED - GPU only)
+            # Note: this uses advanced indexing on GPU tensors; if errors occur
+            # check tensor device placement (cpu vs cuda) and dtype compatibility.
             ball_color_act = ball_color[active_mask]
             # Vectorized color copying - use advanced indexing on GPU
             # For small_i collisions: copy color from j to i

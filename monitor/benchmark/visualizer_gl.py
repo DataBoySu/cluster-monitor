@@ -1,4 +1,10 @@
-"""Ultra-optimized GPU particle visualizer using ModernGL with instanced rendering."""
+"""Ultra-optimized GPU particle visualizer using ModernGL with instanced rendering.
+
+Maintenance:
+- Purpose: optional GPU-accelerated visual frontend for particle workloads.
+- Debug: requires `moderngl`; if visualization fails, fallback to headless mode
+    by not instantiating this class. Keep rendering code isolated for profiling.
+"""
 
 import time
 import numpy as np

@@ -1,4 +1,11 @@
-"""GPU metrics collector using NVML or nvidia-smi."""
+"""GPU metrics collector using NVML or nvidia-smi.
+
+Maintenance:
+- Purpose: collect per-GPU metrics and process info. Prefers pynvml when
+    available and falls back to parsing `nvidia-smi` output.
+- Debug: enable `nvidia-smi` and NVML logging to diagnose GPU read failures.
+    The collector tolerates missing tools and returns `error` fields where needed.
+"""
 
 import subprocess
 import os
@@ -82,6 +89,13 @@ class GPUCollector:
                                 proc_info['cmdline'] = ' '.join(p.cmdline()[:3])
                             except (psutil.NoSuchProcess, psutil.AccessDenied):
                                 pass
+                        else:
+                            try:
+                                uname = self._resolve_username(proc.pid)
+                                if uname:
+                                    proc_info['username'] = uname
+                            except Exception:
+                                pass
                         
                         processes.append(proc_info)
                 except Exception:
@@ -148,13 +162,27 @@ class GPUCollector:
                 parts = [p.strip() for p in line.split(',')]
                 if len(parts) >= 4:
                     pid = int(parts[1])
-                    processes.append({
+                    proc_info = {
                         'gpu_index': 0,
                         'pid': pid,
                         'gpu_memory_mb': float(parts[2]) if parts[2] != '[N/A]' else 0,
                         'name': parts[3],
                         'gpu_utilization': utilization_map.get(pid, {}).get('gpu_util', None),
-                    })
+                    }
+                    try:
+                        if PSUTIL_AVAILABLE:
+                            p = psutil.Process(pid)
+                            proc_info['username'] = p.username()
+                        else:
+                            uname = self._resolve_username(pid)
+                            if uname:
+                                proc_info['username'] = uname
+                            else:
+                                proc_info['username'] = 'Unknown'
+                    except Exception:
+                        proc_info['username'] = 'Unknown'
+
+                    processes.append(proc_info)
             return processes
         except Exception:
             return []
@@ -249,3 +277,35 @@ class GPUCollector:
             
         except Exception as e:
             return [{'error': str(e)}]
+    
+    def _resolve_username(self, pid: int) -> str:
+        """Attempt to resolve the username owning a PID using OS utilities.
+
+        Uses `ps` on POSIX and PowerShell/WMI on Windows as a fallback when
+        psutil is not available or cannot access the process.
+        Returns empty string if resolution fails.
+        """
+        try:
+            import platform, subprocess
+            system = platform.system()
+            if system == 'Windows':
+                # Use WMI via PowerShell to get the process owner
+                cmd = [
+                    'powershell', '-NoProfile', '-NonInteractive',
+                    '-Command',
+                    f"(Get-WmiObject -Class Win32_Process -Filter \"ProcessId={pid}\").GetOwner().User"
+                ]
+                proc = subprocess.run(cmd, capture_output=True, text=True, timeout=3)
+                out = (proc.stdout or '').strip()
+                if out:
+                    return out
+            else:
+                # POSIX: use ps to get the user for a PID
+                cmd = ['ps', '-o', 'user=', '-p', str(pid)]
+                proc = subprocess.run(cmd, capture_output=True, text=True, timeout=2)
+                out = (proc.stdout or '').strip()
+                if out:
+                    return out
+        except Exception:
+            pass
+        return ''

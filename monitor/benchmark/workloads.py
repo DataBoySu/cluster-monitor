@@ -1,4 +1,11 @@
 """GPU workload implementations for benchmarking - REFACTORED."""
+"""GPU workload implementations for benchmarking - REFACTORED.
+
+Maintenance:
+- Purpose: provide workload implementations (GEMM, particle sim) used by
+    the benchmark runner. Keep compute-heavy loops separate for easier profiling.
+- Debug: to profile workloads, run them standalone and measure CPU/GPU usage.
+"""
 
 import time
 import subprocess
@@ -33,37 +40,58 @@ class GPUStressWorker:
     
     def _detect_and_setup(self):
         """Detect available GPU libraries and setup workload."""
-        # Try cupy first
-        try:
-            import cupy as cp
-            self._method = 'cupy'
-            self._cp = cp
-            self._setup_cupy()
-            self._initialized = True
-            return
-        except ImportError:
-            pass
-        except Exception as e:
-            print(f"[DEBUG] CuPy setup failed: {e}")
-            pass
-        
-        # Try torch
-        try:
-            import torch
-            if torch.cuda.is_available():
-                self._method = 'torch'
-                self._torch = torch
-                self._setup_torch()
+        # Honor preferred backend if provided in config
+        preferred = getattr(self.config, 'preferred_backend', 'auto')
+
+        def try_cupy():
+            try:
+                import cupy as cp
+                self._method = 'cupy'
+                self._cp = cp
+                self._setup_cupy()
                 self._initialized = True
+                return True
+            except Exception as e:
+                print(f"[DEBUG] CuPy setup failed: {e}")
+                return False
+
+        def try_torch():
+            try:
+                import torch
+                if torch.cuda.is_available():
+                    self._method = 'torch'
+                    self._torch = torch
+                    self._setup_torch()
+                    self._initialized = True
+                    return True
+            except Exception as e:
+                print(f"[DEBUG] PyTorch setup failed: {e}")
+            return False
+
+        # If user requested a specific backend, try it first
+        if preferred == 'cupy':
+            if try_cupy():
                 return
-        except ImportError:
-            pass
-        except Exception as e:
-            print(f"[DEBUG] PyTorch setup failed: {e}")
-            import traceback
-            traceback.print_exc()
-            pass
-        
+            # fall back to torch then passive
+            if try_torch():
+                return
+        elif preferred == 'torch':
+            if try_torch():
+                return
+            if try_cupy():
+                return
+        elif preferred == 'cpu':
+            # Force passive mode
+            self._method = 'passive'
+            self.workload_type = "Passive CPU mode selected"
+            return
+
+        # Default auto-detect: try cupy, then torch
+        if try_cupy():
+            return
+        if try_torch():
+            return
+
         # Fallback: passive monitoring
         self._method = 'passive'
         self.workload_type = "Passive Monitoring (cupy/torch not available - run your own GPU workload)"

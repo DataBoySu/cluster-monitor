@@ -1,9 +1,11 @@
 """GPU Benchmark module - modular benchmark system.
 
-Public API:
-- GPUBenchmark: Main benchmark orchestrator
-- BenchmarkConfig: Configuration dataclass
-- get_benchmark_instance: Global benchmark instance factory
+Maintenance:
+- Purpose: contains the benchmark orchestration and helpers used to run
+    GPU stress and workload tests. The submodules implement workloads,
+    storage for baselines, and runner orchestration.
+- Debug: importables are re-exported here for convenience; if a submodule
+    fails to import, check its dependencies (CuPy, PyTorch) and GPU drivers.
 """
 
 from .config import BenchmarkConfig
@@ -12,9 +14,9 @@ from .storage import BaselineStorage
 from .workloads import GPUStressWorker
 
 __all__ = [
-    'BenchmarkConfig',
-    'GPUBenchmark',
-    'get_benchmark_instance',
-    'BaselineStorage',
-    'GPUStressWorker',
+        'BenchmarkConfig',
+        'GPUBenchmark',
+        'get_benchmark_instance',
+        'BaselineStorage',
+        'GPUStressWorker',
 ]

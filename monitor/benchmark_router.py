@@ -1,4 +1,10 @@
-"""API router for benchmark-related endpoints."""
+"""API router for benchmark-related endpoints.
+
+Maintenance:
+- Purpose: expose HTTP endpoints used by the UI to start/stop benchmarks.
+- Debug: if endpoints are not responding, ensure the router is included in the
+    FastAPI app and that the server startup initialized the benchmark instance.
+"""
 
 import threading
 from fastapi import APIRouter
@@ -27,7 +33,8 @@ async def start_benchmark(
     num_particles: int = 100000,
     auto_scale: bool = False,
     visualize: bool = False,
-    backend_multiplier: int = 1
+    backend_multiplier: int = 1,
+    preferred_backend: str = 'auto'
 ):
     global benchmark_thread
     with benchmark_lock:
@@ -45,7 +52,8 @@ async def start_benchmark(
             num_particles=num_particles,
             auto_scale=auto_scale,
             target_gpu_util=98,
-            backend_multiplier=backend_multiplier
+            backend_multiplier=backend_multiplier,
+            preferred_backend=preferred_backend
         )
         
         def run_benchmark():

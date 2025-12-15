@@ -1,4 +1,10 @@
 """Update mechanism for cluster health monitor."""
+"""Update helper utilities.
+
+Maintenance:
+- Purpose: check for and apply updates (currently placeholder behavior).
+- Debug: network calls use urllib; failures are returned in API responses.
+"""
 
 import requests
 import subprocess
