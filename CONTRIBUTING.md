@@ -1,75 +1,102 @@
 # Contributing to Cluster Health Monitor
 
-First off, thanks for taking the time to contribute! 🎉
+First off, thanks for taking the time to go through my project!
 
-This project started as a personal tool for local monitoring and testing of AI models. It has grown into a lightweight, "nvidia-smi wrapper on steroids" that aims to simplify GPU management for developers and researchers.
+This project started as a personal tool for monitoring my local GPU setup, while I play with the AI models. It has grown into a lightweight, "nvidia-smi wrapper on steroids" that makes it easy to manage GPUs, for developers and researchers.
 
-We welcome contributions of all kinds—bug fixes, new features, documentation improvements, and more.
+All contributions are welcome, bug fixes, new features, documentation improvements, and more.
 
 ## Getting Started
 
 ### Prerequisites
-- **OS**: Windows 10/11 (currently the primary target, though Linux/Mac support is on the roadmap).
-- **Python**: 3.8+
+
+- **OS**: Windows 10/11
+- **Python**: 3.10+
 - **CUDA**: Toolkit 12.x (required for GPU benchmarking features).
 
 ### Setting Up the Development Environment
 
 1. **Clone the repository**:
+
    ```bash
-   git clone https://github.com/yourusername/cluster-health-monitor.git
-   cd cluster-health-monitor
+   git clone https://github.com/DataBoySu/Local-GPUMonitor.git
+   # Contributing to GPU Health Monitor
+
+   Thank you for taking an interest in contributing. This document describes how to get the repository locally, coding and commit guidelines, and the process for submitting changes.
+
+   Repository: https://github.com/DataBoySu/Local-GPUMonitor
+
+   ## Quick Start (clone & run)
+
+   1. Fork the repository on GitHub and clone your fork:
+
+   ```bash
+   git clone https://github.com/DataBoySu/Local-GPUMonitor.git
+   cd Local-GPUMonitor
    ```
 
-2. **Create a virtual environment**:
+   2. Create and activate a Python virtual environment:
+
    ```powershell
    python -m venv .venv
    .\.venv\Scripts\Activate.ps1
    ```
 
-3. **Install dependencies**:
+   3. Install dependencies:
+
    ```powershell
    pip install -r requirements.txt
    ```
 
-4. **Run the application**:
+   4. Run the application (web dashboard):
+
    ```powershell
-   # Run the web server
    python health_monitor.py web
    ```
 
-## Project Structure
+   Or run the CLI mode:
 
-- `monitor/`: Core package source.
-  - `api/`: FastAPI server and static assets (frontend).
-  - `collectors/`: System and GPU metric collectors.
-  - `benchmark/`: GPU stress testing and particle simulation logic.
-  - `alerting/`: Notification logic (Windows toasts).
-- `health_monitor.py`: Main entry point.
+   ```powershell
+   python health_monitor.py cli
+   ```
 
-## Roadmap & Future Work
+   ## Branching & Commit Guidelines
 
-We are actively looking for help with:
-- **Multi-GPU Support**: robust handling of multi-card setups.
-- **Cross-Platform Support**: Porting to Linux and macOS.
-- **Containerization**: Docker support for easy deployment.
-- **Remote Access**: SSH tunneling or secure remote monitoring capabilities.
-- **Hardware Support**: AMD (ROCm) and Intel (Arc) GPU support.
+   - Branch from `main` for new work: `git checkout -b feat/short-description` or `fix/short-description`.
+   - Keep commits small and focused. Use clear commit messages (imperative present tense):
 
-## Submitting Changes
+     `Add VRAM cap enforcement for per-process watchlist`
 
-1. **Fork the repo** and create your branch from `main`.
-2. **Make your changes**. Ensure code is clean and commented where necessary.
-3. **Test your changes**. Run the monitor in both CLI and Web modes to ensure no regressions.
-4. **Submit a Pull Request**. Describe your changes in detail and link to any relevant issues.
+   - Rebase or squash when appropriate before opening a PR to keep history tidy.
 
-## Code Style
+   ## Pull Requests
 
-- **Python**: Follow PEP 8. We use type hints where possible.
-- **JavaScript**: Keep it vanilla and simple. We avoid heavy frontend frameworks to keep the project lightweight.
+   1. Push your branch to your fork and open a Pull Request against `DataBoySu/Local-GPUMonitor:main`.
+   2. In the PR description include:
+      - A short summary of the change/with images if possible.
+      - Motivation and any relevant issue links.
+      - Testing steps to reproduce or verify the change.
+   3. Ensure CI (if any) passes and address review comments promptly.
 
-## Community
+   ## Code Style & Tests
 
-If you have questions or want to discuss ideas, please open a [Discussion](https://github.com/yourusername/cluster-health-monitor/discussions) or an Issue.
+   - Python: follow PEP 8 and use type hints where appropriate. We prefer readable, explicit code.
+   - JavaScript: keep vanilla JS simple and modular. Follow consistent indentation and naming.
+   - Add tests where appropriate (unit tests for collectors, integration tests for API endpoints). If you add tests, include instructions to run them in your PR.
 
-Happy coding! 🚀
+   ## Running Locally (developer tips)
+
+   - To run the web server with auto-reload during development, use your editor's Python run configuration or run with `watchdog`/`honcho` if you add it.
+   - For debugging GPU collectors on non-GPU machines, mock or stub out GPU calls (see `monitor/collectors` for structure).
+
+   ## Communication, Reporting Issues & Security
+
+   - Use GitHub Discussions for general conversation and design proposals: <https://github.com/DataBoySu/Local-GPUMonitor/discussions/9>
+   - Open issues for bugs, feature requests, and design discussions
+   - For sensitive security issues, please contact the repository owner directly instead of opening a public issue.
+
+   ## License
+
+   This project is distributed under the MIT License. See `LICENSE` for details.
+
+   With your help, I would like to keeps this project useful and evolving.
