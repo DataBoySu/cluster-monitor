@@ -42,20 +42,13 @@ def create_app(config: Dict[str, Any]) -> FastAPI:
     )
     # Determine if the process is running with admin/elevated rights or was started with --admin
     try:
-        import sys, platform
-        is_elev = False
-        if platform.system() == 'Windows':
-            try:
-                import ctypes
-                is_elev = bool(ctypes.windll.shell32.IsUserAnAdmin())
-            except Exception:
-                is_elev = False
-        else:
-            try:
-                import os
-                is_elev = (os.geteuid() == 0)
-            except Exception:
-                is_elev = False
+        import sys
+        # Only Windows elevation is supported; POSIX fallbacks removed.
+        try:
+            import ctypes
+            is_elev = bool(ctypes.windll.shell32.IsUserAnAdmin())
+        except Exception:
+            is_elev = False
 
         started_with_flag = '--admin' in (sys.argv[1:] if len(sys.argv) > 1 else [])
         app.state.is_admin = bool(is_elev or started_with_flag)
@@ -435,27 +428,17 @@ def create_app(config: Dict[str, Any]) -> FastAPI:
 
     @app.get('/api/is_elevated')
     async def is_elevated():
-        """Return whether the current process has elevated/admin privileges."""
+        """Return whether the current process has elevated/admin privileges (Windows only)."""
         try:
-            import sys, os, platform
+            import sys
             elevated = False
-            method = 'unknown'
+            method = 'windows.IsUserAnAdmin'
             note = None
-            # Prefer platform-specific checks
-            if platform.system() == 'Windows':
-                try:
-                    import ctypes
-                    elevated = bool(ctypes.windll.shell32.IsUserAnAdmin())
-                    method = 'windows.IsUserAnAdmin'
-                except Exception as e:
-                    note = str(e)
-            else:
-                # POSIX: root uid
-                try:
-                    elevated = (os.geteuid() == 0)
-                    method = 'posix.geteuid'
-                except Exception as e:
-                    note = str(e)
+            try:
+                import ctypes
+                elevated = bool(ctypes.windll.shell32.IsUserAnAdmin())
+            except Exception as e:
+                note = str(e)
 
             # Also surface if server was started with explicit --admin flag
             try:
