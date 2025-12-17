@@ -698,13 +698,19 @@ async function loadProcesses() {
             tbody.innerHTML = sorted.map(p => {
                 const userDisplay = p.username || p.user || 'N/A';
                 const pid = p.pid;
+                // Disable terminate button and add tooltip when the server is not running elevated
+                const disabledAttr = (window.isAdmin ? '' : 'disabled');
+                const tooltipAttr = (window.isAdmin ? '' : ' data-tooltip="Run as admin"');
+                const baseStyle = 'padding:6px 10px;border-radius:6px;border:none;background:var(--accent-red);color:#fff;';
+                const disabledStyle = window.isAdmin ? '' : 'opacity:0.55;cursor:not-allowed;';
+                const combinedStyle = `style="${baseStyle}${disabledStyle}"`;
                 return `
                     <tr>
                         <td>${pid}</td>
                         <td>${p.name || 'N/A'}</td>
                         <td>GPU ${p.gpu_index}</td>
                         <td>${userDisplay}</td>
-                        <td><button id="terminate-${pid}" onclick="terminateProcess(${pid})" style="padding:6px 10px;border-radius:6px;border:none;background:var(--accent-red);color:#fff;cursor:pointer;">Terminate</button></td>
+                        <td><button id="terminate-${pid}" onclick="terminateProcess(${pid})" ${disabledAttr}${tooltipAttr} ${combinedStyle}>Terminate</button></td>
                     </tr>
                 `;
             }).join('');
@@ -724,6 +730,11 @@ function exportData(format) {
 // Terminate a process by PID via server endpoint
 async function terminateProcess(pid) {
     try {
+        // Safety: prevent UI-initiated terminate when not running elevated
+        if (typeof window !== 'undefined' && window.isAdmin === false) {
+            if (typeof showToast === 'function') showToast('Run as admin', { level: 'yellow', duration: 4000 });
+            return;
+        }
         // Directly send terminate request (no confirm). Disable button while in-flight.
         const btn = document.getElementById(`terminate-${pid}`);
         if (btn) { btn.disabled = true; btn.textContent = 'Terminating...'; }
@@ -1218,6 +1229,14 @@ async function loadFeatures() {
     try {
         const response = await fetch('/api/features');
         const features = await response.json();
+        // Detect whether the server process is elevated so the UI can enable/disable admin actions
+        try {
+            const elevResp = await fetch('/api/is_elevated');
+            const elevJson = await elevResp.json().catch(() => ({}));
+            window.isAdmin = Boolean(elevJson && (elevJson.elevated || elevJson.started_with_flag));
+        } catch (e) {
+            window.isAdmin = false;
+        }
         
         const benchTab = document.querySelector('[data-tab="benchmark"]');
         const startBtn = document.getElementById('start-bench-btn');

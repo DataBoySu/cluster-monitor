@@ -1,7 +1,9 @@
 # Cluster Health Monitor Configuration
+# Vortex Monitor Configuration
 
 cluster:
   name: "My GPU Cluster"
+  name: "Vortex Local"
   nodes: []  # Add nodes for multi-node monitoring
   # Example:
   # - hostname: gpu-server-01

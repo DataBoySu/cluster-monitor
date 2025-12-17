@@ -65,10 +65,15 @@ The tool supports three installation types:
 
    ```powershell
    # For MINIMAL or STANDARD:
+
   .\.venv\Scripts\python.exe .\health_monitor.py cli
+
    # For STANDARD or FULL:
+
   .\.venv\Scripts\python.exe .\health_monitor.py web
+
    ```
+   
 ### Usage
 
 **Web Dashboard** (Standard/Full installations)
