@@ -1,213 +1,160 @@
-# Local GPU Monitor
+# Cluster Health Monitor
 
-Simple, fast and minimal cli + webui interface for local NVIDIA GPU monitoring
-*only for windows
+**A lightweight, admin-focused GPU monitoring and management utility.**
 
+> *Essentially an `nvidia-smi` wrapper built for varying levels of complexity.*
+
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Python](https://img.shields.io/badge/python-3.10%2B-blue)
+![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)
+
+## Gallery
+
+```markdown
+<!-- Web dashboard demo GIF -->
+![Web Dashboard Demo](assets/gallery/web-dashboard-demo.gif)
+
+<!-- CLI mode screenshot -->
+![CLI Mode](assets/gallery/cli-mode.png)
+```
+
+---
+
+## Overview
+
+**Cluster Health Monitor** started as a personal project for local monitoring and testing while working with AI models. It has evolved into a versatile utility that bridges the gap between simple command-line tools and complex enterprise monitoring solutions.
+
+Whether you are a researcher fine-tuning LLMs, a developer testing CUDA kernels, or an admin managing a local compute cluster, this tool provides the visibility and control you need without the overhead.
+
+### Why use this?
+
+- **Lightweight**: Minimal resource footprint. It gets out of your way.
+- **Flexible**: Runs as a CLI tool, a background service, or a full-featured Web Dashboard.
+- **Admin-Centric**: Includes features like **VRAM Enforcement** (auto-kill processes exceeding limits) and **Watchlists**.
+- **Developer-Friendly**: Built-in benchmarking and stress-testing tools (GEMM, Particle Physics) to validate system stability.
+
+---
+ 
 ## Features
 
-- **Real-time Monitoring**: GPU utilization, memory, temperature, power, and system metrics
-- **Web Dashboard**: Interactive charts with live updates and historical data (optional)
-- **GPU Stress Testing**: Particle simulation with auto-scaling backend load
-- **Performance Baselines**: Track and compare GPU performance over time
-- **Visualization**: Real-time particle physics simulation with interactive controls (optional)
-- **Multiple Test Modes**: Quick, Standard, Extended, Stress Test, and Custom configurations
-- **Modular Installation**: Install only what you need (CLI-only, with Web UI, or Full)
+- **Real-time Monitoring**:
+  - Detailed GPU metrics (Utilization, VRAM, Power, Temp, Fan Speed).
+  - System metrics (CPU, RAM, Disk I/O).
+  - Per-process VRAM usage tracking.
+
+- **Admin & Enforcement**:
+  - **VRAM Caps**: Set hard limits on VRAM usage per GPU.
+  - **Auto-Termination**: Automatically terminate processes that violate VRAM policies (Admin only).
+  - **Watchlists**: Monitor specific PIDs or process names.
+
+- **Benchmarking & Simulation**:
+  - **Stress Testing**: Configurable GEMM workloads to test thermal throttling and stability.
+  - **Visual Simulation**: Interactive 3D particle physics simulation to visualize GPU load.
+  - **TFLOPS Estimation**: Real-time performance estimation during simulations.
+
+---
+
+## Roadmap & Future Work
+
+We are actively working on expanding the capabilities of Cluster Health Monitor. Contributions are welcome!
+
+- **Multi-GPU Support**: Enhanced handling for multi-card setups and NVLink topologies.
+- **Containerization**: Official Docker support for easy deployment in containerized environments.
+- **Remote Access**: SSH tunneling integration and secure remote management.
+- **Cross-Platform**:
+  - [ ] Linux Support (Ubuntu/Debian focus).
+  - [ ] macOS Support (Apple Silicon monitoring).
+- **Hardware Agnostic**:
+  - [ ] AMD ROCm support.
+  - [ ] Intel Arc support.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how to get involved.
+
+---
 
 ## Requirements
 
-- Python 3.8+
-- NVIDIA GPU with drivers (required for GPU benchmarking)
-- CUDA Toolkit 12.x (STRICTLY REQUIRED) — the application supports CUDA 12.* only. If you have any other CUDA major version installed (e.g., 11.x or 13.x) the application will treat GPU libraries as incompatible and GPU benchmarking/visualization will be disabled with an instruction to install CUDA 12.x and matching wheels.
-- Windows 10/11 (this project targets Windows only)
+- **OS**: Windows 10/11
+- **Python**: 3.10+
+- **Hardware**: NVIDIA GPU with installed drivers.
+- **CUDA**: Toolkit 12.x (Strictly required for Benchmarking/Simulation features).
+  - *Note: If CUDA 12.x is not detected, GPU-specific benchmarking features will be disabled.*
 
-## Installation Options
+---
 
-The tool supports three installation types:
+## Installation
 
-### 1. MINIMAL (CLI only)
+The tool supports modular installation to fit your needs:
 
-- Command-line interface with rich output
-- Basic monitoring (click, rich, psutil)
-- Smallest installation (~10 MB)
-- **Use case**: Headless servers, minimal footprint
+### 1. Minimal (CLI Only)
 
-### 2. STANDARD (CLI + Web UI)
+Best for headless servers or background monitoring.
 
-- Everything in Minimal
-- Web dashboard with real-time charts
-- REST API endpoints
-- **Use case**: Remote monitoring, multiple users
+- Command-line interface.
+- Basic system/GPU metrics.
 
-### 3. FULL (Standard + Visualization + GPU)
+### 2. Standard (CLI + Web UI)
 
-- Everything in Standard
-- Particle simulation visualization
-- GPU benchmarking support
-- **Use case**: Full-featured installation, development
+Best for most users.
 
-## Quick Start
+- Includes Web Dashboard.
+- REST API endpoints.
+- Real-time charts.
 
-### Installation
+### 3. Full (Standard + Visualization)
 
-1. **Download** the latest release from [Releases](https://github.com/DataBoySu/cluster-monitor/releases)
+Best for development and stress testing.
 
-2. **Extract** and run setup:
+- Includes Particle Simulation.
+- PyTorch/CuPy dependencies for benchmarking.
 
+### Quick Start
+
+1. **Download** the latest release or clone the repo.
+2. **Run Setup**:
   ```powershell
-  Expand-Archive local-gpu-monitor.zip -DestinationPath C:\Tools\
-  cd C:\Tools\local-gpu-monitor
   .\setup.ps1
   ```
-  
-3. **Select** installation type (1=Minimal, 2=Standard, 3=Full)
 
-4. **Launch**:
+3. **Launch**:
 
-   ```powershell
-   # For MINIMAL or STANDARD:
+```powershell
+# Start the web dashboard (Standard/Full)
+python health_monitor.py web
 
-  .\.venv\Scripts\python.exe .\health_monitor.py cli
+# Start the CLI
+python health_monitor.py cli
+```
 
-# For STANDARD or FULL
+Access the dashboard at `http://localhost:8090` when running in web mode.
+---
 
-  .\.venv\Scripts\python.exe .\health_monitor.py web
+## License
 
-   ```
-   
-### Usage
+MIT License. See [LICENSE](LICENSE) for details.
 
-**Web Dashboard** (Standard/Full installations)
+## Detailed Modes
+
+### Web Dashboard
+
+The web dashboard runs a FastAPI server that serves a lightweight frontend (vanilla JS). It provides real-time charts, per-process details, and desktop notifications on Windows.
+
+Start the web dashboard with:
 
 ```powershell
 python health_monitor.py web
 ```
 
-Access at: <http://localhost:8090>
+By default the dashboard is available at `http://localhost:8090`.
 
-**Terminal Interface** (All installations)
+### CLI Mode
+
+The CLI mode is intended for quick checks and scripted workflows. It provides concise, human-friendly output suitable for headless machines and automation.
+
+Start the CLI with:
 
 ```powershell
 python health_monitor.py cli
 ```
 
-**Command-Line Benchmark** (Full installation with GPU libraries)
-
-```powershell
-# Quick 15s test
-python health_monitor.py benchmark --mode quick
-
-# Stress test with auto-scaling
-python health_monitor.py benchmark --mode stress-test
-```
-
-## Benchmark Modes
-
-| Mode | Duration | Description |
-|------|----------|-------------|
-| **Quick** | 15s | Fast baseline check with fixed workload |
-| **Standard** | 60s | Standard benchmark for consistent results |
-| **Extended** | 180s | Long-term stability and thermal testing |
-| **Stress Test** | 60s | Auto-scaling load targeting 98% GPU utilization |
-| **Custom** | Variable | User-defined parameters and limits |
-
-### Stress Test Auto-Scaling
-
-The Stress Test mode dynamically increases backend particle load:
-
-- **Start**: 200,000 backend particles
-- **Increment**: +50,000 particles every 5 seconds
-- **Maximum**: 500,000 backend particles
-- **Target**: 98% GPU utilization
-- **Timeout**: 60 seconds
-
-This provides progressive GPU loading while maintaining responsive visualization.
-
-## Visualization
-
-Interactive particle simulation with:
-
-- **Real-time Physics**: GPU-accelerated particle collision and bouncing
-- **Interactive Controls**: Gravity, ball speed, splitting behavior
-- **Click Spawning**: Add particles dynamically during simulation
-- **FPS Overlay**: Monitor render performance
-- **GPU Metrics**: Live utilization display
-
-## Configuration
-
-Edit `config.yaml` for custom settings:
-
-```yaml
-monitoring:
-  interval_seconds: 5
-  history_retention_hours: 168
-
-alerts:
-  gpu_temperature_warn: 80
-  gpu_temperature_critical: 90
-
-web:
-  host: 0.0.0.0
-  port: 8090
-```
-
-## API Reference
-
-REST API endpoints (web mode):
-
-- `GET /` - Web dashboard
-- `GET /api/status` - Current GPU metrics
-- `GET /api/history` - Historical data
-
-### Admin mode
-
-If you need the web dashboard to perform privileged actions (terminate processes, restart services), start the server with the `--admin` flag. This signals the application that it should enable administrative actions and the dashboard will show admin controls.
-
-```powershell
-python health_monitor.py web --port 8890 --admin
-```
-
-- `POST /api/benchmark/start` - Start benchmark
-- `GET /api/benchmark/status` - Benchmark progress
-- `POST /api/benchmark/stop` - Stop benchmark
-- `GET /api/benchmark/baseline` - Retrieve saved baseline
-
-## Troubleshooting
-
-nvidia-smi not found
-
-- Install NVIDIA drivers: <https://www.nvidia.com/download/index.aspx>
-
-CUDA compatibility errors
-
-- This project requires CUDA 12.x. If your installed GPU libraries (CuPy or PyTorch) were compiled for a different CUDA major version the app will report them as incompatible and GPU benchmarking/simulation will be disabled.
-- Fix: install CUDA 12.x and the matching Python wheels:
-  - CuPy (CUDA 12.x):
-
-    ```powershell
-    pip install "cupy-cuda12x>=13.0.0"
-    ```
-
-  - PyTorch (CUDA 12.x): check official instructions; example for CUDA 12.1:
-
-    ```powershell
-    pip install torch --index-url https://download.pytorch.org/whl/cu121
-    ```
-
-  - After installing, run:
-
-    ```powershell
-    python health_monitor.py refresh
-    ```
-
-Benchmark disabled / Simulation button grayed out
-
-- GPU compute libraries not installed or not detected (or installed with incompatible CUDA major version)
-- Solution: install CuPy or PyTorch compiled for CUDA 12.x and re-run `python health_monitor.py refresh` or re-run `setup.ps1`.
-
-Port already in use
-
-- Change port: `python health_monitor.py web --port 3000`
-
-## License
-
-MIT License - See LICENSE file
+Use the CLI for cron jobs, automation, or running on machines without a browser.

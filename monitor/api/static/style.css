@@ -22,7 +22,7 @@ body {
     line-height: 1.6;
 }
 
-.container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+.container { max-width: 1800px; margin: 0 auto; padding: 20px; }
 
 header {
     background: var(--accent-green);
@@ -350,10 +350,32 @@ header h1 {
     font-size: 0.9em;
 }
 
+/* Process card wrapper: allow horizontal scroll if table wider than container */
+.process-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 12px;
+    overflow-x: auto;
+}
+
 .process-table th, .process-table td {
     padding: 10px;
     text-align: left;
     border-bottom: 1px solid var(--border-color);
+    word-break: break-word;
+}
+
+/* Ensure the actions column has a reserved width and buttons don't overflow */
+.process-table th:last-child, .process-table td:last-child {
+    width: 220px;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.process-table td .btn, .process-table td button {
+    max-width: 100%;
+    overflow: hidden;
 }
 
 /* Watchlist checkbox and cap-exceeded badge */
