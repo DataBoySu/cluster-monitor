@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Cluster Health Monitor - Real-time GPU cluster monitoring.
+"""Local GPU Monitor - Real-time GPU monitoring.
 
 Maintenance:
 - Purpose: CLI entrypoint and small web/server launcher for the project.
@@ -36,8 +36,8 @@ console = Console()
 
 BANNER = f"""
 ╔══════════════════════════════════════════════════╗
-║          CLUSTER HEALTH MONITOR v{_pkg_version}           ║
-║         Real-time GPU Cluster Monitoring         ║
+║             LOCAL GPU MONITOR v{_pkg_version}             ║
+║        Local GPU monitoring and diagnostics       ║
 ╚══════════════════════════════════════════════════╝
 """
 
@@ -140,7 +140,7 @@ def create_dashboard(metrics: dict, alerts: list) -> Layout:
     
     # Header
     layout["header"].update(Panel(
-        f"[bold cyan]CLUSTER HEALTH MONITOR[/bold cyan] | "
+        f"[bold cyan]LOCAL GPU MONITOR[/bold cyan] | "
         f"Node: [green]{metrics.get('hostname', 'N/A')}[/green] | "
         f"Last Update: {datetime.now().strftime('%H:%M:%S')} | "
         f"Alerts: [{'red' if alerts else 'green'}]{len(alerts)}[/]",
@@ -362,7 +362,7 @@ def _run_app(config_path, port, nodes, once, web_mode=False, cli_mode=False):
 @click.option('--admin', is_flag=True, help='Start in administrative mode (enables privileged dashboard actions).')
 @click.pass_context
 def cli(ctx, config, port, update, admin):
-    """Cluster Health Monitor: Real-time GPU and system health monitoring."""
+    """Local GPU Monitor: Real-time GPU and system health monitoring."""
     # If the user requested admin mode, attempt to relaunch this process elevated
     # on platforms that support elevation (Windows -> UAC, POSIX -> sudo).
     def _is_elevated():
@@ -500,8 +500,43 @@ def refresh():
     # Test CuPy
     try:
         import cupy as cp
-        cp.cuda.Device(0).compute_capability
-        console.print("  CuPy: [green]OK[/green]")
+        # Try to detect CuPy CUDA runtime major version
+        cuda_ok = False
+        try:
+            # attempt several runtime inspection methods
+            cuda_version = None
+            try:
+                if hasattr(cp, 'cuda') and hasattr(cp.cuda, 'runtime') and hasattr(cp.cuda.runtime, 'get_runtime_version'):
+                    cuda_version = cp.cuda.runtime.get_runtime_version()
+            except Exception:
+                cuda_version = None
+            if cuda_version is None:
+                try:
+                    if hasattr(cp.cuda, 'runtime') and hasattr(cp.cuda.runtime, 'runtimeGetVersion'):
+                        cuda_version = cp.cuda.runtime.runtimeGetVersion()
+                except Exception:
+                    cuda_version = None
+
+            # normalize/inspect
+            if cuda_version is not None:
+                s = str(cuda_version)
+                if s.startswith('12') or ('.' in s and s.split('.')[0] == '12'):
+                    cuda_ok = True
+        except Exception:
+            cuda_ok = False
+
+        # Validate device access
+        try:
+            cp.cuda.Device(0).compute_capability
+        except Exception:
+            console.print("  CuPy: [red]Error - cannot access GPU device[/red]")
+            raise
+
+        if cuda_ok:
+            console.print("  CuPy: [green]OK (CUDA 12.x)[/green]")
+        else:
+            console.print("  CuPy: [yellow]Installed but NOT built for CUDA 12.x[/yellow]")
+            console.print("           Install a CuPy wheel built for CUDA 12.x (e.g. cupy-cuda12x)")
     except ImportError:
         console.print("  CuPy: [yellow]Not installed[/yellow]")
     except Exception as e:
@@ -510,11 +545,16 @@ def refresh():
     # Test PyTorch
     try:
         import torch
-        if torch.cuda.is_available():
-            console.print(f"  PyTorch: [green]OK (CUDA {torch.version.cuda})[/green]")
+        cuda_report = getattr(torch.version, 'cuda', None)
+        if cuda_report is None:
+            console.print("  PyTorch: [yellow]Installed but CUDA version not reported[/yellow]")
         else:
-            console.print("  PyTorch: [red]Installed but CUDA not available[/red]")
-            console.print(f"           [dim]PyTorch version: {torch.__version__}[/dim]")
+            major = str(cuda_report).split('.')[0]
+            if major == '12' and torch.cuda.is_available():
+                console.print(f"  PyTorch: [green]OK (CUDA {cuda_report})[/green]")
+            else:
+                console.print(f"  PyTorch: [yellow]Installed but incompatible CUDA ({cuda_report})[/yellow]")
+                console.print(f"           Install a PyTorch wheel built for CUDA 12.x and ensure CUDA 12.x is installed")
     except ImportError:
         console.print("  PyTorch: [yellow]Not installed[/yellow]")
     except Exception as e:

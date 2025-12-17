@@ -1248,30 +1248,43 @@ async function loadFeatures() {
         if (!features.gpu_benchmark) {
             if (benchTab) {
                 benchTab.classList.add('disabled');
-                benchTab.setAttribute('data-tooltip', 'Install CuPy or PyTorch for GPU benchmarking');
+                // If libraries are present but compiled for wrong CUDA, show specific guidance
+                if ((features.cupy_present && !features.cupy_cuda_ok) || (features.torch_present && !features.torch_cuda_ok)) {
+                    benchTab.setAttribute('data-tooltip', 'Incompatible CUDA version: install CUDA 12.x and matching CuPy/PyTorch wheels');
+                } else {
+                    benchTab.setAttribute('data-tooltip', 'Install CuPy or PyTorch for GPU benchmarking (CUDA 12.x)');
+                }
                 benchTab.style.pointerEvents = 'auto';
             }
-            
+
             if (startBtn) {
                 startBtn.disabled = true;
                 startBtn.style.opacity = '0.5';
                 startBtn.style.cursor = 'not-allowed';
-                startBtn.title = 'GPU benchmark libraries not installed';
+                if ((features.cupy_present && !features.cupy_cuda_ok) || (features.torch_present && !features.torch_cuda_ok)) {
+                    startBtn.title = 'Incompatible CUDA version - install CUDA 12.x and matching wheels';
+                } else {
+                    startBtn.title = 'GPU benchmark libraries not installed';
+                }
             }
-            
+
             if (startSimBtn) {
                 startSimBtn.disabled = true;
                 startSimBtn.style.opacity = '0.5';
                 startSimBtn.style.cursor = 'not-allowed';
-                startSimBtn.title = 'Install CuPy or PyTorch for simulation';
+                if ((features.cupy_present && !features.cupy_cuda_ok) || (features.torch_present && !features.torch_cuda_ok)) {
+                    startSimBtn.title = 'Incompatible CUDA version - install CUDA 12.x and matching wheels';
+                } else {
+                    startSimBtn.title = 'Install CuPy or PyTorch for simulation';
+                }
             }
-            
+
             typeButtons.forEach(btn => {
                 btn.disabled = true;
                 btn.style.opacity = '0.5';
                 btn.style.cursor = 'not-allowed';
             });
-            
+
             modeButtons.forEach(btn => {
                 btn.disabled = true;
                 btn.style.opacity = '0.5';

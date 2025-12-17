@@ -1,4 +1,4 @@
-# GPU Health Monitor
+# Local GPU Monitor
 
 Simple, fast and minimal cli + webui interface for local NVIDIA GPU monitoring
 *only for windows
@@ -16,9 +16,9 @@ Simple, fast and minimal cli + webui interface for local NVIDIA GPU monitoring
 ## Requirements
 
 - Python 3.8+
-- NVIDIA GPU with drivers (optional - for GPU benchmarking)
-- CUDA Toolkit 12.0+ (optional - for GPU acceleration)
-- Windows 10/11 or Linux
+- NVIDIA GPU with drivers (required for GPU benchmarking)
+- CUDA Toolkit 12.x (STRICTLY REQUIRED) — the application supports CUDA 12.* only. If you have any other CUDA major version installed (e.g., 11.x or 13.x) the application will treat GPU libraries as incompatible and GPU benchmarking/visualization will be disabled with an instruction to install CUDA 12.x and matching wheels.
+- Windows 10/11 (this project targets Windows only)
 
 ## Installation Options
 
@@ -53,11 +53,11 @@ The tool supports three installation types:
 
 2. **Extract** and run setup:
 
-   ```powershell
-   Expand-Archive cluster-health-monitor.zip -DestinationPath C:\Tools\
-   cd C:\Tools\cluster-health-monitor
-   .\setup.ps1
-   ```
+  ```powershell
+  Expand-Archive local-gpu-monitor.zip -DestinationPath C:\Tools\
+  cd C:\Tools\local-gpu-monitor
+  .\setup.ps1
+  ```
 
 3. **Select** installation type (1=Minimal, 2=Standard, 3=Full)
 
@@ -176,21 +176,27 @@ nvidia-smi not found
 
 - Install NVIDIA drivers: <https://www.nvidia.com/download/index.aspx>
 
-CUDA not detected
+CUDA compatibility errors
 
-- Download CUDA Toolkit: <https://developer.nvidia.com/cuda-downloads>
-- Re-run `setup.ps1` after installation
+- This project requires CUDA 12.x. If your installed GPU libraries (CuPy or PyTorch) were compiled for a different CUDA major version the app will report them as incompatible and GPU benchmarking/simulation will be disabled.
+- Fix: install CUDA 12.x and the matching Python wheels:
+  - CuPy (CUDA 12.x):
+    ```powershell
+    pip install "cupy-cuda12x>=13.0.0"
+    ```
+  - PyTorch (CUDA 12.x): check official instructions; example for CUDA 12.1:
+    ```powershell
+    pip install torch --index-url https://download.pytorch.org/whl/cu121
+    ```
+  - After installing, run:
+    ```powershell
+    python health_monitor.py refresh
+    ```
 
 Benchmark disabled / Simulation button grayed out
 
-- GPU compute libraries not installed or not detected
-- Solution 1: Run `python health_monitor.py refresh` to update detection cache
-- Solution 2: Re-run `setup.ps1` and install CuPy or PyTorch
-
-CuPy installation fails on CUDA 13.0
-
-- Use: `pip install "cupy-cuda12x>=13.0.0"`
-- CuPy 13.x supports CUDA 12.x and 13.0
+- GPU compute libraries not installed or not detected (or installed with incompatible CUDA major version)
+- Solution: install CuPy or PyTorch compiled for CUDA 12.x and re-run `python health_monitor.py refresh` or re-run `setup.ps1`.
 
 Port already in use
 

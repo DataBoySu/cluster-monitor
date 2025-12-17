@@ -36,7 +36,7 @@ package.ps1
 setup.ps1
 RELEASE_NOTES.md
 DISTRIBUTION.md
-cluster-health-monitor-v*.zip
+local-gpu-monitor-v*.zip
 
 # OS
 .DS_Store

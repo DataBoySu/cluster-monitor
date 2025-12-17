@@ -1,4 +1,4 @@
-"""Update mechanism for cluster health monitor."""
+"""Update mechanism for Local GPU Monitor."""
 """Update helper utilities.
 
 Maintenance:
@@ -109,7 +109,7 @@ def apply_update(zip_path: Path) -> bool:
             zf.extractall(temp_dir)
         
         # Find extracted directory
-        extracted = list(temp_dir.glob("cluster-health-monitor*"))
+        extracted = list(temp_dir.glob("local-gpu-monitor*"))
         if not extracted:
             return False
         

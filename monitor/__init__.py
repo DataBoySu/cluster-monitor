@@ -1,4 +1,4 @@
-"""Top-level package for Cluster Health Monitor.
+"""Top-level package for Local GPU Monitor.
 
 Expose high-level package metadata and commonly-used helpers so callers
 can import from ``monitor`` conveniently. Keep this file minimal to avoid

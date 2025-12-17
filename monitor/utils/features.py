@@ -23,22 +23,82 @@ def _detect_nvidia_smi() -> bool:
     except Exception:
         return False
 
-def _detect_cupy() -> bool:
-    """Check if cupy is available."""
+def _cupy_info():
+    """Return CuPy presence and whether it is built for CUDA 12.x.
+
+    Returns: (present: bool, cuda_ok: bool)
+    """
     try:
         import cupy as cp
-        cp.cuda.Device(0).compute_capability
-        return True
     except Exception:
-        return False
+        return (False, False)
 
-def _detect_torch() -> bool:
-    """Check if torch with CUDA is available."""
+    # Try to detect CuPy's compiled CUDA runtime version. Several accessors exist.
+    cuda_version = None
+    try:
+        v = getattr(cp, 'cuda', None)
+        if v is not None and hasattr(v, 'runtime') and hasattr(v.runtime, 'get_runtime_version'):
+            rv = v.runtime.get_runtime_version()
+            cuda_version = str(rv)
+    except Exception:
+        cuda_version = None
+
+    if cuda_version is None:
+        try:
+            if hasattr(cp, 'cuda') and hasattr(cp.cuda, 'runtime') and hasattr(cp.cuda.runtime, 'runtimeGetVersion'):
+                rv = cp.cuda.runtime.runtimeGetVersion()
+                cuda_version = str(rv)
+        except Exception:
+            cuda_version = None
+
+    if cuda_version is None:
+        try:
+            if hasattr(cp.cuda, 'get_runtime_version'):
+                rv = cp.cuda.get_runtime_version()
+                cuda_version = str(rv)
+        except Exception:
+            cuda_version = None
+
+    cuda_major = None
+    try:
+        if cuda_version:
+            s = str(cuda_version)
+            if s.startswith('12'):
+                cuda_major = 12
+            else:
+                if '.' in s and s.split('.')[0] == '12':
+                    cuda_major = 12
+    except Exception:
+        cuda_major = None
+
+    # Validate device access
+    try:
+        cp.cuda.Device(0).compute_capability
+    except Exception:
+        # present but cannot access device
+        return (True, False)
+
+    return (True, cuda_major == 12)
+
+def _torch_info():
+    """Return (present: bool, cuda_ok: bool) for PyTorch.
+
+    We enforce CUDA 12.x only.
+    """
     try:
         import torch
-        return torch.cuda.is_available()
     except Exception:
-        return False
+        return (False, False)
+
+    cuda_report = getattr(torch.version, 'cuda', None)
+    if cuda_report is None:
+        return (True, False)
+    try:
+        major = str(cuda_report).split('.')[0]
+        cuda_ok = (major == '12') and torch.cuda.is_available()
+    except Exception:
+        cuda_ok = False
+    return (True, cuda_ok)
 
 def detect_features(force: bool = False) -> Dict[str, bool]:
     """
@@ -58,13 +118,22 @@ def detect_features(force: bool = False) -> Dict[str, bool]:
             pass
     
     # Detect features
+    cupy_present, cupy_ok = _cupy_info()
+    torch_present, torch_ok = _torch_info()
+
     features = {
         'nvidia_smi': _detect_nvidia_smi(),
-        'cupy': _detect_cupy(),
-        'torch': _detect_torch(),
+        # `cupy` indicates CuPy is installed and compiled for CUDA 12.x
+        'cupy': cupy_present and cupy_ok,
+        'cupy_present': cupy_present,
+        'cupy_cuda_ok': cupy_ok,
+        # `torch` indicates PyTorch is installed and compiled for CUDA 12.x
+        'torch': torch_present and torch_ok,
+        'torch_present': torch_present,
+        'torch_cuda_ok': torch_ok,
     }
-    
-    # GPU benchmark available if cupy or torch available
+
+    # GPU benchmark available if cupy or torch available (with CUDA 12.x)
     features['gpu_benchmark'] = features['cupy'] or features['torch']
     
     # Cache results
