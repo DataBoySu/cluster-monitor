@@ -55,7 +55,7 @@
 
 ### Why use this?
 
-- **Lightweight**: Minimal resource footprint. It gets out of your way.
+- **Lightweight**: Minimal resource footprint.
 - **Flexible**: Runs as a CLI tool, a background service, or a full-featured Web Dashboard.
 - **Admin-Centric**: Includes features like **VRAM Enforcement** (auto-kill processes exceeding limits) and **Watchlists**.
 - **Developer-Friendly**: Built-in benchmarking and stress-testing tools (GEMM, Particle Physics) to validate system stability.
