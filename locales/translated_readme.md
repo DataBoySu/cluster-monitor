@@ -1,21 +1,19 @@
-<div style="text-align:center; margin:18px 0;">
-  <img src="../monitor/api/static/logo.png" alt="MyGPU Logo"/>
-</div>
+# MyGPU — Ein leichtgewichtiges GPU-Verwaltungstool: Ein kompakter Wrapper für `nvidia-smi` mit einer sauberen Web-Dashboard-Schnittstelle
 
-> *MyGPU — Leichtgewichtige GPU-Verwaltung: ein kompakter Wrapper um nvidia-smi mit einem sauberen Web-Dashboard.*
-
-![Lizenz](https://img.shields.io/badge/license-MIT-blue.svg)
-![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Version](https://img.shields.io/badge/version-1.2.3-blue)
-![Plattform](https://img.shields.io/badge/platform-Windows-lightgrey)
+![Lizenz](https://img.shields.io/badge/Lizenz-MIT-blue.svg)
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
+![Version](https://img.shields.io/badge/Version-1.2.3-blue)
+![Plattform](https://img.shields.io/badge/Plattform-Windows-lightgrey)
 ![CUDA 12.x](https://img.shields.io/badge/CUDA-12.x-0f9d58?logo=nvidia)
 
 ## Galerie
 
+### Web-Dashboard
+
 <details>
   <summary>Web-Dashboard</summary>
   <div style="display:flex; overflow-x:auto; gap:10px; padding:12px 0; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;">
-    <!-- Verwende den ersten Bildaspektverhältnis 1624x675 für die Slide-Frame; Bilder passen sich an mit object-fit:contain -->
+    <!-- Verwenden Sie das erste Bild mit einem Seitenverhältnis von 1624x675 für den Folienrahmen; die Bilder passen sich mit `object-fit: contain` innerhalb an -->
     <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
       <img src="../monitor/api/static/web1.png" style="width:100%; height:100%; object-fit:contain;" />
     </div>
@@ -30,14 +28,16 @@
     </div>
   </div>
 </details>
+
+### CLI
+
 <details>
   <summary>CLI</summary>
   <div style="display:flex; overflow-x:auto; gap:10px; padding:12px 0; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;">
-
-  <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
+    <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
       <img src="../monitor/api/static/cli1.png" style="width:100%; height:100%; object-fit:contain;" />
-  </div>
-  <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
+    </div>
+    <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
       <img src="../monitor/api/static/cli2.png" style="width:100%; height:100%; object-fit:contain;" />
     </div>
     <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
@@ -49,109 +49,89 @@
     <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
       <img src="../monitor/api/static/cli5.png" style="width:100%; height:100%; object-fit:contain;" />
     </div>
+  </div>
 </details>
 
-### Warum dieses Tool verwenden?
+### Warum diese Nutzung?
 
-- **Leichtgewichtig**: Minimaler Ressourcenverbrauch.
-- **Flexibel**: Kann als CLI-Tool, als Hintergrunddienst oder als vollständiges Web-Dashboard verwendet werden.
-- **Admin-orientiert**: Funktionen wie **VRAM-Enforcement** (Automatische Beendigung von Prozessen, die Grenzwerte überschreiten) und **Watchlists**.
-- **Entwicklerfreundlich**: Integrierte Benchmarking- und Stress-Test-Tools (GEMM, Teilchenphysik) zur Validierung der Systemstabilität.
+- **Leichtgewichtig**: Minimaler Ressourcenbedarf.
+- **Flexibel**: Als CLI-Tool, Hintergrunddienst oder voll ausgestattetes Web-Dashboard ausführbar.
+- **admin-zentriert**: Enthält Funktionen wie **VRAM-Enforcement** (Automatische Beendigung von Prozessen, die Grenzwerte überschreiten) und **Watchlists**.
+- **entwicklerfreundlich**: Integrierte Benchmarking- und Stresstest-Tools (GEMM, Teilchenphysik) zur Validierung der Systemstabilität.
 
 ---
 
 ## Funktionen
 
-- **Echtzeit-Monitoring**:
-  - Ausführliche GPU-Metriken (Ausnutzung, VRAM, Leistung, Temperatur).
+- **Echtzeit-Überwachung**:
+  - Detaillierte GPU-Metriken (Nutzung, VRAM, Leistung, Temperatur).
   - Systemmetriken (CPU, RAM usw.).
 
-- **Admin- und Kontrollfunktionen**:
-  - **VRAM-Begrenzungen**: Festlegung harte Grenzwerte für die VRAM-Nutzung pro GPU.
-  - **Automatische Beendigung**: Automatische Beendigung von Prozessen, die VRAM-Richtlinien verletzen (nur für Admins).
-  - **Watchlists**: Spezifische PIDs oder Prozessnamen überwachen.
+- **Admin- und Durchsetzungsfunktionen**:
+  - **VRAM-Grenzen**: Legen Sie harte Grenzen für die VRAM-Nutzung pro GPU fest.
+  - **Automatische Beendigung**: Automatisch Prozesse beenden, die VRAM-Richtlinien verletzen (nur für Administratoren).
+  - **Watchlists**: Überwachen Sie bestimmte PIDs oder Prozessnamen.
 
 - **Benchmarking und Simulation**:
-  - **Stress-Testing**: Konfigurierbare GEMM-Arbeitslasten zur Prüfung von thermischer Drosselung und Stabilität.
+  - **Stresstest**: Konfigurierbare GEMM-Lasten zur Tests der thermischen Throtting und Stabilität.
   - **Visuelle Simulation**: Interaktive 3D-Teilchenphysik-Simulation zur Visualisierung der GPU-Last.
 
 ---
 
-## Roadmap und zukünftige Entwicklungen
+## Roadmap und zukünftige Arbeit
 
-Beiträge sind willkommen! Die wichtigsten zukünftigen Entwicklungen sind:
+Beiträge sind willkommen! Die Hauptpunkte, die in der Zukunft abgedeckt werden sollen, sind:
 
-- **Multi-GPU-Unterstützung**: Verbesserte Behandlung von Mehrkarten-Setups und NVLink-Topologien.
-- **Containerisierung**: Offizielle Docker-Unterstützung für einfache Bereitstellung in containerisierten Umgebungen.
-- **Fernzugriff**: Integration von SSH-Tunneln und sichere Fernverwaltung.
-- **Cross-Plattform**:
+- **Multi-GPU-Unterstützung**: Verbesserte Handhabung für Multi-Karten-Setups und NVLink-Topologien.
+- **Containerisierung**: Offizielle Docker-Unterstützung für eine einfache Bereitstellung in Containerumgebungen.
+- **Remote-Zugriff**: SSH-Tunnel-Integration und sicherer Remote-Management.
+- **Plattformübergreifend**:
   - [ ] Linux-Unterstützung (Ubuntu/Debian-Fokus).
-  - [ ] macOS-Unterstützung (Apple Silicon-Monitoring).
-- **Hardware-ungesetzte Unterstützung**:
+  - [ ] macOS-Unterstützung (Apple Silicon-Überwachung).
+- **Hardware-agnostisch**:
   - [ ] AMD ROCm-Unterstützung.
   - [ ] Intel Arc-Unterstützung.
 
-Weitere Informationen zur Beteiligung finden Sie in [CONTRIBUTING.md](../CONTRIBUTING.md).
+Siehe [CONTRIBUTING.md](../CONTRIBUTING.md) für Hinweise zum Einbringen.
 
 ---
 
 ## Anforderungen
 
-- **Betriebssystem**: Windows 10/11
+- **OS**: Windows 10/11
 - **Python**: 3.10+
 - **Hardware**: NVIDIA-GPU mit installierten Treibern.
-- **CUDA**: Toolkit 12.x (für Benchmarking- und Simulationselemente strikt erforderlich).
+- **CUDA**: Toolkit 12.x (Streng erforderlich für Benchmarking/Simulation-Funktionen).
   - *Hinweis: Wenn CUDA 12.x nicht erkannt wird, werden GPU-spezifische Benchmarking-Funktionen deaktiviert.*
 
 ---
 
 ## Installation
 
-Das Tool unterstützt eine modulare Installation, um Ihren Bedarf zu erfüllen:
+Das Tool unterstützt eine modulare Installation, um Ihren Bedürfnissen gerecht zu werden:
 
-### 1. Minimal (nur CLI)
+### 1. Minimale Installation (CLI nur)
 
-Optimal für headless-Server oder Hintergrundüberwachung.
+Am besten für Headless-Server oder Hintergrundüberwachung geeignet.
 
-- Befehlszeilenschnittstelle.
-- Grundlegende System- und GPU-Metriken.
+- Befehlszeileninterface.
+- Grundlegende System-/GPU-Metriken.
 
-### 2. Standard (CLI + Web-UI)
+### 2. Standardinstallation (CLI + Web-UI)
 
-Optimal für die meisten Benutzer.
+Am besten für die meisten Benutzer geeignet.
 
 - Enthält Web-Dashboard.
 - REST-API-Endpunkte.
-- Echtzeit-Karten.
+- Echtzeit-Diagramme.
 
-### 3. Vollständig (Standard + Visualisierung)
+### 3. Vollständige Installation (Standard + Visualisierung)
 
-Optimal für Entwicklung und Stress-Tests.
+Am besten für Entwicklung und Stresstest geeignet.
 
-- Enthält Teilchen-Simulation.
-- Abhängigkeiten von PyTorch/CuPy für Benchmarking.
+- Enthält Teilchenphysik-Simulation.
+- Abhängigkeiten für PyTorch/CuPy-Benchmarking.
 
-### Schnellstart
+### Schnelle Einrichtung
 
-1. **Herunterladen** der neuesten Version oder Klonen des Repositories.
-2. **Setup ausführen**:
-
-  ```powershell
-  .\setup.ps1
-  ```
-
-3. **Starten**:
-
-```powershell
-# Starte das Web-Dashboard (Standard/Vollständig)
-python health_monitor.py web
-
-# Starte die CLI
-python health_monitor.py cli
-```
-
----
-
-## Lizenz
-
-MIT-Lizenz. Weitere Details finden Sie in [LICENSE](../LICENSE).
+1. **
