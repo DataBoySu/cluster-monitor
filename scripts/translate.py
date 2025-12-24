@@ -11,9 +11,9 @@ MODEL_PATH = os.path.join(BASE_DIR, "models", "aya-expanse-8b-q4_k_s.gguf")
 # Ensure output directory exists
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-# Reduced n_ctx to 4096 to fit 8B model + KV cache within 7GB GitHub Runner RAM.
+# Set n_ctx to 6144 as a safe middle ground for 8B model on 7GB RAM.
 # Added n_threads=2 to match GitHub Action runner vCPUs.
-llm = Llama(model_path=MODEL_PATH, n_ctx=4096, n_threads=2, verbose=False)
+llm = Llama(model_path=MODEL_PATH, n_ctx=6144, n_threads=2, verbose=False)
 
 with open(README_PATH, "r", encoding="utf-8") as f:
     text_to_translate = f.read()
@@ -34,7 +34,7 @@ Do not add new information, do not summarize, and do not include any conversatio
 # 2. FIX: High max_tokens (4096) to prevent cut-off and low temperature for accuracy
 response = llm(
     prompt, 
-    max_tokens=4096, 
+    max_tokens=6144, 
     temperature=0, # Set to 0 for maximum determinism in translation
     stop=["<|END_OF_TURN_TOKEN|>", "<|START_OF_TURN_TOKEN|>"]
 )
