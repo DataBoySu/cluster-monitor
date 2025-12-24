@@ -1,21 +1,21 @@
 <div style="text-align:center; margin:18px 0;">
-  <img src="../monitor/api/static/logo.png" alt="MyGPU logo"/>
+  <img src="../monitor/api/static/logo.png" alt="MyGPU Logo"/>
 </div>
 
-> *MyGPU — Ein leichtgewichtiges GPU-Verwaltungsskript: ein einfaches `nvidia-smi`-Wrapper mit einem klaren Web-Dashboard.*
+> *MyGPU — Leichtgewichtige GPU-Verwaltung: ein kompakter Wrapper um `nvidia-smi` mit einem sauberen Web-Dashboard.*
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Version](https://img.shields.io/badge/version-1.2.3-blue)
-![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)
-![cuda 12.x](https://img.shields.io/badge/CUDA-12.x-0f9d58?logo=nvidia)
+![Lizenz](https://img.shields.io/badge/license-MIT-blue.svg)  
+![Python](https://img.shields.io/badge/python-3.10%2B-blue)  
+![Version](https://img.shields.io/badge/version-1.2.3-blue)  
+![Plattform](https://img.shields.io/badge/platform-Windows-lightgrey)  
+![CUDA 12.x](https://img.shields.io/badge/CUDA-12.x-0f9d58?logo=nvidia)
 
 ## Galerie
 
 <details>
-  <summary>Web Dashboard</summary>
+  <summary>Web-Dashboard</summary>
   <div style="display:flex; overflow-x:auto; gap:10px; padding:12px 0; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;">
-    <!-- Use first image aspect ratio 1624x675 for slide frame; images fit inside using object-fit:contain -->
+    <!-- Verwende den ersten Bildaspektverhältnis 1624x675 für die Slide-Frame; Bilder passen sich an mit object-fit:contain -->
     <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
       <img src="../monitor/api/static/web1.png" style="width:100%; height:100%; object-fit:contain;" />
     </div>
@@ -29,7 +29,6 @@
       <img src="../monitor/api/static/web4.png" style="width:100%; height:100%; object-fit:contain;" />
     </div>
   </div>
-
 </details>
 <details>
   <summary>CLI</summary>
@@ -53,90 +52,90 @@
 
 </details>
 
-### Warum verwenden Sie dies?
+### Warum verwenden Sie dieses Tool?
 
-- **Leichtgewichtig**: Minimaler Ressourcenbedarf. Sie bleibt aus Ihrem Weg.
-- **Flexibel**: Lauffert als CLI-Tool, als Hintergrunddienst oder als vollständiger Web-Dashboard.
-- **Admin-Centric**: Inklusive Funktionen wie **VRAM-Begrenzung** (automatisches Beenden von Prozessen übersteigender Grenzen) und **Watchlisten**.
-- **Entwicklerfreundlich**: Inklusive Benchmark- und Simulationstools (GEMM, Teilphysisik) zur Überprüfung der Systemstabilität.
+- **Leichtgewichtig**: Minimaler Ressourcenverbrauch. Es stört nicht.
+- **Flexibel**: Kann als CLI-Tool, als Hintergrunddienst oder als vollständiges Web-Dashboard verwendet werden.
+- **Admin-orientiert**: Umfasst Funktionen wie **VRAM-Enforcement** (Automatische Beendigung von Prozessen, die Grenzwerte überschreiten) und **Watchlisten**.
+- **Entwicklerfreundlich**: Integrierte Benchmarking- und Stress-Tests (GEMM, Teilchenphysik) zur Validierung der Systemstabilität.
 
 ---
 
 ## Funktionen
 
-- **Real-time Monitoring**:
-  - Details über GPU-Metriken (Verwendung, VRAM, Leistung, Temperatur).
-  - System-Metriken (CPU, RAM, usw.).
+- **Echtzeitüberwachung**:
+  - Ausführliche GPU-Metriken (Ausnutzung, VRAM, Leistung, Temperatur).
+  - Systemmetriken (CPU, RAM usw.).
 
-- **Admin & Enforcement**:
-  - **VRAM-Caps**: Festlegliche Grenzen für VRAM-Verwendung pro GPU.
-  - **Auto-Termination**: Automatisches Beenden von Prozessen, die übersteigern Grenzen (Admins nur).
-  - **Watchlists**: Überwachen bestimmter Prozess IDs oder Prozessnamen.
+- **Admin- und Kontrollfunktionen**:
+  - **VRAM-Begrenzung**: Festlegung harte Grenzen für die VRAM-Nutzung pro GPU.
+  - **Automatische Beendigung**: Automatische Beendigung von Prozessen, die VRAM-Richtlinien verletzen (nur für Admin).
+  - **Watchlisten**: Überwachung bestimmter PIDs oder Prozessnamen.
 
-- **Benchmarking & Simulation**:
-  - **Stress Testing**: Konfigurierbare GEMM-Workloads zur Überprüfung der thermischen Stoppungen und Stabilität.
-  - **Visual Simulation**: Interaktive 3D Teilphysisik-Simulation zur Visualisierung der GPU-Leistung.
-
----
-
-## Roadmap & Zukunftsponts
-
-Beiträge sind herzlich willkommen! Hauptfuture Punkte, die zu übernehmen sind, sind:
-
-- **Multi-GPU Unterstützung**: Erhöhtes Verständnis für mehr-Karte-Setups und NVLink-Topologien.
-- **Containerisierung**: Offizielle Docker-Unterstützung für einfache Deployment in Containerisierten Umgebungen.
-- **Remote-Zugriff**: SSH-Tunneling-Integration und sichere Remote-Management.
-- **Cross-Plattform**:
-  - [ ] Linux-Support (Ubuntu/Debian-Fokus).
-  - [ ] macOS-Support (Apple Silicon-Verwaltung).
-- **Hardware-Agnostisch**:
-  - [ ] AMD ROCm-Support.
-  - [ ] Intel Arc-Support.
-
-Sie finden [CONTRIBUTING.md](../CONTRIBUTING.md) für weitere Informationen.
+- **Benchmarking und Simulation**:
+  - **Stress-Testing**: Konfigurierbare GEMM-Aufgaben zur Prüfung von thermischer Drosselung und Stabilität.
+  - **Visuelle Simulation**: Interaktive 3D-Teilchenphysik-Simulation zur Visualisierung der GPU-Last.
 
 ---
 
-## Voraussetzungen
+## Roadmap und zukünftige Entwicklungen
 
-- **OS**: Windows 10/11
+Beiträge sind willkommen! Die wichtigsten zukünftigen Entwicklungen sind:
+
+- **Multi-GPU-Unterstützung**: Verbesserte Behandlung von Multi-Karten-Setups und NVLink-Topologien.
+- **Containerisierung**: Offizielle Docker-Unterstützung für einfache Bereitstellung in containerisierten Umgebungen.
+- **Fernzugriff**: Integration von SSH-Tunneln und sichere Fernverwaltung.
+- **Krossplattform**:
+  - [ ] Linux-Unterstützung (Ubuntu/Debian-Fokus).
+  - [ ] macOS-Unterstützung (Apple Silicon-Überwachung).
+- **Hardware-ungesetzte Unterstützung**:
+  - [ ] AMD ROCm-Unterstützung.
+  - [ ] Intel Arc-Unterstützung.
+
+Weitere Informationen zur Beteiligung finden Sie in [CONTRIBUTING.md](../CONTRIBUTING.md).
+
+---
+
+## Anforderungen
+
+- **Betriebssystem**: Windows 10/11
 - **Python**: 3.10+
-- **Hardware**: NVIDIA GPU mit installierten Treiber.
-- **CUDA**: Toolkit 12.x (Strittig required für Benchmarking/Simulation-Funktionen).
-  - *Hinweis: Wenn CUDA 12.x nicht detektiert wird, werden GPU-specific Benchmarking-Funktionen deaktiviert.*
+- **Hardware**: NVIDIA-GPU mit installierten Treibern.
+- **CUDA**: Toolkit 12.x (für Benchmarking- und Simulationselemente **strikt erforderlich**).
+  - *Hinweis: Wenn CUDA 12.x nicht erkannt wird, werden GPU-spezifische Benchmark-Funktionen deaktiviert.*
 
 ---
 
 ## Installation
 
-Das Tool unterstützt modular Installation, um Ihre Bedürfnisse anzupassen:
+Das Tool unterstützt eine modulare Installation, um Ihren Bedarf zu erfüllen:
 
-### 1. Minimal (CLI-Only)
+### 1. Minimal (nur CLI)
 
-Best für Headless Server oder Hintergrundmonitoring.
+Optimal für headless-Server oder Hintergrundüberwachung.
 
-- Kommandozeileninterface.
-- Basische System/GPU-Metriken.
+- Befehlszeilenschnittstelle.
+- Grundlegende System- und GPU-Metriken.
 
-### 2. Standard (CLI + Web UI)
+### 2. Standard (CLI + Web-UI)
 
-Best für die meisten Benutzer.
+Optimal für die meisten Benutzer.
 
-- Inklusive Web-Dashboard.
+- Enthält Web-Dashboard.
 - REST-API-Endpunkte.
-- Real-time-Platten.
+- Echtzeit-Karten.
 
-### 3. Voll (Standard + Visualization)
+### 3. Vollständig (Standard + Visualisierung)
 
-Best für Entwicklung und Stresstestung.
+Optimal für Entwicklung und Stress-Tests.
 
-- Inklusive Teilphysisik-Simulation.
-- PyTorch/CuPy-Abhängigkeiten für Benchmarking.
+- Enthält Teilchen-Simulation.
+- Abhängigkeiten von PyTorch/CuPy für Benchmarking.
 
-### Schnelle Start
+### Schnellstart
 
-1. **Herunterladen** der aktuellen Version oder clonen des Repositories.
-2. **Setup**:
+1. **Herunterladen** der neuesten Version oder Klonen des Repositories.
+2. **Setup ausführen**:
 
   ```powershell
   .\setup.ps1
@@ -145,10 +144,10 @@ Best für Entwicklung und Stresstestung.
 3. **Starten**:
 
 ```powershell
-# Starte den Web-Dashboard (Standard/Full)
+# Starte das Web-Dashboard (Standard oder Vollständig)
 python health_monitor.py web
 
-# Starte den CLI
+# Starte die CLI
 python health_monitor.py cli
 ```
 
@@ -156,4 +155,4 @@ python health_monitor.py cli
 
 ## Lizenz
 
-MIT-Lizenz. Sie finden [LICENSE](../LICENSE) für weitere Informationen.
+MIT-Lizenz. Weitere Details finden Sie in [LICENSE](../LICENSE).
