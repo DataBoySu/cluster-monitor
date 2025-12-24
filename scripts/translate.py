@@ -1,4 +1,5 @@
 import os
+import re
 from llama_cpp import Llama
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -36,6 +37,20 @@ response = llm(
 )
 
 translated_content = response['choices'][0]['text'].strip()
+
+# 1. CLEANUP: Remove markdown code fences if the LLM included them
+if translated_content.startswith("```"):
+    lines = translated_content.splitlines()
+    if lines[0].startswith("```"):
+        lines = lines[1:]
+    if lines and lines[-1].strip().startswith("```"):
+        lines = lines[:-1]
+    translated_content = "\n".join(lines).strip()
+
+# 2. FIX PATHS: Prepend ../ to relative paths since this file lives in /locales/
+# This targets Markdown links/images text and HTML src="path"/href="path"
+translated_content = re.sub(r'(\[.*?\]\()(?!(?:http|/|#))', r'\1../', translated_content)
+translated_content = re.sub(r'((?:src|href)=")(?!(?:http|/|#))', r'\1../', translated_content)
 
 with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
     f.write(translated_content)
