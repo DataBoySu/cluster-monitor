@@ -37,7 +37,7 @@ jobs:
       - name: Download Aya Expanse Translation Model
         run: |
           # Downloading Aya Expanse 8B (Q4_K_S) for superior multilingual technical translation
-          wget -O models/aya-expanse-8b-q4_k_s.gguf https://huggingface.co/matrixportalx/aya-expanse-8b-Q4_K_S-GGUF/blob/main/aya-expanse-8b-q4_k_s.gguf
+          wget -O models/aya-expanse-8b-q4_k_s.gguf https://huggingface.co/matrixportal/aya-expanse-8b-GGUF/resolve/main/aya-expanse-8b-Q4_K_S.gguf
 
       - name: Run Translation Script
         run: python scripts/translate.py

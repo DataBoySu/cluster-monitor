@@ -11,8 +11,9 @@ MODEL_PATH = os.path.join(BASE_DIR, "models", "aya-expanse-8b-q4_k_s.gguf")
 # Ensure output directory exists
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-# Added n_threads=2 to match GitHub Action runner vCPUs
-llm = Llama(model_path=MODEL_PATH, n_ctx=8192, n_threads=2, verbose=False)
+# Reduced n_ctx to 4096 to fit 8B model + KV cache within 7GB GitHub Runner RAM.
+# Added n_threads=2 to match GitHub Action runner vCPUs.
+llm = Llama(model_path=MODEL_PATH, n_ctx=4096, n_threads=2, verbose=False)
 
 with open(README_PATH, "r", encoding="utf-8") as f:
     text_to_translate = f.read()
