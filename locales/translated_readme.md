@@ -1,6 +1,5 @@
-```markdown
 <div style="text-align:center; margin:18px 0;">
-  <img src="monitor/api/static/logo.png" alt="MyGPU logo"/>
+  <img src="../monitor/api/static/logo.png" alt="MyGPU logo"/>
 </div>
 
 > *MyGPU — Ein leichtgewichtiges GPU-Verwaltungsskript: ein einfaches `nvidia-smi`-Wrapper mit einem klaren Web-Dashboard.*
@@ -18,16 +17,16 @@
   <div style="display:flex; overflow-x:auto; gap:10px; padding:12px 0; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;">
     <!-- Use first image aspect ratio 1624x675 for slide frame; images fit inside using object-fit:contain -->
     <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
-      <img src="monitor/api/static/web1.png" style="width:100%; height:100%; object-fit:contain;" />
+      <img src="../monitor/api/static/web1.png" style="width:100%; height:100%; object-fit:contain;" />
     </div>
     <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
-      <img src="monitor/api/static/web2.png" style="width:100%; height:100%; object-fit:contain;" />
+      <img src="../monitor/api/static/web2.png" style="width:100%; height:100%; object-fit:contain;" />
     </div>
     <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
-      <img src="monitor/api/static/web3.png" style="width:100%; height:100%; object-fit:contain;" />
+      <img src="../monitor/api/static/web3.png" style="width:100%; height:100%; object-fit:contain;" />
     </div>
     <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
-      <img src="monitor/api/static/web4.png" style="width:100%; height:100%; object-fit:contain;" />
+      <img src="../monitor/api/static/web4.png" style="width:100%; height:100%; object-fit:contain;" />
     </div>
   </div>
 
@@ -37,19 +36,19 @@
   <div style="display:flex; overflow-x:auto; gap:10px; padding:12px 0; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;">
 
   <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
-      <img src="monitor/api/static/cli1.png" style="width:100%; height:100%; object-fit:contain;" />
+      <img src="../monitor/api/static/cli1.png" style="width:100%; height:100%; object-fit:contain;" />
   </div>
   <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
-      <img src="monitor/api/static/cli2.png" style="width:100%; height:100%; object-fit:contain;" />
+      <img src="../monitor/api/static/cli2.png" style="width:100%; height:100%; object-fit:contain;" />
     </div>
     <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
-      <img src="monitor/api/static/cli3.png" style="width:100%; height:100%; object-fit:contain;" />
+      <img src="../monitor/api/static/cli3.png" style="width:100%; height:100%; object-fit:contain;" />
     </div>
     <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
-      <img src="monitor/api/static/cli4.png" style="width:100%; height:100%; object-fit:contain;" />
+      <img src="../monitor/api/static/cli4.png" style="width:100%; height:100%; object-fit:contain;" />
     </div>
     <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
-      <img src="monitor/api/static/cli5.png" style="width:100%; height:100%; object-fit:contain;" />
+      <img src="../monitor/api/static/cli5.png" style="width:100%; height:100%; object-fit:contain;" />
     </div>
 
 </details>
@@ -94,7 +93,7 @@ Beiträge sind herzlich willkommen! Hauptfuture Punkte, die zu übernehmen sind,
   - [ ] AMD ROCm-Support.
   - [ ] Intel Arc-Support.
 
-Sie finden [CONTRIBUTING.md](CONTRIBUTING.md) für weitere Informationen.
+Sie finden [CONTRIBUTING.md](../CONTRIBUTING.md) für weitere Informationen.
 
 ---
 
@@ -157,5 +156,4 @@ python health_monitor.py cli
 
 ## Lizenz
 
-MIT-Lizenz. Sie finden [LICENSE](LICENSE) für weitere Informationen.
-```
+MIT-Lizenz. Sie finden [LICENSE](../LICENSE) für weitere Informationen.
