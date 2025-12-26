@@ -32,12 +32,12 @@ text_to_translate = original_text
 # Specialized Prompt for CJK/Eastern Languages
 prompt = f"""<|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|>
 You are a professional technical {target_lang_name} translator.
-Your task is to translate the README into {target_lang_name} while strictly preserving the header and layout.
-
-MANDATORY INSTRUCTIONS:
-1. **Start with the Header**: The output MUST begin with the exact Navigation Bar HTML and Logo HTML from the source. Do not translate or modify them.
-2. **Preserve Badges**: All lines starting with `![` are code/badges. Copy them exactly. Do not translate the text inside `[]` or `()`. Do NOT add spaces inside the URL parentheses.
-3. **Translate Content**: Translate the rest of the documentation into professional {target_lang_name}.
+Your task is to translate the README into {target_lang_name}.
+Keep the markdown format and HTML tags the same.
+CRITICAL INSTRUCTIONS:
+1. **Preserve HTML**: Do NOT translate or modify any HTML tags (lines starting with `<`). Output them exactly as they are in the source.
+2. **Preserve Images**: Do NOT translate or modify any Markdown images or badges (lines starting with `![`). Output them exactly as they are in the source. Do NOT add spaces inside URLs.
+3. **Translation**: Translate only the text content (paragraphs, headers, lists) into {target_lang_name}.
 4. **Technical Terms**: Keep terms like GPU, CLI, VRAM, SSH, Docker, API, CUDA in English.
 5. **Context**: 
    - 'Enforcement' = Policy restriction (e.g., JA: 制限/強制).
