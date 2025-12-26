@@ -1,16 +1,14 @@
 # MyGPU: Utilitário de Gerenciamento de GPU Leve: um Wrapper Compacto para `nvidia-smi` com um Dashboard Web Elegante
 
-*MyGPU: Uma ferramenta de gerenciamento de GPU leve, com um wrapper compacto para `nvidia-smi` e um dashboard web elegante.*
+> *MyGPU: Um utilitário de gerenciamento de GPU leve, com um wrapper compacto para `nvidia-smi` e um dashboard web elegante.*
 
 ![Licença](https://img.shields.io/badge/licença-MIT-blue.svg)
-![Python](https://img.shields.io/badge/python-3.10%2B-blue)
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![Versão](https://img.shields.io/badge/versão-1.2.3-blue)
 ![Plataforma](https://img.shields.io/badge/plataforma-Windows-lightgrey)
 ![CUDA 12.x](https://img.shields.io/badge/CUDA-12.x-0f9d58?logo=nvidia)
 
 ## Galeria
-
-### Dashboard Web
 
 <details>
   <summary>Dashboard Web</summary>
@@ -29,17 +27,16 @@
       <img src="../monitor/api/static/web4.png" style="width:100%; height:100%; object-fit:contain;" />
     </div>
   </div>
+
 </details>
-
-### CLI
-
 <details>
   <summary>CLI</summary>
   <div style="display:flex; overflow-x:auto; gap:10px; padding:12px 0; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;">
-    <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
+
+  <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
       <img src="../monitor/api/static/cli1.png" style="width:100%; height:100%; object-fit:contain;" />
-    </div>
-    <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
+  </div>
+  <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
       <img src="../monitor/api/static/cli2.png" style="width:100%; height:100%; object-fit:contain;" />
     </div>
     <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
@@ -51,7 +48,6 @@
     <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
       <img src="../monitor/api/static/cli5.png" style="width:100%; height:100%; object-fit:contain;" />
     </div>
-  </div>
 </details>
 
 ### Por que usar isso?
@@ -59,7 +55,7 @@
 - **Leveza**: Pés no chão em termos de uso de recursos.
 - **Flexibilidade**: Funciona como uma ferramenta CLI ou um dashboard web completo.
 - **Foco no Administrador**: Inclui recursos como **Limites de VRAM** (desligar processos que excedem limites) e **Listas de Observação**.
-- **Amigável ao Desenvolvedor**: Ferramentas de teste e simulação integradas (GEMM, Física de Partículas) para validar a estabilidade do sistema.
+- **Amigável ao Desenvolvedor**: Ferramentas de teste de desempenho integradas (GEMM, Física de Partículas) para validar a estabilidade do sistema.
 
 ---
 
@@ -75,7 +71,7 @@
   - **Listas de Observação**: Monitore PIDs ou nomes de processos específicos.
 
 - **Testes e Simulação**:
-  - **Testes de Estresse**: Configure cargas de trabalho GEMM para testar a capacidade de resfriamento térmico e a estabilidade.
+  - **Testes de Estresse**: Cargas de trabalho GEMM configuráveis para testar a capacidade de resfriamento e estabilidade.
   - **Simulação Visual**: Simulação interativa de física de partículas para visualizar a carga de trabalho da GPU.
 
 ---
@@ -85,15 +81,12 @@
 Contribuições são bem-vindas! Os principais pontos futuros a serem abordados seriam:
 
 - **Suporte Multi-GPU**: Melhor suporte para configurações multi-cartão e topologias NVLink.
-- **Containerização**: Suporte oficial do Docker para implantação fácil em ambientes de contêiner.
+- **Containerização**: Suporte oficial do Docker para implantação fácil em ambientes contêinerizados.
 - **Acesso Remoto**: Integração de túnel SSH e gerenciamento remoto seguro.
-- **Plataformas Cruzadas**:
+- **Plataforma Cruzada**:
   - [ ] Suporte a Linux (foco em Ubuntu/Debian).
   - [ ] Suporte a Apple Silicon para monitoramento.
-- **Hardware Agnóstico**:
-  - [ ] Suporte a AMD ROCm.
-  - [ ] Suporte a Intel Arc.
-- **Documentação Multilíngue**: Suporte aos idiomas mais populares do GitHub.
+- **Documentação Multilíngue**: Suporte para as principais linguagens do GitHub.
 
 Veja [CONTRIBUTING.md](../CONTRIBUTING.md) para saber como contribuir.
 
@@ -104,7 +97,7 @@ Veja [CONTRIBUTING.md](../CONTRIBUTING.md) para saber como contribuir.
 - **OS**: Windows 10/11
 - **Python**: 3.10+
 - **Hardware**: GPU NVIDIA com drivers instalados.
-- **CUDA**: Versão 12.x (estritamente necessária para recursos de teste e simulação).
+- **CUDA**: Kit de Desenvolvimento 12.x (estritamente necessário para recursos de teste e simulação).
   - *Observação: Se a CUDA 12.x não for detectada, os recursos de teste e simulação serão desabilitados.*
 
 ---
@@ -127,16 +120,16 @@ Ideal para a maioria dos usuários.
 - Inclui o Dashboard Web.
 - Endpoints de API REST.
 - Gráficos em tempo real.
-- Mas sem recursos de simulação ou teste.
+- Mas sem a Simulação ou os recursos de teste.
 
 ### 3. Instalação Completa (Padrão + Visualização)
 
 Ideal para desenvolvimento e testes de estresse.
 
-- Inclui a simulação.
-- Dependências do PyTorch/CuPy para testes de benchmark.
+- Inclui a Simulação.
+- Dependências do PyTorch/CuPy para testes de desempenho.
 
-### Instalação Rápida
+### Início Rápido
 
 1. **Baixe** a versão mais recente ou clone o repositório.
 2. **Execute o Setup**:

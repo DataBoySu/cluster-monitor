@@ -1,10 +1,9 @@
 # MyGPU : Outil de gestion de GPU léger
 
-*MyGPU est un utilitaire de gestion de GPU léger, un wrapper compact pour `nvidia-smi` avec un tableau de bord web élégant.*
+*MyGPU : Un outil de gestion de GPU léger, un wrapper compact pour `nvidia-smi` avec un tableau de bord web élégant.*
 
-<!-- Ne pas traduire la section de badges suivante, la copier telle quelle -->
 ![Licence](https://img.shields.io/badge/licence-MIT-blue.svg)
-![Python](https://img.shields.io/badge/python-3.10%2B-blue)
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![Version](https://img.shields.io/badge/version-1.2.3-blue)
 ![Plateforme](https://img.shields.io/badge/plateforme-Windows-lightgrey)
 ![CUDA 12.x](https://img.shields.io/badge/CUDA-12.x-0f9d58?logo=nvidia)
@@ -14,7 +13,7 @@
 <details>
   <summary>Tableau de bord web</summary>
   <div style="display:flex; overflow-x:auto; gap:10px; padding:12px 0; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;">
-    <!-- Utiliser la première image pour le cadre de diaporama, respecter le rapport d'aspect 1624/675 et remplir avec `object-fit: contain` -->
+    <!-- Utilisez la première image pour le cadre de diapositive avec un rapport d'aspect 1624x675; les autres images s'ajustent automatiquement -->
     <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
       <img src="../monitor/api/static/web1.png" style="width:100%; height:100%; object-fit:contain;" />
     </div>
@@ -28,7 +27,6 @@
       <img src="../monitor/api/static/web4.png" style="width:100%; height:100%; object-fit:contain;" />
     </div>
   </div>
-
 </details>
 <details>
   <summary>Interface en ligne de commande (CLI)</summary>
@@ -51,12 +49,12 @@
   </div>
 </details>
 
-### Pourquoi utiliser MyGPU ?
+### Pourquoi l'utiliser ?
 
 - **Léger** : Empreinte ressource minimale.
-- **Polyvalent** : Exécutable en tant qu'outil CLI ou avec un tableau de bord web complet.
-- **Orienté administration** : Inclut des fonctionnalités telles que **l'enforcement de la mémoire VRAM** (arrêt automatique des processus dépassant les limites) et les **listes de surveillance**.
-- **Amical pour les développeurs** : Outils intégrés de test et de simulation (GEMM, physique des particules) pour valider la stabilité du système.
+- **Polyvalent** : Disponible en outil CLI, ou tableau de bord web complet.
+- **Orienté administration** : Inclut des fonctionnalités comme **l'enforcement de la mémoire VRAM** (arrêt automatique des processus dépassant les limites) et les **listes de surveillance**.
+- **Amical pour les développeurs** : Outils intégrés de test de performance et de simulation (GEMM, physique des particules) pour valider la stabilité du système.
 
 ---
 
@@ -68,12 +66,12 @@
 
 - **Administration et application de règles** :
   - **Limites de VRAM** : Définir des limites strictes sur l'utilisation de la VRAM par GPU.
-  - **Arrêt automatique** : Arrêter automatiquement les processus qui violent les règles de VRAM (seul l'administrateur a accès).
-  - **Listes de surveillance** : Surveiller des PIDs ou des noms de processus spécifiques.
+  - **Arrêt automatique** : Arrêter automatiquement les processus qui violent les règles de VRAM (accès administrateur uniquement).
+  - **Listes de surveillance** : Surveiller des PIDs ou noms de processus spécifiques.
 
 - **Benchmarking et simulation** :
-  - **Tests de stress** : Configurer des charges de travail GEMM pour tester la thermolage et la stabilité.
-  - **Simulation visuelle** : Simulation interactive de physique des particules pour visualiser la charge de travail du GPU.
+  - **Tests de stress** : Utiliser des charges de travail GEMM configurables pour tester la throttling thermique et la stabilité.
+  - **Simulation visuelle** : Simulation interactive de physique des particules pour visualiser la charge GPU.
 
 ---
 
@@ -81,14 +79,14 @@
 
 Les contributions sont les bienvenues ! Les points principaux à couvrir seraient :
 
-- **Prise en charge multi-GPU** : Gestion améliorée des configurations multi-cartes et des topologies NVLink.
+- **Prise en charge multi-GPU** : Gestion améliorée des configurations multi-cartes et topologies NVLink.
 - **Conteneurisation** : Support officiel pour Docker pour un déploiement facile dans des environnements conteneurisés.
-- **Accès à distance** : Intégration du tunnel SSH et de la gestion à distance sécurisée.
+- **Accès à distance** : Intégration du tunnel SSH et gestion à distance sécurisée.
 - **Prise en charge multiplateforme** :
-  - [ ] Prise en charge d'Ubuntu/Debian pour Linux.
-  - [ ] Prise en charge d'Apple Silicon pour la surveillance macOS.
+  - [ ] Linux (focalisation sur Ubuntu/Debian).
+  - [ ] macOS (surveillance Apple Silicon).
 - **Indépendance matérielle** :
-  - [ ] Prise en charge de ROCm d'AMD.
+  - [ ] Prise en charge d'AMD ROCm.
   - [ ] Prise en charge d'Intel Arc.
 - ~~**Documentation multilingue** : Prise en charge des principales langues GitHub.~~
 
@@ -108,21 +106,21 @@ Consultez [CONTRIBUTING.md](../CONTRIBUTING.md) pour savoir comment contribuer.
 
 ## Installation
 
-L'outil offre plusieurs options d'installation :
+L'outil offre plusieurs options d'installation pour répondre à vos besoins :
 
 ### 1. Installation minimale (CLI uniquement)
 
 Idéale pour les serveurs sans tête ou la surveillance en arrière-plan.
 
 - Interface en ligne de commande.
-- Surveillance de base du système et des GPU.
+- Métriques système et GPU de base.
 
 ### 2. Installation standard (CLI + Tableau de bord web)
 
 Idéale pour la plupart des utilisateurs.
 
 - Inclut le tableau de bord web.
-- API REST.
+- Endpoints API REST.
 - Graphiques en temps réel.
 - Mais sans simulation ou benchmarking.
 
@@ -135,19 +133,19 @@ Idéale pour le développement et les tests de stress.
 
 ### Démarrage rapide
 
-1. **Télécharger** la dernière version ou cloner le dépôt.
-2. **Exécuter l'installation** :
+1. **Téléchargez** la dernière version ou clonez le dépôt.
+2. **Exécutez l'installation** :
 
   ```powershell
   .\setup.ps1
   ```
 
-3. **Lancer** :
+3. **Lancez** :
 
 ```powershell
-# Démarrer le tableau de bord web (Standard/Complete)
+# Démarrez le tableau de bord web (Standard/Complete)
 python health_monitor.py web
 
-# Démarrer l'interface en ligne de commande
+# Lancez l'interface en ligne de commande
 python health_monitor.py cli
 ```
