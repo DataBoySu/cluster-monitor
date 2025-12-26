@@ -1,6 +1,6 @@
-# MyGPU: Ein leichtgewichtiges GPU-Verwaltungstool: Ein kompakter Wrapper für `nvidia-smi` mit einer eleganten Web-Dashboard-Schnittstelle
+# MyGPU: Ein leichtgewichtiges GPU-Verwaltungstool: Eine kompakte `nvidia-smi` Wrapper mit einem eleganten Web-Dashboard
 
-> *MyGPU: Ein leichtgewichtiges GPU-Verwaltungstool mit einem eleganten Web-Dashboard.*
+*MyGPU: Ein leichtgewichtiges GPU-Verwaltungstool: eine kompakte `nvidia-smi` Wrapper mit einem eleganten Web-Dashboard.*
 
 ![Lizenz](https://img.shields.io/badge/lizenz-MIT-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
@@ -13,7 +13,7 @@
 <details>
   <summary>Web-Dashboard</summary>
   <div style="display:flex; overflow-x:auto; gap:10px; padding:12px 0; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;">
-    <!-- Erstes Bild mit 1624x675 Pixeln als Rahmen für die Folie; Bilder passen sich mit object-fit:contain innerhalb an -->
+    <!-- Verwenden Sie das erste Bild mit einem Seitenverhältnis von 1624x675 für den Folienrahmen; Bilder passen sich mit `object-fit: contain` automatisch an -->
     <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
       <img src="../monitor/api/static/web1.png" style="width:100%; height:100%; object-fit:contain;" />
     </div>
@@ -49,10 +49,10 @@
   </div>
 </details>
 
-### Warum MyGPU?
+### Warum dies verwenden?
 
-- **Leichtgewichtig**: Minimaler Ressourcenbedarf.
-- **Flexibel**: Als CLI-Tool oder mit einer voll ausgestatteten Web-Dashboard-Schnittstelle verfügbar.
+- **Leichtgewichtig**: Minimale Ressourcenbelastung.
+- **Flexibel**: Als CLI-Tool oder als vollständiges Web-Dashboard ausführbar.
 - **admin-zentriert**: Enthält Funktionen wie **VRAM-Enforcement** (Automatische Beendigung von Prozessen, die VRAM-Richtlinien verletzen) und **Watchlists**.
 - **entwicklerfreundlich**: Integrierte Benchmarking- und Stresstest-Tools (GEMM, Teilchenphysik) zur Validierung der Systemstabilität.
 
@@ -60,22 +60,22 @@
 
 ## Funktionen
 
-- **Echtzeit-Überwachung**:
+- **Echtzeitüberwachung**:
   - Detaillierte GPU-Metriken (Nutzung, VRAM, Leistung, Temperatur).
   - Systemmetriken (CPU, RAM usw.).
 
 - **Admin- und Durchsetzungsfunktionen**:
-  - **VRAM-Limits**: Legen Sie harte VRAM-Nutzungsgrenzen für jede GPU fest.
-  - **Automatische Beendigung**: Beenden Sie automatisch Prozesse, die VRAM-Richtlinien verletzen (nur für Administratoren).
-  - **Watchlists**: Überwachen Sie bestimmte PIDs oder Prozessnamen.
+  - **VRAM-Grenzen**: Legen Sie harte VRAM-Nutzungsgrenzen für jede GPU fest.
+  - **Automatische Beendigung**: Automatisch beenden Sie Prozesse, die VRAM-Richtlinien verletzen (nur für Administratoren).
+  - **Watchlists**: Überwachen Sie spezifische PIDs oder Prozessnamen.
 
-- **Benchmarking und Simulation**:
+- **Benchmarking & Simulation**:
   - **Stresstest**: Konfigurierbare GEMM-Lasten zum Testen der thermischen Throttling und Stabilität.
   - **Visuelle Simulation**: Interaktive 3D-Teilchenphysik-Simulation zur Visualisierung der GPU-Last.
 
 ---
 
-## Roadmap und zukünftige Arbeiten
+## Roadmap & zukünftige Arbeit
 
 Beiträge sind willkommen! Die Hauptpunkte, die in der Zukunft abgedeckt werden sollen, sind:
 
@@ -108,7 +108,7 @@ Siehe [CONTRIBUTING.md](../CONTRIBUTING.md), um herauszufinden, wie du dich einb
 
 Das Tool unterstützt eine modulare Installation, um Ihren Bedürfnissen gerecht zu werden:
 
-### 1. Minimal (CLI nur)
+### 1. Minimale (CLI nur)
 
 Am besten für Headless-Server oder Hintergrundüberwachung geeignet.
 
@@ -121,25 +121,26 @@ Am besten für die meisten Benutzer geeignet.
 
 - Enthält Web-Dashboard.
 - REST-API-Endpunkte.
-- Echtzeit-Diagramme.
+- Echtzeitdiagramme.
+- Aber keine Simulation oder Benchmarking.
 
 ### 3. Vollständig (Standard + Visualisierung)
 
 Am besten für Entwicklung und Stresstest geeignet.
 
 - Enthält Simulation.
-- Abhängigkeiten für PyTorch/CuPy-Benchmarking.
+- Abhängigkeiten für PyTorch/CuPy für Benchmarking.
 
 ### Schnelle Startanleitung
 
 1. **Laden** Sie die neueste Version herunter oder klonen Sie das Repository.
-2. **Ausführen der Setup-Skripte**:
+2. **Einrichten**:
 
-  ```powershell
-  .\setup.ps1
-  ```
+   ```powershell
+   .\setup.ps1
+   ```
 
-3. **Starten**:
+3. **Ausführen**:
 
 ```powershell
 # Starten Sie das Web-Dashboard (Standard/Vollständig)

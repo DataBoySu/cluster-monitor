@@ -1,6 +1,6 @@
-# MyGPU: Utilitário de Gerenciamento de GPU Leve: um Wrapper Compacto para `nvidia-smi` com um Dashboard Web Elegante
+# MyGPU: Utilitário de Gerenciamento de GPU Leve: uma Utilidade de Wrapper `nvidia-smi` Compacto com um Dashboard Web Elegante
 
-> *MyGPU: Um utilitário de gerenciamento de GPU leve, com um wrapper compacto para `nvidia-smi` e um dashboard web elegante.*
+*MyGPU: Uma ferramenta de gerenciamento de GPU leve, com um wrapper compacto para `nvidia-smi` e um dashboard web elegante.*
 
 ![Licença](https://img.shields.io/badge/licença-MIT-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
@@ -55,8 +55,8 @@
 
 - **Leveza**: Pés no chão em termos de uso de recursos.
 - **Flexibilidade**: Funciona como uma ferramenta CLI ou um dashboard web completo.
-- **Orientado a Administradores**: Inclui recursos como **limites de VRAM** (desligar processos que excedem limites) e **listas de observação**.
-- **Amigável para Desenvolvedores**: Inclui ferramentas de teste de desempenho (GEMM, Física de Partículas) para validar a estabilidade do sistema.
+- **Foco no Administrador**: Inclui recursos como **limites de VRAM** (desligar processos que excedem limites) e **listas de observação**.
+- **Amigável ao Desenvolvedor**: Inclui ferramentas de teste de estresse e simulação (GEMM, Física de Partículas) para validar a estabilidade do sistema.
 
 ---
 
@@ -66,12 +66,12 @@
   - Métricas detalhadas da GPU (Utilização, VRAM, Potência, Temperatura).
   - Métricas do sistema (CPU, RAM, etc.).
 
-- **Administração e Aplicação de Políticas**:
+- **Admin e Aplicação**:
   - **Limites de VRAM**: Defina limites rígidos de uso de VRAM por GPU.
-  - **Desligar Automaticamente**: Desligue automaticamente processos que violem as políticas de VRAM (apenas para administradores).
+  - **Desligamento Automático**: Desligue automaticamente processos que violem as políticas de VRAM (apenas para administradores).
   - **Listas de Observação**: Monitore PIDs ou nomes de processos específicos.
 
-- **Testes e Simulações**:
+- **Testes e Simulação**:
   - **Testes de Estresse**: Configure cargas de trabalho GEMM configuráveis para testar a estabilidade térmica e o desempenho.
   - **Simulação Visual**: Simulação interativa de física de partículas para visualizar a carga da GPU.
 
@@ -81,18 +81,15 @@
 
 Contribuições são bem-vindas! Os principais pontos futuros a serem abordados seriam:
 
-- **Suporte Multi-GPU**: Melhor tratamento para configurações multi-cartão e topologias NVLink.
-- **Containerização**: Suporte oficial para Docker para implantação fácil em ambientes contêinerizados.
+- **Suporte Multi-GPU**: Melhor suporte para configurações multi-cartão e topologias NVLink.
+- **Containerização**: Suporte oficial do Docker para implantação fácil em ambientes contêinerizados.
 - **Acesso Remoto**: Integração de túnel SSH e gerenciamento remoto seguro.
 - **Plataforma Cruzada**:
-  - [ ] Suporte para Ubuntu/Debian (foco em Linux).
-  - [ ] Suporte para Apple Silicon (monitoramento).
-- **Hardware Agnóstico**:
-  - [ ] Suporte para AMD ROCm.
-  - [ ] Suporte para Intel Arc.
-- ~~**Documentação Multilíngue**: Suporte para as principais linguagens do GitHub.~~
+  - [ ] Suporte a Linux (foco em Ubuntu/Debian).
+  - [ ] Suporte a Apple Silicon para monitoramento.
+- **Documentação Multilíngue**: Suporte para as principais linguagens do GitHub.
 
-Consulte [CONTRIBUTING.md](../CONTRIBUTING.md) para saber como contribuir.
+Veja [CONTRIBUTING.md](../CONTRIBUTING.md) para saber como contribuir.
 
 ---
 
@@ -101,14 +98,14 @@ Consulte [CONTRIBUTING.md](../CONTRIBUTING.md) para saber como contribuir.
 - **OS**: Windows 10/11
 - **Python**: 3.10+
 - **Hardware**: GPU NVIDIA com drivers instalados.
-- **CUDA**: 12.x (estritamente necessário para recursos de teste de desempenho/simulação).
-  - *Observação: Se a CUDA 12.x não for detectada, os recursos de teste de desempenho serão desabilitados.*
+- **CUDA**: Kit de Desenvolvimento 12.x (estritamente necessário para recursos de teste de estresse/simulação).
+  - *Observação: Se o CUDA 12.x não for detectado, os recursos de teste de estresse/simulação serão desabilitados.*
 
 ---
 
 ## Instalação
 
-O utilitário oferece opções de instalação modular para atender às suas necessidades:
+A ferramenta oferece opções de instalação modular para atender às suas necessidades:
 
 ### 1. Instalação Mínima (CLI apenas)
 
@@ -124,13 +121,14 @@ Ideal para a maioria dos usuários.
 - Inclui o Dashboard Web.
 - Endpoints de API REST.
 - Gráficos em tempo real.
+- Mas sem recursos de simulação ou teste de estresse.
 
-### 3. Instalação Completa (Padrão + Simulação)
+### 3. Instalação Completa (Padrão + Visualização)
 
 Ideal para desenvolvimento e testes de estresse.
 
-- Inclui Simulação.
-- Dependências do PyTorch/CuPy para testes de desempenho.
+- Inclui a Simulação.
+- Dependências do PyTorch/CuPy para testes de estresse.
 
 ### Início Rápido
 
