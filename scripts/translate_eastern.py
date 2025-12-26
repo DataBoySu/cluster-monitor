@@ -31,20 +31,20 @@ text_to_translate = original_text
 
 # Specialized Prompt for CJK/Eastern Languages
 prompt = f"""<|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|>
-You are a professional technical {target_lang_name} translator. 
-Translate the provided GitHub README into {target_lang_name}.
+You are a professional technical {target_lang_name} translator.
+Task: Translate the README content into {target_lang_name} while preserving the exact layout, HTML, and badges.
 
-CRITICAL RULES:
-1. **Navigation Bar**: The top HTML block (`<div align="center">...</div>`) containing language links MUST remain EXACTLY the same. Do NOT translate the filenames or language names inside it. Do not change anything in it.
-2. **Badges**: Do NOT translate the text inside badge links (e.g., `![License]`, `![Python]`). Keep the URLs exactly as is.
-3. **Logo**: Keep the logo HTML block (`<div style="text-align:center...`) exactly as is.
-4. **Formatting**: Preserve all emojis and HTML/Markdown tags exactly.
+STRICT PROTECTION RULES:
+1. **Navigation Bar**: The first block `<div align="center">...</div>` is IMMUTABLE. Copy it exactly. Do NOT translate "English", "Deutsch", etc.
+2. **Logo**: The block `<div style="text-align:center...` is IMMUTABLE. Copy it exactly.
+3. **Badges**: Lines starting with `![` are IMMUTABLE CODE. Copy them character-for-character. Do NOT translate text inside `[...]` or `(...)`. Do NOT add spaces inside brackets.
+4. **Formatting**: Keep all HTML tags, markdown links, and emojis exactly as is.
 5. **Terminology**: Keep English technical terms (GPU, CLI, VRAM, Docker, CUDA) in English.
 6. **Context**: 
    - 'Enforcement' = Policy restriction (e.g., JA: 制限/強制).
    - 'Headless' = Server without GUI/display.
    - 'Agnostic' = Hardware Independence (JA: 非依存, ZH: 无关性).
-7. **Output**: ONLY the translated text. No explanations.
+7. **Output**: ONLY the translated README. No code fences.
 <|END_OF_TURN_TOKEN|>
 <|START_OF_TURN_TOKEN|><|USER_TOKEN|>
 {text_to_translate}<|END_OF_TURN_TOKEN|>

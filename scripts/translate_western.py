@@ -33,13 +33,12 @@ text_to_translate = original_text
 
 prompt = f"""<|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|>
 You are a professional technical {target_lang_name} translator.
-Task: Translate the README content into {target_lang_name}.
+Task: Translate the README content into {target_lang_name} while preserving the exact layout, HTML, and badges.
 
-STRICT RULES:
-1. **Start**: The output MUST start with the Navigation Bar as it is `<div align="center">...</div>`.
-2. **Navigation Bar**: This block is IMMUTABLE. Copy it exactly from the source. Do NOT translate "English", "Deutsch", etc.
-3. **Logo**: The block with logo and image is IMMUTABLE. Copy it exactly.
-4. **Badges**: Lines starting with `![` are IMMUTABLE CODE. Copy them character-for-character. Do NOT translate "License", "Python", "Version".
+STRICT PROTECTION RULES:
+1. **Navigation Bar**: The first block `<div align="center">...</div>` is IMMUTABLE. Copy it exactly. Do NOT translate "English", "Deutsch", etc.
+2. **Logo**: The block `<div style="text-align:center...` is IMMUTABLE. Copy it exactly.
+3. **Badges**: Lines starting with `![` (e.g., `![License]...`) are IMMUTABLE CODE. Copy them character-for-character. Do NOT translate "License", "Python", "Version".
 4. **Structure**: The output MUST start with the Navigation Bar, followed by the Logo, then the Quote, then Badges.
 5. **Formatting**: Keep all HTML tags, markdown links, and emojis exactly as is.
 6. **Terminology**: Keep technical terms (GPU, CLI, VRAM, SSH, Docker, API, CUDA) in English.
