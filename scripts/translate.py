@@ -75,24 +75,35 @@ if translated_content.startswith("```"):
     translated_content = "\n".join(lines).strip()
 
 # 2. FIX PATHS: Handle relative paths for files in /locales/
-# First, remove "locales/" if the LLM hallucinated it into the path
+# We need to ensure that links to the root go up one level (../) 
+# but links to other files in the same /locales/ folder stay relative.
+
+# Step 1: Prepend ../ to relative paths (ignoring external links, absolute paths, anchors, or locales/)
+# This targets Markdown links/images text and HTML src="path"/href="path"
+translated_content = re.sub(r'(\[.*?\]\()(?!(?:http|/|#|\.\./|locales/))', r'\1../', translated_content)
+translated_content = re.sub(r'((?:src|href)=")(?!(?:http|/|#|\.\./|locales/))', r'\1../', translated_content)
+
+# Step 2: Handle links that point to the locales directory.
+# Since the translated file is ALREADY in /locales/, we strip the 'locales/' prefix
+# so they point to the sibling files in the same directory.
 translated_content = re.sub(r'(\[.*?\]\()locales/', r'\1', translated_content)
 translated_content = re.sub(r'((?:src|href)=")locales/', r'\1', translated_content)
 
-# Then, prepend ../ to relative paths (ignoring external links, absolute paths, or anchors)
-# This targets Markdown links/images text and HTML src="path"/href="path"
-translated_content = re.sub(r'(\[.*?\]\()(?!(?:http|/|#|\.\./))', r'\1../', translated_content)
-translated_content = re.sub(r'((?:src|href)=")(?!(?:http|/|#|\.\./))', r'\1../', translated_content)
+# 3. RESTORE BADGES: Ensure badges match the original English README exactly.
+# This fixes cases where the LLM translates the Alt text (e.g., ![License] -> ![Lizenz])
+# or slightly alters the URL.
 
-# List of badges that should NEVER be translated
-protected_badges = ["License", "Python", "Version", "Platform", "cuda 12.x"]
+# Extract all shields.io badges from the original source text
+original_badges = re.findall(r'(!\[.*?\]\(https://img\.shields\.io/.*?\))', text_to_translate)
 
-for badge in protected_badges:
-    # This regex finds translated versions of badges by looking for the 
-    # specific Shields.io URL and replacing label back to the original.
-    # Pattern matches: ![Anything](URL containing shields.io and the badge key)
-    pattern = rf'!\[.*?\]\(https://img\.shields\.io/badge/{badge.lower()}.*?\)'
-    original_badge_line = f"![{badge}](...)" # Map your original lines here
+for badge in original_badges:
+    # Extract the URL from the original badge to use as a key
+    match = re.search(r'\((https://img\.shields\.io/.*?)\)', badge)
+    if match:
+        url = match.group(1)
+        # Replace any markdown image in the translated text that has this URL
+        # with the exact original badge string.
+        translated_content = re.sub(rf'!\[.*?\]\({re.escape(url)}\)', lambda m: badge, translated_content)
 
 with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
     f.write(translated_content)

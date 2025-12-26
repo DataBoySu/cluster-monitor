@@ -48,29 +48,38 @@ jobs:
       - name: Run Translation Script
         run: python scripts/translate.py --lang ${{ matrix.lang }}
 
-      - name: Upload Translation Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: readme-${{ matrix.lang }}
-          path: locales/README.${{ matrix.lang }}.md
+      - name: Commit and Push
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add locales/README.${{ matrix.lang }}.md
+          git commit -m "docs: update ${{ matrix.lang }} translation" || echo "No changes to commit"
+          git pull --rebase
+          git push
 
-  commit-translations:
-    needs: translate
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+  #     - name: Upload Translation Artifact
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: readme-${{ matrix.lang }}
+  #         path: locales/README.${{ matrix.lang }}.md
 
-      - name: Download All Translations
-        uses: actions/download-artifact@v4
-        with:
-          pattern: readme-*
-          path: locales
-          merge-multiple: true
+  # commit-translations:
+  #   needs: translate
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout Code
+  #       uses: actions/checkout@v4
 
-      - name: Commit and Push Changes
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "docs: update multilingual translations"
-          file_pattern: 'locales/*.md'
-          push_options: '--force-with-lease'
+  #     - name: Download All Translations
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         pattern: readme-*
+  #         path: locales
+  #         merge-multiple: true
+
+  #     - name: Commit and Push Changes
+  #       uses: stefanzweifel/git-auto-commit-action@v5
+  #       with:
+  #         commit_message: "docs: update multilingual translations"
+  #         file_pattern: 'locales/*.md'
+  #         push_options: '--force-with-lease'
