@@ -16,18 +16,18 @@
 
 > *MyGPU: Ein leichtgewichtiges GPU-Verwaltungstool: Ein kompakter Wrapper für `nvidia-smi` mit einer sauberen Web-Dashboard-Schnittstelle.*
 
-![Lizenz](https://img.shields.io/badge/Lizenz-MIT-blue.svg)
-![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
-![Version](https://img.shields.io/badge/Version-1.2.3-blue)
-![Plattform](https://img.shields.io/badge/Plattform-Windows-lightgrey)
-![cuda 12.x](https://img.shields.io/badge/CUDA-12.x-0f9d58?logo=nvidia)
+![Lizenz](https://img.shields.io/badge/lizenz-MIT-blue.svg)
+![Python](https://img.shields.io/badge/python-3.10%2B-blue)
+![Version](https://img.shields.io/badge/version-1.2.3-blue)
+![Plattform](https://img.shields.io/badge/plattform-Windows-lightgrey)
+![CUDA 12.x](https://img.shields.io/badge/CUDA-12.x-0f9d58?logo=nvidia)
 
 ## Galerie
 
 <details>
   <summary>Web-Dashboard</summary>
   <div style="display:flex; overflow-x:auto; gap:10px; padding:12px 0; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;">
-    <!-- Verwenden Sie das erste Bild mit einem Seitenverhältnis von 1624x675 für den Folienrahmen; Bilder passen sich mit `object-fit: contain` innerhalb an -->
+    <!-- Verwenden Sie das erste Bild mit einem Seitenverhältnis von 1624/675 für den Folienrahmen; Bilder passen sich mit object-fit:contain an -->
     <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
       <img src="../monitor/api/static/web1.png" style="width:100%; height:100%; object-fit:contain;" />
     </div>
@@ -65,31 +65,31 @@
 
 ### Warum diese Nutzung?
 
-- **Leichtgewichtig**: Minimaler Ressourcenverbrauch.
+- **Leichtgewichtig**: Minimaler Ressourcenbedarf.
 - **Flexibel**: Als CLI-Tool, Hintergrunddienst oder voll ausgestattetes Web-Dashboard ausführbar.
 - **admin-zentriert**: Enthält Funktionen wie **VRAM-Enforcement** (Automatische Beendigung von Prozessen, die VRAM-Grenzen überschreiten) und **Watchlists**.
 - **entwicklerfreundlich**: Integrierte Benchmarking- und Simulationswerkzeuge (GEMM, Teilchenphysik) zur Validierung der Systemstabilität.
 
 ---
 
-## Funktionen
+### Funktionen
 
 - **Echtzeit-Überwachung**:
   - Detaillierte GPU-Metriken (Nutzung, VRAM, Leistung, Temperatur).
   - Systemmetriken (CPU, RAM usw.).
 
 - **Admin- und Durchsetzungsfunktionen**:
-  - **VRAM-Grenzen**: Legen Sie harte Grenzen für die VRAM-Nutzung pro GPU fest.
+  - **VRAM-Grenzen**: Legen Sie harte Grenzen für VRAM-Verwendung pro GPU fest.
   - **Automatische Beendigung**: Automatisch Prozesse beenden, die VRAM-Richtlinien verletzen (nur für Administratoren).
   - **Watchlists**: Überwachen Sie spezifische PIDs oder Prozessnamen.
 
-- **Benchmarking & Simulation**:
-  - **Stresstest**: Konfigurierbare GEMM-Lasten zur Tests der thermischen Throtting und Stabilität.
+- **Benchmarking und Simulation**:
+  - **Stresstest**: Konfigurierbare GEMM-Lasten zur Tests der thermischen Throttling und Stabilität.
   - **Visuelle Simulation**: Interaktive 3D-Teilchenphysik-Simulation zur Visualisierung der GPU-Last.
 
 ---
 
-## Roadmap & zukünftige Arbeiten
+### Roadmap & zukünftige Arbeit
 
 Beiträge sind willkommen! Die Hauptpunkte, die in der Zukunft abgedeckt werden sollen, sind:
 
@@ -102,12 +102,13 @@ Beiträge sind willkommen! Die Hauptpunkte, die in der Zukunft abgedeckt werden 
 - **Hardware-agnostisch**:
   - [ ] AMD ROCm-Unterstützung.
   - [ ] Intel Arc-Unterstützung.
+- ~~**Mehrsprachige Dokumentation**: Unterstützung der beliebtesten GitHub-Sprachen.~~
 
 Siehe [CONTRIBUTING.md](../CONTRIBUTING.md), um herauszufinden, wie du dich einbringen kannst.
 
 ---
 
-## Anforderungen
+### Anforderungen
 
 - **OS**: Windows 10/11
 - **Python**: 3.10+
@@ -117,7 +118,7 @@ Siehe [CONTRIBUTING.md](../CONTRIBUTING.md), um herauszufinden, wie du dich einb
 
 ---
 
-## Installation
+### Installation
 
 Das Tool unterstützt eine modulare Installation, um Ihren Bedürfnissen gerecht zu werden:
 

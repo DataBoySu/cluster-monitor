@@ -27,7 +27,7 @@
 <details>
   <summary>Tableau de bord web</summary>
   <div style="display:flex; overflow-x:auto; gap:10px; padding:12px 0; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;">
-    <!-- Utilisez la première image pour le cadre de diapositive; ajustez les autres en conséquence -->
+    <!-- Utilisez la première image pour le cadre de diapositive avec un rapport d'aspect 1624/675; les autres images s'ajustent automatiquement -->
     <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
       <img src="../monitor/api/static/web1.png" style="width:100%; height:100%; object-fit:contain;" />
     </div>
@@ -55,58 +55,59 @@
 ### Pourquoi l'utiliser ?
 
 - **Léger** : empreinte ressource minimale.
-- **Polyvalent** : peut être exécuté en tant qu'outil CLI, service en arrière-plan ou tableau de bord web complet.
-- **Orienté administrateur** : inclut des fonctionnalités telles que **l'enforcement de la VRAM** (arrêt automatique des processus dépassant les limites) et les **listes de surveillance**.
-- **Amical pour les développeurs** : outils intégrés de test et de simulation (GEMM, physique des particules) pour valider la stabilité du système.
+- **Polyvalent** : fonctionne comme outil en ligne de commande, service en arrière-plan ou tableau de bord web complet.
+- **Orienté administration** : inclut des fonctionnalités telles que l'**application de politiques VRAM** (arrêt automatique des processus dépassant les limites) et les **listes de surveillance**.
+- **Amical pour les développeurs** : outils intégrés de test de stabilité et de simulation (GEMM, physique des particules) pour valider la stabilité du système.
 
 ---
 
-## Fonctionnalités
+### Fonctionnalités
 
 - **Surveillance en temps réel** :
   - Métriques détaillées sur les GPU (Utilisation, VRAM, Puissance, Température).
   - Métriques système (CPU, RAM, etc.).
 
-- **Administration et application de règles** :
-  - **Limites de VRAM** : définissez des limites dures sur l'utilisation de la VRAM par GPU.
-  - **Arrêt automatique** : arrêtez automatiquement les processus qui violent les règles de politique de VRAM (uniquement administrateur).
+- **Administration et application de politiques** :
+  - **Limites VRAM** : définissez des limites dures sur l'utilisation de la VRAM par GPU.
+  - **Arrêt automatique** : arrêtez automatiquement les processus qui violent les politiques VRAM (uniquement pour les administrateurs).
   - **Listes de surveillance** : surveillez des PIDs ou des noms de processus spécifiques.
 
-- **Test et simulation** :
-  - **Tests de stress** : configurez des charges de travail GEMM pour tester la thermolage et la stabilité.
+- **Benchmarking et simulation** :
+  - **Tests de stress** : configurez des charges de travail GEMM pour tester le throtting thermique et la stabilité.
   - **Simulation visuelle** : simulation interactive de physique des particules pour visualiser la charge de travail du GPU.
 
 ---
 
-## Roadmap et travaux futurs
+### Roadmap et travaux futurs
 
-Les contributions sont les bienvenues ! Les points principaux à aborder seraient :
+Les contributions sont les bienvenues ! Les points principaux à couvrir seraient :
 
 - **Prise en charge multi-GPU** : gestion améliorée des configurations multi-cartes et des topologies NVLink.
-- **Conteneurisation** : prise en charge officielle de Docker pour un déploiement facile dans des environnements conteneurisés.
+- **Conteneurisation** : support officiel pour Docker pour un déploiement facile dans des environnements conteneurisés.
 - **Accès à distance** : intégration du tunnel SSH et gestion à distance sécurisée.
 - **Prise en charge multiplateforme** :
-  - [ ] Linux (focalisation sur Ubuntu/Debian).
+  - [ ] Linux (Ubuntu/Debian à l'accent).
   - [ ] macOS (surveillance Apple Silicon).
-- **Indépendance du matériel** :
+- **Indépendance matérielle** :
   - [ ] Prise en charge d'AMD ROCm.
   - [ ] Prise en charge d'Intel Arc.
+- ~~**Documentation multilingue** : prise en charge des principales langues GitHub.~~
 
 Consultez [CONTRIBUTING.md](../CONTRIBUTING.md) pour savoir comment participer.
 
 ---
 
-## Exigences
+### Exigences
 
 - **Système d'exploitation** : Windows 10/11
 - **Python** : 3.10+
 - **Matériel** : GPU NVIDIA avec pilotes installés.
-- **CUDA** : Version 12.x (strictement requise pour les fonctionnalités de test et de simulation).
-  - *Remarque : Si CUDA 12.x n'est pas détecté, les fonctionnalités de test et de simulation seront désactivées.*
+- **CUDA** : Version 12.x (strictement requise pour les fonctionnalités de benchmarking/simulation).
+  - *Remarque : Si CUDA 12.x n'est pas détecté, les fonctionnalités de benchmarking seront désactivées.*
 
 ---
 
-## Installation
+### Installation
 
 L'outil prend en charge une installation modulaire pour répondre à vos besoins :
 
@@ -127,10 +128,10 @@ Idéale pour la plupart des utilisateurs.
 
 ### 3. Installation complète (Standard + Simulation)
 
-Idéale pour le développement et les tests de stress.
+Idéale pour le développement et les tests de charge :
 
-- Inclut la simulation de particules.
-- Dépendances PyTorch/CuPy pour les tests de benchmark.
+- Inclut la simulation de physique des particules.
+- Dépendances PyTorch/CuPy pour le benchmarking.
 
 ### Démarrage rapide
 
