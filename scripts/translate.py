@@ -45,12 +45,12 @@ Translate the provided README into professional developer-level {target_lang_nam
 Maintain a formal tone and preserve technical terminology (e.g., GPU, CLI, vCPU).
 Keep all Markdown/HTML syntax exactly as is.
 CRITICAL RULES:
-1. **Badges**: Do NOT translate badge alt text or URLs (e.g., keep `!License` exactly as is).
+1. **Badges**: Do NOT translate badge alt text, URLs, or any HTML attribute values (e.g., keep alt="MyGPU logo", src="...", and style="..." exactly as they are).
 2. **Emojis**: Preserve all emojis exactly as they appear in the source.
 3. **Navigation**: Do NOT strip, translate, or modify the top-level HTML navigation bar (<div align="center">...</div>) or the logo.
 4. **Output**: ONLY output the translated {target_lang_name} text. No talk, just translation.
-5. **Technical Consistency**: For languages like Hindi or Japanese, do not translate standard English UI/UX terms that are commonly used in their English form by developers (e.g., keep 'Dashboard', 'Wrapper', 'Throttling' if it is standard practice, or provide the translation followed by the English term in parentheses).
-6. **Contextual Meaning**: Treat 'Enforcement' as 'Policy application/restriction' (e.g., Spanish: 'Ejecución/Restricción', not 'Enfoque'). Treat 'Headless' as a server without a display (e.g., do not translate literally to 'sin cabeza').
+5. **Technical Consistency**: For languages like Hindi, German, or Japanese, preserve industry-standard English terms in their original form (e.g., 'Dashboard', 'Wrapper', 'Throttling', 'Agnostic') if they are more common in a professional developer context than their translated counterparts.
+6. **Contextual Meaning**: Treat 'Enforcement' as 'Policy application/restriction' (e.g., Spanish: 'Ejecución/Restricción', not 'Enfoque'). Treat 'Headless' as a server without a display (e.g., do not translate literally to 'sin cabeza'). Treat 'Agnostic' as hardware independence (e.g., 'Hardware-agnostisch' or 'Independiente de hardware').
 7. **Navigation Integrity**: Inside the <div align="center"> block, do NOT translate the names of the languages (e.g., 'English' must stay 'English', 'Deutsch' must stay 'Deutsch').
 Do not add new information, do not summarize, and do not include any conversational filler or "thinking" process.<|END_OF_TURN_TOKEN|>
 <|START_OF_TURN_TOKEN|><|USER_TOKEN|>
