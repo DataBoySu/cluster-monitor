@@ -25,7 +25,7 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 llm = Llama(model_path=MODEL_PATH, n_ctx=6144, n_threads=2, verbose=False)
 
 with open(README_PATH, "r", encoding="utf-8") as f:
-    original_text = f.read()
+    lines = f.readlines()
 
 # --- PRE-PROCESSING ---
 protected_blocks = []
@@ -35,13 +35,16 @@ def protect_match(match):
     protected_blocks.append(match.group(0))
     return placeholder
 
-text_to_translate = original_text
+# Manual Line Protection (User Request)
+# Block 0: Lines 1-15 (Nav + Logo) -> lines[0:15]
+protected_blocks.append("".join(lines[0:15]))
+# Block 1: Lines 19-66 (Badges + Gallery) -> lines[18:66]
+protected_blocks.append("".join(lines[18:66]))
 
-# 1. Protect Navigation Bar
-text_to_translate = re.sub(r'(<div\s+[^>]*align=["\']center["\'][^>]*>.*?</div>)', protect_match, text_to_translate, flags=re.DOTALL | re.IGNORECASE)
-# 2. Protect Logo Block
-text_to_translate = re.sub(r'(<div\s+[^>]*style=["\'][^"\']*text-align:\s*center[^"\']*["\'][^>]*>.*?</div>)', protect_match, text_to_translate, flags=re.DOTALL | re.IGNORECASE)
-# 3. Protect ALL Images (Badges + Gallery)
+# Construct text: PB0 + Lines 16-18 (Quote) + PB1 + Lines 67+ (Body)
+text_to_translate = f"__PB_0__{''.join(lines[15:18])}__PB_1__{''.join(lines[66:])}"
+
+# Protect any remaining images in the rest of the text
 text_to_translate = re.sub(r'(!\[[^\]\r\n]*\]\([^)\r\n]+\))', protect_match, text_to_translate)
 
 # Specialized Prompt for CJK/Eastern Languages
