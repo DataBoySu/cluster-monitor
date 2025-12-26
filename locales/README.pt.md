@@ -35,7 +35,18 @@
     <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
       <img src="../monitor/api/static/cli1.png" style="width:100%; height:100%; object-fit:contain;" />
     </div>
-    <!-- Adicione mais imagens CLI conforme necessário -->
+    <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
+      <img src="../monitor/api/static/cli2.png" style="width:100%; height:100%; object-fit:contain;" />
+    </div>
+    <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
+      <img src="../monitor/api/static/cli3.png" style="width:100%; height:100%; object-fit:contain;" />
+    </div>
+    <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
+      <img src="../monitor/api/static/cli4.png" style="width:100%; height:100%; object-fit:contain;" />
+    </div>
+    <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
+      <img src="../monitor/api/static/cli5.png" style="width:100%; height:100%; object-fit:contain;" />
+    </div>
   </div>
 </details>
 
@@ -44,7 +55,7 @@
 - **Leveza**: Pés no chão em termos de uso de recursos.
 - **Flexibilidade**: Funciona como uma ferramenta CLI ou um Dashboard Web completo.
 - **Orientado a Administradores**: Inclui recursos como **Enforcamento de VRAM** (desligar processos que excedem limites) e **Listas de Observação**.
-- **Amigável para Desenvolvedores**: Ferramentas de teste e simulação integradas (GEMM, Física de Partículas) para validar a estabilidade do sistema.
+- **Amigável para Desenvolvedores**: Inclui ferramentas de teste de desempenho e simulação (GEMM, Física de Partículas) para validar a estabilidade do sistema com visuais legais.
 
 ---
 
@@ -56,49 +67,49 @@
 
 - **Administração e Enforcamento**:
   - **Limites de VRAM**: Defina limites rígidos de uso de VRAM por GPU.
-  - **Desligar Automaticamente**: Desligue automaticamente processos que violem as políticas de VRAM (apenas para administradores).
+  - **Desligamento Automático**: Desligue automaticamente processos que violem as políticas de VRAM (apenas para administradores).
   - **Listas de Observação**: Monitore PIDs ou nomes de processos específicos.
 
 - **Testes e Simulação**:
-  - **Testes de Estresse**: Cargas de trabalho GEMM configuráveis para testar a capacidade de resfriamento térmico e estabilidade.
+  - **Testes de Estresse**: Configure cargas de trabalho GEMM configuráveis para testar a capacidade de resfriamento térmico e a estabilidade.
   - **Simulação Visual**: Simulação interativa de física de partículas para visualizar a carga da GPU.
 
 ---
 
 ## Roadmap e Trabalho Futuro
 
-Contribuições são bem-vindas! Os principais pontos futuros a serem abordados incluem:
+Contribuições são bem-vindas! Os principais pontos futuros a serem abordados seriam:
 
-- **Suporte Multi-GPU**: Melhor suporte para configurações multi-cartão e topologias NVLink.
-- **Containerização**: Suporte oficial para Docker para implantação fácil em ambientes contêinerizados.
+- **Suporte Multi-GPU**: Melhor tratamento para configurações multi-cartão e topologias NVLink.
+- **Containerização**: Suporte oficial para Docker para implantação fácil em ambientes de contêiner.
 - **Acesso Remoto**: Integração de túnel SSH e gerenciamento remoto seguro.
-- **Plataformas Cruzadas**:
+- **Plataforma Cruzada**:
   - [ ] Suporte a Linux (foco em Ubuntu/Debian).
   - [ ] Suporte a Apple Silicon para monitoramento.
 - **Hardware Agnóstico**:
   - [ ] Suporte a AMD ROCm.
   - [ ] Suporte a Intel Arc.
-- **Documentação Multilíngue**: Suporte aos principais idiomas do GitHub.
+- ~~**Documentação Multilíngue**: Suporte aos principais idiomas do GitHub.~~
 
-Veja [CONTRIBUTING.md](../CONTRIBUTING.md) para saber como contribuir.
+Consulte [CONTRIBUTING.md](../CONTRIBUTING.md) para saber como contribuir.
 
 ---
 
 ## Requisitos
 
-- **Sistema Operacional**: Windows 10/11
+- **OS**: Windows 10/11
 - **Python**: 3.10+
 - **Hardware**: GPU NVIDIA com drivers instalados.
-- **CUDA**: Versão 12.x (estritamente necessária para recursos de teste e simulação).
-  - *Observação: Se a CUDA 12.x não for detectada, os recursos de teste e simulação serão desabilitados.*
+- **CUDA**: 12.x (requerido estritamente para recursos de teste de desempenho/simulação).
+  - *Observação: Se a CUDA 12.x não for detectada, os recursos de teste de desempenho serão desativados.*
 
 ---
 
 ## Instalação
 
-A ferramenta oferece opções de instalação modular para atender às suas necessidades:
+A ferramenta suporta instalação modular para atender às suas necessidades:
 
-### 1. Mínimo (apenas CLI)
+### 1. Mínimo (CLI Apenas)
 
 Ideal para servidores sem cabeça ou monitoramento em segundo plano.
 
@@ -118,16 +129,16 @@ Ideal para a maioria dos usuários.
 Ideal para desenvolvimento e testes de estresse.
 
 - Inclui Simulação de Partículas.
-- Dependências de PyTorch/CuPy para testes de benchmark.
+- Dependências de PyTorch/CuPy para testes de desempenho.
 
 ### Início Rápido
 
 1. **Baixe** a versão mais recente ou clone o repositório.
 2. **Execute o Setup**:
 
-   ```powershell
-   .\setup.ps1
-   ```
+  ```powershell
+  .\setup.ps1
+  ```
 
 3. **Inicie**:
 
