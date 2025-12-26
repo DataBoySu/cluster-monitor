@@ -15,7 +15,7 @@
 </div>
 
 > *MyGPU: Lightweight GPU Management Utility: a compact `nvidia-smi` wrapper with an elegant web dashboard.*
-<!-- do not translate the folloeing shields.io badge section, keep it as it is -->
+<!-- do not translate the following badge section, output it as it is -->
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![Version](https://img.shields.io/badge/version-1.2.3-blue)

@@ -33,16 +33,14 @@ text_to_translate = original_text
 
 prompt = f"""<|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|>
 You are a professional technical {target_lang_name} translator.
-Task: Translate the README content into {target_lang_name} while preserving the exact layout, HTML, and badges.
+Your task is to translate the README into {target_lang_name} while strictly preserving the header and layout.
 
-STRICT PROTECTION RULES:
-1. **Navigation Bar**: The first block `<div align="center">...</div>` is IMMUTABLE. Copy it exactly. Do NOT translate "English", "Deutsch", etc.
-2. **Logo**: The block `<div style="text-align:center...` is IMMUTABLE. Copy it exactly.
-3. **Badges**: Lines starting with `![` (e.g., `![License]...`) are IMMUTABLE CODE. Copy them character-for-character. Do NOT translate "License", "Python", "Version".
-4. **Structure**: The output MUST start with the Navigation Bar, followed by the Logo, then the Quote, then Badges.
-5. **Formatting**: Keep all HTML tags, markdown links, and emojis exactly as is.
-6. **Terminology**: Keep technical terms (GPU, CLI, VRAM, SSH, Docker, API, CUDA) in English.
-7. **No Talk**: Output ONLY the translated README. No code fences.
+MANDATORY INSTRUCTIONS:
+1. **Start with the Header**: The output MUST begin with the exact Navigation Bar HTML and Logo HTML from the source. Do not translate or modify them.
+2. **Preserve Badges**: All lines starting with `![` are code/badges. Copy them exactly. Do not translate the text inside `[]` or `()`.
+3. **Translate Content**: Translate the rest of the documentation into professional {target_lang_name}.
+4. **Technical Terms**: Keep terms like GPU, CLI, VRAM, SSH, Docker, API, CUDA in English.
+5. **No Conversational Text**: Output only the final Markdown file content. No "Here is the translation" or code fences.
 <|END_OF_TURN_TOKEN|>
 <|START_OF_TURN_TOKEN|><|USER_TOKEN|>
 {text_to_translate}<|END_OF_TURN_TOKEN|>
@@ -60,7 +58,6 @@ if translated_content.startswith("```"):
     if lines and lines[-1].strip().startswith("```"):
         lines = lines[:-1]
     translated_content = "\n".join(lines).strip()
-
 
 # 2. Path Correction
 # Prepend ../ to relative paths

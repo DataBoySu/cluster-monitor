@@ -32,19 +32,18 @@ text_to_translate = original_text
 # Specialized Prompt for CJK/Eastern Languages
 prompt = f"""<|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|>
 You are a professional technical {target_lang_name} translator.
-Task: Translate the README content into {target_lang_name} while preserving the exact layout, HTML, and badges.
+Your task is to translate the README into {target_lang_name} while strictly preserving the header and layout.
 
-STRICT PROTECTION RULES:
-1. **Navigation Bar**: The first block `<div align="center">...</div>` is IMMUTABLE. Copy it exactly. Do NOT translate "English", "Deutsch", etc.
-2. **Logo**: The block `<div style="text-align:center...` is IMMUTABLE. Copy it exactly.
-3. **Badges**: Lines starting with `![` are IMMUTABLE CODE. Copy them character-for-character. Do NOT translate text inside `[...]` or `(...)`. Do NOT add spaces inside brackets.
-4. **Formatting**: Keep all HTML tags, markdown links, and emojis exactly as is.
-5. **Terminology**: Keep English technical terms (GPU, CLI, VRAM, Docker, CUDA) in English.
-6. **Context**: 
+MANDATORY INSTRUCTIONS:
+1. **Start with the Header**: The output MUST begin with the exact Navigation Bar HTML and Logo HTML from the source. Do not translate or modify them.
+2. **Preserve Badges**: All lines starting with `![` are code/badges. Copy them exactly. Do not translate the text inside `[]` or `()`. Do NOT add spaces inside the URL parentheses.
+3. **Translate Content**: Translate the rest of the documentation into professional {target_lang_name}.
+4. **Technical Terms**: Keep terms like GPU, CLI, VRAM, SSH, Docker, API, CUDA in English.
+5. **Context**: 
    - 'Enforcement' = Policy restriction (e.g., JA: 制限/強制).
    - 'Headless' = Server without GUI/display.
    - 'Agnostic' = Hardware Independence (JA: 非依存, ZH: 无关性).
-7. **Output**: ONLY the translated README. No code fences.
+6. **No Conversational Text**: Output only the final Markdown file content. No "Here is the translation" or code fences.
 <|END_OF_TURN_TOKEN|>
 <|START_OF_TURN_TOKEN|><|USER_TOKEN|>
 {text_to_translate}<|END_OF_TURN_TOKEN|>
