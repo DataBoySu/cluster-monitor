@@ -1,19 +1,19 @@
 # MyGPU: GPU管理ユーティリティ
 
-**軽量で直感的なGPU管理ツール：エレガントなウェブダッシュボードを備えた`nvidia-smi`のコンパクトラッパー**
+**軽量で、エレガントなWebダッシュボードを備えたNVIDIA GPU管理ツール**
 
-![ライセンス](https://img.shields.io/badge/license-MIT-blue.svg)
-![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![バージョン](https://img.shields.io/badge/version-1.2.3-blue)
-![プラットフォーム](https://img.shields.io/badge/platform-Windows-lightgrey)
+![ライセンス](https://img.shields.io/badge/ライセンス-MIT-blue.svg)
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
+![バージョン](https://img.shields.io/badge/バージョン-1.2.3-blue)
+![プラットフォーム](https://img.shields.io/badge/プラットフォーム-Windows-lightgrey)
 ![CUDA 12.x](https://img.shields.io/badge/CUDA-12.x-0f9d58?logo=nvidia)
 
 ## ギャラリー
 
-### ウェブダッシュボード
+### Webダッシュボード
 
 <details>
-  <summary>ウェブダッシュボード</summary>
+  <summary>Webダッシュボード</summary>
   <div style="display:flex; overflow-x:auto; gap:10px; padding:12px 0; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;">
     <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
       <img src="../monitor/api/static/web1.png" style="width:100%; height:100%; object-fit:contain;" />
@@ -56,9 +56,9 @@
 ### 使用理由
 
 - **軽量**: リソース消費量が少ない。
-- **柔軟性**: CLIツールとして、または完全機能を備えたウェブダッシュボードとして利用可能。
+- **柔軟性**: CLIツールとして、またはWebダッシュボードとして利用可能。
 - **管理者向け**: VRAM制限（ポリシーの強制）やウォッチリストなどの機能を備えている。
-- **開発者向け**: ゲムM（行列演算）ワークロードや粒子物理学シミュレーションによるベンチマークとストレステストが可能。
+- **開発者向け**: ベンチマークやストレステストツール（GEMM、粒子物理学）でシステムの安定性を検証できる。
 
 ---
 
@@ -74,27 +74,27 @@
   - **ウォッチリスト**: 特定のPIDやプロセス名を監視。
 
 - **ベンチマークとシミュレーション**:
-  - **ストレステスト**: 構成可能なGEMMワークロードで熱的スローシングと安定性をテスト。
-  - **視覚化シミュレーション**: インタラクティブな3D粒子物理学シミュレーションでGPU負荷を視覚化。
+  - **ストレステスト**: GEMMワークロードを使用して、サーマルスローや安定性をテスト。
+  - **視覚化シミュレーション**: 3D粒子物理学シミュレーションでGPU負荷を視覚化。
 
 ---
 
-## 開発ロードマップ
+## ロードマップと将来の作業
 
 貢献は歓迎します！主な今後のポイントは以下の通りです。
 
 - **マルチGPUサポート**: マルチカードセットアップやNVLinkトポロジーの処理を強化。
-- **コンテナ化**: 公式Dockerサポートで環境の簡単なデプロイを実現。
+- **コンテナ化**: Docker公式サポートで、コンテナ環境への簡単なデプロイを実現。
 - **リモートアクセス**: SSHトンネル統合とセキュアなリモート管理。
 - **クロスプラットフォーム**:
-  - [ ] Linuxサポート（Ubuntu/Debianに焦点）。
+  - [ ] Linuxサポート（Ubuntu/Debianに焦点を当てて）。
   - [ ] macOSサポート（Apple Siliconの監視）。
 - **ハードウェア非依存**:
   - [ ] AMD ROCmサポート。
   - [ ] Intel Arcサポート。
-- [ ] 多言語ドキュメント（GitHubで人気のある言語をサポート）。
+- [ ] マルチ言語ドキュメント（GitHubで人気のある言語をサポート）。
 
-[CONTRIBUTING.md](../CONTRIBUTING.md) を参照してください。
+[CONTRIBUTING.md](../CONTRIBUTING.md) を参照して、どのように貢献できるかを見てください。
 
 ---
 
@@ -103,37 +103,37 @@
 - **OS**: Windows 10/11
 - **Python**: 3.10+
 - **ハードウェア**: NVIDIA GPU
-- **CUDA**: 12.xツールキット（ベンチマーク/シミュレーション機能を使用する場合に必須）。
+- **CUDA**: 12.xツールキット（ベンチマーク/シミュレーション機能を使用する場合）。
   - *注: CUDA 12.xが検出されない場合、GPUベンチマーク機能が無効になります。*
 
 ---
 
 ## インストール
 
-ツールにはモジュール式インストールオプションがあります。
+ツールには、ニーズに合わせて複数のインストール方法があります。
 
 ### 1. 最小（CLIのみ）
 
-ヘッドレスサーバーやバックグラウンド監視に最適。
+ヘッドレスサーバーやバックグラウンド監視に最適です。
 
 - コマンドラインインターフェース。
 - 基本的なシステム/GPUメトリクス。
 
-### 2. 標準（CLI + ウェブUI）
+### 2. 標準（CLI + Web UI）
 
-ほとんどのユーザーに最適。
+ほとんどのユーザーに最適です。
 
-- ウェブダッシュボードが含まれています。
+- Webダッシュボードが含まれています。
 - REST APIエンドポイント。
 - リアルタイムチャート。
 - シミュレーションやベンチマークは含まれていません。
 
 ### 3. フル（標準 + 視覚化）
 
-開発やストレステストに最適。
+開発やストレステストに最適です。
 
 - シミュレーションが含まれています。
-- PyTorch/CuPy依存関係によるベンチマーク。
+- PyTorch/CuPy依存関係でベンチマークが可能。
 
 ### クイックスタート
 
@@ -147,7 +147,7 @@
 3. **起動**:
 
 ```powershell
-# ウェブダッシュボードを起動（標準/フル）
+# Webダッシュボードを起動（標準/フル）
 python health_monitor.py web
 
 # CLIを起動
