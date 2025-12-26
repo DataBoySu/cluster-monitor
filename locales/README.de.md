@@ -13,12 +13,12 @@
   <img src="../monitor/api/static/logo.png" alt="MyGPU logo"/>
 </div>
 
-> *MyGPU: Ein leichtgewichtiges GPU-Verwaltungstool: Ein kompakter Wrapper für `nvidia-smi` mit einer eleganten Web-Dashboard-Schnittstelle.*
+> *MeinGPU: Eine leichte GPU-Verwaltungslösung – ein kompaktes `nvidia-smi`-Wrapper mit einer eleganten Web-Dashboard-Schnittstelle.*
 
-![Lizenz](https://img.shields.io/badge/lizenz-MIT-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![Version](https://img.shields.io/badge/version-1.2.3-blue)
-![Plattform](https://img.shields.io/badge/plattform-Windows-lightgrey)
+![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)
 ![cuda 12.x](https://img.shields.io/badge/CUDA-12.x-0f9d58?logo=nvidia)
 
 ## Galerie
@@ -26,7 +26,7 @@
 <details>
   <summary>Web-Dashboard</summary>
   <div style="display:flex; overflow-x:auto; gap:10px; padding:12px 0; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;">
-    <!-- Erstes Bild für den Folienansatz verwenden; Bilder passen in das Rahmenformat mit "object-fit: contain" -->
+    <!-- Erstes Bild für die Diashow verwenden; Bilder passen in das Container-Layout -->
     <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
       <img src="../monitor/api/static/web1.png" style="width:100%; height:100%; object-fit:contain;" />
     </div>
@@ -40,6 +40,7 @@
       <img src="../monitor/api/static/web4.png" style="width:100%; height:100%; object-fit:contain;" />
     </div>
   </div>
+
 </details>
 <details>
   <summary>CLI</summary>
@@ -59,22 +60,24 @@
     <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
       <img src="../monitor/api/static/cli5.png" style="width:100%; height:100%; object-fit:contain;" />
     </div>
-  </details>
+  </div>
 
-### Warum diese?
+</details>
 
-- **Leichtgewichtig**: Minimale Ressourcenbelastung.
-- **Flexibel**: Als CLI-Tool oder als voll ausgestattetes Web-Dashboard einsetzbar.
+### Warum diese Lösung?
+
+- **Leichtgewichtig**: Geringer Ressourcenbedarf.
+- **Flexibel**: Als CLI-Tool oder Web-Dashboard einsetzbar.
 - **admin-zentriert**: Enthält Funktionen wie **VRAM-Enforcement** (Automatische Beendigung von Prozessen, die VRAM-Grenzen überschreiten) und **Watchlists**.
-- **entwicklerfreundlich**: Integrierte Benchmarking- und Stresstest-Tools (GEMM, Teilchenphysik) zur Validierung der Systemstabilität mit coolen Visualisierungen.
+- **Entwicklerfreundlich**: Integrierte Benchmarking- und Stresstest-Tools (GEMM, Teilchenphysik) zur Validierung der Systemstabilität.
 
 ---
 
-## Funktionen
+### Funktionen
 
 - **Echtzeit-Überwachung**:
-  - Detaillierte GPU-Metriken (Nutzung, VRAM, Leistung, Temperatur).
-  - Systemmetriken (CPU, RAM usw.).
+  - Detaillierte GPU-Metriken (Auslastung, VRAM, Temperatur).
+  - Systemmetriken (CPU, RAM, etc.).
 
 - **Admin- und Enforcement-Funktionen**:
   - **VRAM-Grenzen**: Festlegen von VRAM-Nutzungsgrenzen pro GPU.
@@ -83,15 +86,15 @@
 
 - **Benchmarking und Simulation**:
   - **Stresstest**: Konfigurierbare GEMM-Lasten zur Tests der thermischen Throttling und Stabilität.
-  - **Visualisierung**: Interaktive 3D-Teilchenphysik-Simulation zur Visualisierung der GPU-Last.
+  - **Visuelle Simulation**: Interaktive 3D-Teilchenphysik-Simulation zur Visualisierung der GPU-Belastung.
 
 ---
 
-## Roadmap und zukünftige Arbeiten
+### Roadmap und zukünftige Arbeiten
 
-Beiträge sind willkommen! Die Hauptpunkte, die in der Zukunft abgedeckt werden sollen, sind:
+Beiträge sind willkommen! Die wichtigsten zukünftigen Punkte umfassen:
 
-- **Multi-GPU-Unterstützung**: Verbesserte Handhabung für Multi-Karten-Setups und NVLink-Topologien.
+- **Multi-GPU-Unterstützung**: Verbesserte Handhabung für Multi-Card-Setups und NVLink-Topologien.
 - **Containerisierung**: Offizielle Docker-Unterstützung für eine einfache Bereitstellung in Containerumgebungen.
 - **Remote-Zugriff**: SSH-Tunnel-Integration und sichere Remote-Verwaltung.
 - **Plattformübergreifend**:
@@ -102,30 +105,30 @@ Beiträge sind willkommen! Die Hauptpunkte, die in der Zukunft abgedeckt werden 
   - [ ] Intel Arc-Unterstützung.
 - ~~**Mehrsprachige Dokumentation**: Unterstützung der beliebtesten GitHub-Sprachen.~~
 
-Siehe [CONTRIBUTING.md](../CONTRIBUTING.md) für Hinweise, wie du dich einbringen kannst.
+Siehe [CONTRIBUTING.md](../CONTRIBUTING.md) für Informationen zur Beteiligung.
 
 ---
 
-## Anforderungen
+### Anforderungen
 
-- **OS**: Windows 10/11
+- **Betriebssystem**: Windows 10/11
 - **Python**: 3.10+
 - **Hardware**: NVIDIA-GPU mit installierten Treibern.
-- **CUDA**: Toolkit 12.x (Streng erforderlich für Benchmarking/Simulation-Funktionen).
+- **CUDA**: Toolkit 12.x (Streng genommen für Benchmarking- und Simulation-Funktionen erforderlich).
   - *Hinweis: Wenn CUDA 12.x nicht erkannt wird, werden GPU-spezifische Benchmarking-Funktionen deaktiviert.*
 
 ---
 
-## Installation
+### Installation
 
-Das Tool unterstützt eine modulare Installation, um Ihren Bedürfnissen gerecht zu werden:
+Das Tool bietet eine modulare Installation, um Ihren Bedürfnissen gerecht zu werden:
 
 ### 1. Minimal (CLI nur)
 
 Am besten für Headless-Server oder Hintergrundüberwachung geeignet.
 
 - Befehlszeileninterface.
-- Grundlegende System-/GPU-Metriken.
+- Grundlegende System- und GPU-Metriken.
 
 ### 2. Standard (CLI + Web-UI)
 
@@ -154,9 +157,9 @@ Am besten für Entwicklung und Stresstest geeignet.
 3. **Starten**:
 
 ```powershell
-# Starten des Web-Dashboards (Standard/Vollständig)
+# Starten Sie das Web-Dashboard (Standard/Vollständig)
 python health_monitor.py web
 
-# Starten der CLI
+# Starten Sie die CLI
 python health_monitor.py cli
 ```

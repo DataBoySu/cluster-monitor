@@ -1,32 +1,17 @@
-<div align="center">
-  <a href="../README.md">🇺🇸 English</a> |
-  <a href="README.de.md">🇩🇪 Deutsch</a> |
-  <a href="README.fr.md">🇫🇷 Français</a> |
-  <a href="README.es.md">🇪🇸 Español</a> |
-  <a href="README.ja.md">🇯🇵 日本語</a> |
-  <a href="README.zh.md">🇨🇳 中文</a> |
-  <a href="README.pt.md">🇵🇹 Português</a> |
-  <a href="README.ko.md">🇰🇷 한국어</a>
-</div>
+[PROTÉGÉ BLOQUER 0]
 
-<div style="text-align:center; margin:18px 0;">
-  <img src="../monitor/api/static/logo.png" alt="MyGPU logo"/>
-</div>
+[PROTÉGÉ BLOQUER 1]
 
-> *MyGPU : Outil de gestion de GPU léger : un wrapper compact pour `nvidia-smi` avec un tableau de bord web élégant.*
+> *MyGPU : Un utilitaire de gestion de GPU léger : un wrapper compact pour `nvidia-smi` avec un tableau de bord web élégant.*
 
-![Licence](https://img.shields.io/badge/licence-MIT-blue.svg)
-![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Version](https://img.shields.io/badge/version-1.2.3-blue)
-![Plateforme](https://img.shields.io/badge/plateforme-Windows-lightgrey)
-![cuda 12.x](https://img.shields.io/badge/CUDA-12.x-0f9d58?logo=nvidia)
+[PROTÉGÉ BLOQUER 2] [PROTÉGÉ BLOQUER 3] [PROTÉGÉ BLOQUER 4] [PROTÉGÉ BLOQUER 5] [PROTÉGÉ BLOQUER 6]
 
 ## Galerie
 
 <details>
   <summary>Tableau de bord web</summary>
   <div style="display:flex; overflow-x:auto; gap:10px; padding:12px 0; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;">
-    <!-- Utiliser la première image pour le cadre de diapositive avec un rapport d'aspect 1624/675; les autres s'ajusteront à l'intérieur en utilisant object-fit:contain -->
+    <!-- Utilisez la première image pour le cadre de diapositive avec un rapport d'aspect de 1624/675; les autres s'ajusteront automatiquement -->
     <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
       <img src="../monitor/api/static/web1.png" style="width:100%; height:100%; object-fit:contain;" />
     </div>
@@ -40,7 +25,6 @@
       <img src="../monitor/api/static/web4.png" style="width:100%; height:100%; object-fit:contain;" />
     </div>
   </div>
-
 </details>
 <details>
   <summary>Interface en ligne de commande (CLI)</summary>
@@ -61,15 +45,14 @@
       <img src="../monitor/api/static/cli5.png" style="width:100%; height:100%; object-fit:contain;" />
     </div>
   </div>
-
 </details>
 
 ### Pourquoi l'utiliser ?
 
-- **Léger** : empreinte ressource minimale.
-- **Polyvalent** : fonctionne comme un outil en ligne de commande, ou un tableau de bord web complet.
-- **Orienté administration** : inclut des fonctionnalités comme **l'application de limites de VRAM** (termination automatique des processus dépassant les limites) et les **listes de surveillance**.
-- **Amical pour les développeurs** : intégration d'outils de test et de simulation (GEMM, physique des particules) pour valider la stabilité du système avec des visuels cool.
+- **Léger** : Empreinte ressource minimale.
+- **Polyvalent** : Disponible en outil CLI, ou tableau de bord web complet.
+- **Orienté administration** : Inclut des fonctionnalités telles que **l'application de limites de VRAM** (termination automatique des processus dépassant les limites) et les **listes de surveillance**.
+- **Amical pour les développeurs** : Outils intégrés de test de stabilité et de stress (GEMM, physique des particules) pour valider la stabilité du système.
 
 ---
 
@@ -80,30 +63,30 @@
   - Métriques système (CPU, RAM, etc.).
 
 - **Administration et application de politiques** :
-  - **Limites de VRAM** : définissez des limites dures sur l'utilisation de VRAM par GPU.
-  - **Terminaison automatique** : terminez automatiquement les processus qui violent les politiques de VRAM (accès administrateur uniquement).
-  - **Listes de surveillance** : surveillez des PIDs ou des noms de processus spécifiques.
+  - **Limites de VRAM** : Définir des limites dures sur l'utilisation de la VRAM par GPU.
+  - **Terminaison automatique** : Terminer automatiquement les processus qui violent les politiques de VRAM (accès administrateur uniquement).
+  - **Listes de surveillance** : Surveiller des PIDs ou des noms de processus spécifiques.
 
 - **Benchmarking et simulation** :
-  - **Tests de stress** : configurez des charges de travail GEMM pour tester la thermolage et la stabilité.
-  - **Simulation visuelle** : simulation physique des particules interactive pour visualiser la charge GPU.
+  - **Tests de stress** : Configurer des charges de travail GEMM pour tester la throttling thermique et la stabilité.
+  - **Simulation physique** : Simulation interactive en 3D de la physique des particules pour visualiser la charge de travail du GPU.
 
 ---
 
-## Plan de route et travaux futurs
+## Roadmap et travaux futurs
 
-Les contributions sont les bienvenues ! Les principaux points à couvrir seraient :
+Les contributions sont les bienvenues ! Les points principaux à couvrir seraient :
 
-- **Support multi-GPU** : gestion améliorée des configurations multi-cartes et des topologies NVLink.
-- **Conteneurisation** : support officiel pour Docker pour un déploiement facile dans des environnements conteneurisés.
-- **Accès à distance** : intégration du tunnel SSH et de la gestion à distance sécurisée.
-- **Support multiplateforme** :
-  - [ ] Support Ubuntu/Debian sous Linux.
-  - [ ] Support Apple Silicon pour la surveillance.
-- **Agnostique au matériel** :
-  - [ ] Support AMD ROCm.
-  - [ ] Support Intel Arc.
-- ~~**Documentation multilingue** : prise en charge des principales langues GitHub.~~
+- **Prise en charge multi-GPU** : Amélioration du traitement des configurations multi-cartes et des topologies NVLink.
+- **Conteneurisation** : Support officiel pour Docker pour un déploiement facile dans des environnements conteneurisés.
+- **Accès à distance** : Intégration du tunnel SSH et gestion à distance sécurisée.
+- **Compatibilité multiplateforme** :
+  - [ ] Linux (focalisation sur Ubuntu/Debian).
+  - [ ] macOS (surveillance Apple Silicon).
+- **Indépendance matérielle** :
+  - [ ] Prise en charge de ROCm d'AMD.
+  - [ ] Prise en charge d'Intel Arc.
+- ~~**Documentation multilingue** : Prise en charge des principales langues GitHub.~~
 
 Consultez [CONTRIBUTING.md](../CONTRIBUTING.md) pour savoir comment participer.
 
@@ -121,14 +104,14 @@ Consultez [CONTRIBUTING.md](../CONTRIBUTING.md) pour savoir comment participer.
 
 ## Installation
 
-L'outil prend en charge une installation modulaire pour répondre à vos besoins :
+L'outil offre une installation modulaire pour répondre à vos besoins :
 
 ### 1. Installation minimale (CLI uniquement)
 
 Idéale pour les serveurs sans tête ou la surveillance en arrière-plan.
 
 - Interface en ligne de commande.
-- Métriques de base système/GPU.
+- Métriques système et GPU de base.
 
 ### 2. Installation standard (CLI + Tableau de bord web)
 
@@ -142,7 +125,7 @@ Idéale pour la plupart des utilisateurs.
 
 Idéale pour le développement et les tests de stress.
 
-- Inclut la simulation physique des particules.
+- Inclut la simulation physique.
 - Dépendances PyTorch/CuPy pour le benchmarking.
 
 ### Démarrage rapide
@@ -160,6 +143,6 @@ Idéale pour le développement et les tests de stress.
 # Démarrez le tableau de bord web (Standard/Complete)
 python health_monitor.py web
 
-# Lancez l'interface en ligne de commande
+# Lancez l'interface CLI
 python health_monitor.py cli
 ```
