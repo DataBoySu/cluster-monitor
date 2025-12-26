@@ -40,8 +40,8 @@ with open(README_PATH, "r", encoding="utf-8") as f:
 
 # Aya Expanse uses a specific header format for system/user/chatbot turns
 prompt = f"""<|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|>
-You are a professional technical translator. 
-Perform a strict technical translation of the provided README into professional developer-level {target_lang_name}. 
+You are a professional technical translator specializing in software documentation (GitHub READMEs).
+Translate the provided README into professional developer-level {target_lang_name}.
 Maintain a formal tone and preserve technical terminology (e.g., GPU, CLI, vCPU).
 Keep all Markdown/HTML syntax exactly as is.
 CRITICAL RULES:
@@ -49,6 +49,9 @@ CRITICAL RULES:
 2. **Emojis**: Preserve all emojis exactly as they appear in the source.
 3. **Navigation**: Do NOT strip, translate, or modify the top-level HTML navigation bar (<div align="center">...</div>) or the logo.
 4. **Output**: ONLY output the translated {target_lang_name} text. No talk, just translation.
+5. **Technical Consistency**: For languages like Hindi or Japanese, do not translate standard English UI/UX terms that are commonly used in their English form by developers (e.g., keep 'Dashboard', 'Wrapper', 'Throttling' if it is standard practice, or provide the translation followed by the English term in parentheses).
+6. **Contextual Meaning**: Treat 'Enforcement' as 'Policy application/restriction' (e.g., Spanish: 'Ejecución/Restricción', not 'Enfoque'). Treat 'Headless' as a server without a display (e.g., do not translate literally to 'sin cabeza').
+7. **Navigation Integrity**: Inside the <div align="center"> block, do NOT translate the names of the languages (e.g., 'English' must stay 'English', 'Deutsch' must stay 'Deutsch').
 Do not add new information, do not summarize, and do not include any conversational filler or "thinking" process.<|END_OF_TURN_TOKEN|>
 <|START_OF_TURN_TOKEN|><|USER_TOKEN|>
 {text_to_translate}<|END_OF_TURN_TOKEN|>
