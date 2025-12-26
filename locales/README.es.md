@@ -1,6 +1,6 @@
 # MyGPU: Utilidad de Gestión de GPU Ligera
 
-*MyGPU: Una herramienta de gestión de GPU ligera: un envoltorio compacto de `nvidia-smi` con un elegante tablero web.*
+*"MyGPU: Utilidad de Gestión de GPU Ligera: un envoltorio compacto de `nvidia-smi` con un elegante tablero web."*
 
 ## Galería
 
@@ -43,12 +43,12 @@
   </div>
 </details>
 
-## ¿Por qué usar MyGPU?
+## ¿Por qué usar esto?
 
 - **Ligero**: Pie de contacto mínimo.
 - **Versátil**: Funciona como una herramienta de línea de comandos o un tablero web completo.
-- **Orientado a la administración**: Incluye características como **límites de VRAM** (terminación automática de procesos que superen los límites) y **listas de vigilancia**.
-- **Amigable para desarrolladores**: Herramientas integradas de prueba y simulación (GEMM, Física de Partículas) para validar la estabilidad del sistema.
+- **Orientado a administradores**: Incluye características como **límites de VRAM** (terminación automática de procesos que superen los límites) y **listas de vigilancia**.
+- **Amigable con los desarrolladores**: Herramientas integradas de prueba y simulación (GEMM, Física de Partículas) para validar la estabilidad del sistema.
 
 ---
 
@@ -71,18 +71,18 @@
 
 ## Roadmap y trabajo futuro
 
-¡Las contribuciones son bienvenidas! Los puntos principales a cubrir serían:
+¡Las contribuciones son bienvenidas! Los futuros puntos principales a cubrir serían:
 
-- **Soporte para múltiples GPU**: Manejo mejorado para configuraciones de múltiples tarjetas y topologías NVLink.
-- **Contenedorización**: Soporte oficial para Docker para un despliegue fácil en entornos contenedorizados.
+- **Soporte multi-GPU**: Manejo mejorado para configuraciones multi-tarjeta y topologías NVLink.
+- **Contenedorización**: Soporte oficial de Docker para un despliegue fácil en entornos contenedorizados.
 - **Acceso remoto**: Integración de túneles SSH y gestión remota segura.
-- **Compatibilidad multiplataforma**:
+- **Plataforma cruzada**:
   - [ ] Soporte para Ubuntu/Debian (foco en Linux).
-  - [ ] Soporte para Apple Silicon (monitoreo de física de partículas).
-- **Independencia de hardware**:
+  - [ ] Soporte para Apple Silicon (monitoreo de hardware).
+- **Independiente de hardware**:
   - [ ] Soporte para AMD ROCm.
   - [ ] Soporte para Intel Arc.
-- ~~**Documentación multilingüe**: Apoyo a los lenguajes más populares de GitHub.~~
+- ~~**Documentación multilingüe**: Apoyo a los lenguajes de GitHub más populares.~~
 
 Consulte [CONTRIBUTING.md](../CONTRIBUTING.md) para saber cómo involucrarse.
 
@@ -123,7 +123,7 @@ Ideal para la mayoría de los usuarios.
 Ideal para desarrollo y pruebas de estrés.
 
 - Incluye simulación.
-- Dependencias de PyTorch/CuPy para pruebas de estrés.
+- Dependencias de PyTorch/CuPy para pruebas de rendimiento.
 
 ### Inicio rápido
 

@@ -43,11 +43,11 @@
   </div>
 </details>
 
-### Warum dieses Tool?
+## Warum dieses Tool?
 
 - **Leichtgewichtig**: Minimale Ressourcenbelastung.
-- **Flexibel**: Als CLI-Tool oder als Web-Dashboard einsetzbar.
-- **Admin-zentriert**: Enthält Funktionen wie **VRAM-Enforcement** (Automatische Beendigung von Prozessen, die VRAM-Grenzen überschreiten) und **Watchlists**.
+- **Flexibel**: Als CLI-Tool oder Web-Dashboard ausführbar.
+- **Admin-zentriert**: Enthält Funktionen wie **VRAM-Enforcement** (Automatische Beendigung von Prozessen, die VRAM-Richtlinien verletzen) und **Watchlists**.
 - **Entwicklerfreundlich**: Integrierte Benchmarking- und Stresstest-Tools (GEMM, Teilchenphysik) zur Validierung der Systemstabilität.
 
 ---
@@ -55,8 +55,8 @@
 ## Funktionen
 
 - **Echtzeit-Überwachung**:
-  - Detaillierte GPU-Metriken (Nutzung, VRAM, Temperatur).
-  - Systemmetriken (CPU, RAM, usw.).
+  - Detaillierte GPU-Metriken (Nutzung, VRAM, Leistung, Temperatur).
+  - Systemmetriken (CPU, RAM usw.).
 
 - **Admin- und Durchsetzungsfunktionen**:
   - **VRAM-Grenzen**: Legen Sie harte Grenzen für die VRAM-Nutzung pro GPU fest.
@@ -65,7 +65,7 @@
 
 - **Benchmarking und Simulation**:
   - **Stresstest**: Konfigurierbare GEMM-Lasten (Thermalthrotting und Stabilitätstests).
-  - **Visuelle Simulation**: Interaktive 3D-Teilchenphysik-Simulation zur Visualisierung der GPU-Last.
+  - **Visuelle Simulation**: Interaktive 3D-Teilchenphysik-Simulation zur Visualisierung der GPU-Belastung.
 
 ---
 
@@ -75,7 +75,7 @@ Beiträge sind willkommen! Die Hauptpunkte, die in der Zukunft abgedeckt werden 
 
 - **Multi-GPU-Unterstützung**: Verbesserte Handhabung für Multi-Card-Setups und NVLink-Topologien.
 - **Containerisierung**: Offizielle Docker-Unterstützung für eine einfache Bereitstellung in Containerumgebungen.
-- **Remote-Zugriff**: SSH-Tunneling-Integration und sicherer Remote-Management.
+- **Remote-Zugriff**: SSH-Tunnel-Integration und sicherer Remote-Management.
 - **Plattformübergreifend**:
   - [ ] Linux-Unterstützung (Ubuntu/Debian-Fokus).
   - [ ] macOS-Unterstützung (Apple Silicon-Überwachung).
@@ -127,14 +127,14 @@ Am besten für Entwicklung und Stresstest geeignet.
 
 ### Schnelle Startanleitung
 
-1. **Laden** Sie die neueste Version herunter oder klonen Sie das Repository.
-2. **Führen Sie die Setup-Skript aus**:
+1. **Herunterladen** der neuesten Version oder Klonen des Repos.
+2. **Setup ausführen**:
 
   ```powershell
   .\setup.ps1
   ```
 
-3. **Starten** Sie:
+3. **Ausführen**:
 
 ```powershell
 # Starten Sie das Web-Dashboard (Standard/Vollständig)
