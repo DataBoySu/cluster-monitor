@@ -1,85 +1,246 @@
-# MyGPU：轻量级GPU管理工具：一款紧凑的`nvidia-smi`包装器，配有优雅的Web仪表板
+<!-- HTML_BLOCK:1... -->
 
-## 语言支持
 
-- 美国英语
-- 德语
-- 法语
-- 西班牙语
-- 日语
-- 中文
-- 葡萄牙语
-- 韩语
-- 印地语
+<div align="center">
+  <a href="README.md">🇺🇸 English</a> |
+  <a href="locales/README.de.md">🇩🇪 Deutsch</a> |
+  <a href="locales/README.fr.md">🇫🇷 Français</a> |
+  <a href="locales/README.es.md">🇪🇸 Español</a> |
+  <a href="locales/README.ja.md">🇯🇵 日本語</a> |
+  <a href="locales/README.zh.md">🇨🇳 中文</a> |
+  <a href="locales/README.pt.md">🇵🇹 Português</a> |
+  <a href="locales/README.ko.md">🇰🇷 한국어</a> |
+  <a href="locales/README.hi.md">🇮🇳 हिंदी</a>
+</div>
+<!-- HTML_BLOCK:2... -->
+<div style="text-align:center; margin:18px 0;">
+  <img src="monitor/api/static/logo.png" alt="MyGPU logo"/>
+</div>
+<!-- HTML_BLOCK:... -->
 
-## 简介
 
-MyGPU是一款轻量级GPU管理工具，它是一个紧凑的`nvidia-smi`包装器，配有优雅的Web仪表板。它为用户提供实时监控、灵活管理和强大的测试功能，以确保GPU资源的高效利用。
 
-## 功能
 
-- **实时监控**：获取详细的GPU和系统指标（利用率、VRAM、功耗、温度等）。
-- **管理与强制执行**：设置VRAM上限，自动终止超出限制的进程（仅管理员），创建监控列表。
-- **基准测试与模拟**：配置GEMM工作负载进行压力测试，或使用交互式3D粒子物理模拟可视化GPU负载。
+> *MyGPU: Lightweight GPU Management Utility: a compact `nvidia-smi` wrapper with an elegant web dashboard.*
 
-## 路线图与未来工作
+<!-- HTML_BLOCK: no change to url; output entire as it is... -->
 
-欢迎贡献！未来计划包括：
 
-- 多GPU支持
-- Docker容器支持
-- 远程访问集成
-- 跨平台支持（Linux、macOS）
-- 硬件独立性（AMD ROCm、Intel Arc）
-- 多语言文档支持
+![](../)
+![](../)
+![](../)
+![](../)
+![](../)
 
-请参阅[CONTRIBUTING.md](../CONTRIBUTING.md)了解如何参与。
 
-## 要求
 
-- 操作系统：Windows 10/11
-- Python：3.10及以上
-- 硬件：NVIDIA GPU及安装驱动
-- CUDA：12.x（基准测试和模拟功能严格要求CUDA 12.x）
+# 画廊
 
-## 安装
 
-工具支持模块化安装，以适应您的需求：
 
-### 1. 最小化（仅CLI）
+<details>
+  <summary>Web Dashboard</summary>
+  <div style="display:flex; overflow-x:auto; gap:10px; padding:12px 0; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;">
+    <!-- Use first image aspect ratio 1624x675 for slide frame; images fit inside using object-fit:contain -->
+    <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
+      <img src="monitor/api/static/web1.png" style="width:100%; height:100%; object-fit:contain;" />
+    </div>
+    <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
+      <img src="monitor/api/static/web2.png" style="width:100%; height:100%; object-fit:contain;" />
+    </div>
+    <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
+      <img src="monitor/api/static/web3.png" style="width:100%; height:100%; object-fit:contain;" />
+    </div>
+    <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
+      <img src="monitor/api/static/web4.png" style="width:100%; height:100%; object-fit:contain;" />
+    </div>
+  </div>
 
-适用于无GUI的服务器或后台监控。
 
-- 命令行界面
-- 基本系统/GPU指标
 
-### 2. 标准（CLI + Web UI）
 
-适用于大多数用户。
+</details>
+<details>
+  <summary>CLI</summary>
+  <div style="display:flex; overflow-x:auto; gap:10px; padding:12px 0; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;">
 
-- 包含Web仪表板
-- REST API端点
-- 实时图表
-- 但不包含模拟或基准测试
 
-### 3. 完整（标准 + 视觉化）
 
-适用于开发和压力测试。
 
-- 包含模拟
-- PyTorch/CuPy依赖基准测试
+  <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
+      <img src="monitor/api/static/cli1.png" style="width:100%; height:100%; object-fit:contain;" />
+  </div>
+  <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
+      <img src="monitor/api/static/cli2.png" style="width:100%; height:100%; object-fit:contain;" />
+    </div>
+    <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
+      <img src="monitor/api/static/cli3.png" style="width:100%; height:100%; object-fit:contain;" />
+    </div>
+    <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
+      <img src="monitor/api/static/cli4.png" style="width:100%; height:100%; object-fit:contain;" />
+    </div>
+    <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
+      <img src="monitor/api/static/cli5.png" style="width:100%; height:100%; object-fit:contain;" />
+    </div>
+</details>
 
-### 快速入门
 
-1. 下载最新版本或克隆仓库。
-2. 运行设置：
 
-   [[PB_0]]
 
-3. 启动：
+# 为什么使用它？
 
-[[PB_1]]
 
-## 许可证
 
-MIT许可证。请参阅[LICENSE](../LICENSE)获取详细信息。
+- 
+
+- 
+
+- 
+
+- 
+
+---
+
+
+
+# 功能
+
+
+
+- 
+
+- 
+
+- 
+
+---
+
+
+
+# 路线图与未来工作
+
+
+
+“欢迎贡献！未来需要涵盖的主要点包括：”
+
+
+
+- 
+
+- 
+
+- 
+
+- 
+
+- 
+
+- 
+
+请参考 `CONTRIBUTING.md` 了解如何参与。[CONTRIBUTING.md](../) for how to get involved.
+
+
+
+---
+
+
+
+# 要求事项
+
+
+
+- 
+
+- 
+
+- 
+
+- 
+
+---
+
+
+
+# 安装
+
+
+
+该工具支持模块化安装，以满足您的需求：
+
+
+
+# 1. 最小化（仅命令行界面）
+
+
+
+最适合无头服务器或后台监控。
+
+
+
+- 
+
+- 
+
+# 2. 标准（命令行界面+Web用户界面）
+
+
+
+对大多数用户最适合。
+
+
+
+- 
+
+- 
+
+- 
+
+- 
+
+# 3. 完整（标准 + 可视化）
+
+
+
+最适合开发和压力测试。
+
+
+
+- 
+
+- 
+
+# 快速入门
+
+
+
+- 
+
+- 
+
+```
+.\setup.ps1
+```
+
+
+
+- 
+
+```
+# Start the web dashboard (Standard/Full)
+python health_monitor.py web
+
+# Start the CLI
+python health_monitor.py cli
+```
+
+
+
+---
+
+
+
+# 许可证
+
+
+
+MIT 许可证。详细信息请见 LICENSE。[LICENSE](../) for details.

@@ -1,3 +1,4 @@
+<!-- HTML_BLOCK:1... -->
 <div align="center">
   <a href="README.md">🇺🇸 English</a> |
   <a href="locales/README.de.md">🇩🇪 Deutsch</a> |
@@ -9,13 +10,14 @@
   <a href="locales/README.ko.md">🇰🇷 한국어</a> |
   <a href="locales/README.hi.md">🇮🇳 हिंदी</a>
 </div>
-
+<!-- HTML_BLOCK:2... -->
 <div style="text-align:center; margin:18px 0;">
   <img src="monitor/api/static/logo.png" alt="MyGPU logo"/>
 </div>
+<!-- HTML_BLOCK:... -->
 
 > *MyGPU: Lightweight GPU Management Utility: a compact `nvidia-smi` wrapper with an elegant web dashboard.*
-
+<!-- HTML_BLOCK: no change to url; output entire as it is... -->
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![Version](https://img.shields.io/badge/version-1.2.3-blue)

@@ -46,13 +46,6 @@ def protect_match(match):
 
 text_to_translate = original_text
 
-# 1. Protect Navigation Bar (Robust regex for attributes and whitespace)
-text_to_translate = re.sub(r'(<div\s+[^>]*align=["\']center["\'][^>]*>.*?</div>)', protect_match, text_to_translate, flags=re.DOTALL | re.IGNORECASE)
-# 2. Protect Logo Block (Robust regex for style attribute)
-text_to_translate = re.sub(r'(<div\s+[^>]*style=["\'][^"\']*text-align:\s*center[^"\']*["\'][^>]*>.*?</div>)', protect_match, text_to_translate, flags=re.DOTALL | re.IGNORECASE)
-# 3. Protect Badges (Robust regex for shields.io URLs)
-text_to_translate = re.sub(r'(!\[[^\]]*\]\(https?://img\.shields\.io/[^\)]+\))', protect_match, text_to_translate, flags=re.IGNORECASE)
-
 # Refined Prompt for CJK and Technical Nuance
 prompt = f"""<|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|>
 You are a professional technical translator. Translate the provided README into professional developer-level {target_lang_name}.
@@ -77,21 +70,6 @@ response = llm(prompt, max_tokens=6144, temperature=0, stop=["<|END_OF_TURN_TOKE
 translated_content = response['choices'][0]['text'].strip()
 
 # --- POST-PROCESSING ---
-
-# 1. Restore Protected Blocks
-for i, block in enumerate(protected_blocks):
-    # This regex looks for common translations or variations of your placeholder
-    # It catches [[PB_0]], [[pb_0]], [ [PB_0] ], etc.
-    tag_pattern = rf"\[\s*\[\s*PB_{i}\s*\]\s*\]"
-    
-    # Check if the tag exists. If not, look for localized versions like [[BLOQUE_0]]
-    if not re.search(tag_pattern, translated_content):
-        # Fallback regex to find localized "Block" or "PB" followed by your index i
-        # Use [^\]]* to avoid greedily matching across multiple tags if they appear on one line
-        tag_pattern = rf"\[\s*\[\s*[^\]]*_{i}\s*\]\s*\]"
-    
-    # Use lambda to avoid backslash escaping issues if the block content contains them
-    translated_content = re.sub(tag_pattern, lambda m: block, translated_content)
 
 # 2. Path Correction (Support single and double quotes)
 # First, remove 'locales/' prefix if the LLM hallucinated it (so we can correctly prepend ../ later)

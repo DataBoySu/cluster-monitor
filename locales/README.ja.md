@@ -1,84 +1,148 @@
-# MyGPU: 軽量GPU管理ユーティリティ - NVIDIA `nvidia-smi`のコンパクトラッパーとエレガントなウェブダッシュボード
+<!-- HTML_BLOCK:1... -->
+<div align="center">
+  <a href="../README.md">🇺🇸 英语</a> |
+  <a href="../locales/README.de.md">🇩🇪 德语</a> |
+  <a href="../locales/README.fr.md">🇫🇷 法语</a> |
+  <a href="../locales/README.es.md">🇪🇸 西班牙语</a> |
+  <a href="../locales/README.ja.md">🇯🇵 日语</a> |
+  <a href="../locales/README.zh.md">🇨🇳 中文</a> |
+  <a href="../locales/README.pt.md">🇵🇹 葡萄牙语</a> |
+  <a href="../locales/README.ko.md">🇰🇷 韩语</a> |
+  <a href="../locales/README.hi.md">🇮🇳 印地语</a>
+</div>
+<!-- HTML_BLOCK:2... -->
+<div style="text-align:center; margin:18px 0;">
+  <img src="../monitor/api/static/logo.png" alt="MyGPU logo"/>
+</div>
+<!-- HTML_BLOCK:... -->
 
-## 概要
+> *MyGPU: 轻量级 GPU 管理工具：一个紧凑的 `nvidia-smi` 包装器，配有优雅的网络仪表板。*
 
-*MyGPU* は、軽量で効率的なGPU管理ツールです。コンパクトな`nvidia-smi`ラッパーとして機能し、美しいウェブダッシュボードを提供します。
+## 画廊
 
-## 特徴
+<details>
+  <summary>网络仪表板</summary>
+  <div style="display:flex; overflow-x:auto; gap:10px; padding:12px 0; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;">
+    <!-- 使用第一张图片的宽高比 1624x675 为幻灯片框架；使用 `object-fit:contain` 使图片在内部填充 -->
+    <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
+      <img src="../monitor/api/static/web1.png" style="width:100%; height:100%; object-fit:contain;" />
+    </div>
+    <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
+      <img src="../monitor/api/static/web2.png" style="width:100%; height:100%; object-fit:contain;" />
+    </div>
+    <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
+      <img src="../monitor/api/static/web3.png" style="width:100%; height:100%; object-fit:contain;" />
+    </div>
+    <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
+      <img src="../monitor/api/static/web4.png" style="width:100%; height:100%; object-fit:contain;" />
+    </div>
+  </div>
+</details>
+<details>
+  <summary>命令行界面 (CLI)</summary>
+  <div style="display:flex; overflow-x:auto; gap:10px; padding:12px 0; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;">
+    <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
+      <img src="../monitor/api/static/cli1.png" style="width:100%; height:100%; object-fit:contain;" />
+    </div>
+    <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
+      <img src="../monitor/api/static/cli2.png" style="width:100%; height:100%; object-fit:contain;" />
+    </div>
+    <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
+      <img src="../monitor/api/static/cli3.png" style="width:100%; height:100%; object-fit:contain;" />
+    </div>
+    <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
+      <img src="../monitor/api/static/cli4.png" style="width:100%; height:100%; object-fit:contain;" />
+    </div>
+    <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
+      <img src="../monitor/api/static/cli5.png" style="width:100%; height:100%; object-fit:contain;" />
+    </div>
+  </div>
+</details>
 
-- **軽量性**: リソース消費量が非常に少ない。
-- **柔軟性**: CLIツールとして実行したり、充実したウェブダッシュボードを表示したりできます。
-- **管理者向け**: VRAM制限（超過したプロセスを自動的に終了）やウォッチリストなどの機能を備えています。
-- **開発者向け**: GEMMや粒子物理学シミュレーションなどのベンチマークとストレステスト機能でシステムの安定性を検証できます。
+### 为什么使用这个工具？
 
-## 機能
+- **轻量级**：资源占用最小。
+- **灵活**：作为命令行工具、网络仪表板或全功能 Web 仪表板运行。
+- **管理员友好**：包括 VRAM 限制（自动终止超出限制的进程）和监控列表等功能。
+- **开发人员友好**：内置用于验证系统稳定性的基准测试和粒子物理模拟。
 
-- **リアルタイム監視**: GPUとシステムの詳細なメトリック（利用率、VRAM、電力、温度など）。
-- **管理者および強制機能**: VRAMキャップ（GPUごとの使用量制限）、自動終了（VRAMポリシー違反のプロセスを終了）、ウォッチリスト。
-- **ベンチマークとシミュレーション**: 熱的スローシングと安定性をテストするためのGEMMワークロード、インタラクティブな3D粒子物理学シミュレーション。
+---
 
-## 開発ロードマップ
+## 功能
 
-貢献をお待ちしています！今後の主な開発ポイントは次のとおりです。
+- **实时监控**：
+  - GPU 和系统指标（利用率、VRAM、功耗、温度）。
+  - 系统指标（CPU、内存等）。
 
-- **マルチGPUサポート**: マルチカードセットアップとNVLinkトポロジーの強化。
-- **コンテナ化**: Docker公式サポートによる簡単なデプロイ。
-- **リモートアクセス**: SSHトンネル統合とセキュアなリモート管理。
-- **クロスプラットフォーム**:
-  - Linuxサポート（Ubuntu/Debianに焦点を当てて）。
-  - macOSサポート（Apple Siliconの監視）。
-- **ハードウェア非依存**:
-  - AMD ROCmサポート。
-  - Intel Arcサポート。
-- **マルチ言語ドキュメント**: GitHubで人気の言語のドキュメント。
+- **管理与执行**：
+  - **VRAM限制**：为每个 GPU 设置 VRAM 使用量上限。
+  - **自动终止**（仅管理员权限）：如果检测到超出 VRAM 限制的进程，则自动终止该进程。
+  - **监控列表**：监控特定 PID 或过程名称。
 
-[CONTRIBUTING.md](../CONTRIBUTING.md)を参照して、どのように貢献できるかを見てください。
+- **基准测试与模拟**：
+  - **压力测试**：配置可配置的 GEMM 工作负载以测试系统稳定性。
+  - **粒子物理模拟**：交互式 3D 粒子物理模拟，用于可视化 GPU 加载。
 
-## 要件
+---
 
-- **OS**: Windows 10/11
-- **Python**: 3.10以上
-- **ハードウェア**: NVIDIA GPUとインストールされたドライバー。
-- **CUDA**: 12.xツールキット（ベンチマークやシミュレーション機能を使用する場合に厳密に必要）。
+## 路线图和未来工作
 
-## インストール
+欢迎贡献！主要未来要点包括：
 
-ツールには、ニーズに合わせてモジュール式にインストールできます。
+- **多 GPU 支持**：增强对单卡和 NVLink 拓扑的处理能力。
+- **容器化**：官方 Docker 支持，方便在容器环境中部署。
+- **远程访问**：SSH 隧道集成和安全远程管理。
+- **跨平台**：
+  - [ ] Linux 支持（Ubuntu/Debian 重点）。
+  - [ ] macOS 支持（Apple Silicon 监控）。
+- **硬件无缝集成**：
+  - [ ] AMD ROCm 支持。
+  - [ ] Intel Arc 支持。
+- ~~**多语言文档**：支持 GitHub 上最受欢迎的语言。~~
 
-### 1. 最小（CLIのみ）
+查看 [CONTRIBUTING.md](../CONTRIBUTING.md) 了解如何参与。
 
-ヘッドレスサーバーやバックグラウンド監視に最適です。
+---
 
-- コマンドラインインターフェイス。
-- 基本的なシステム/GPUメトリック。
+## 要求
 
-### 2. 標準（CLI + ウェブUI）
+- **操作系统**：Windows 10/11
+- **Python**：3.10+
+- **硬件**：NVIDIA GPU，并安装驱动程序。
+- **CUDA**：12.x（用于基准测试和模拟功能）。
+  - *注意：如果未检测到 CUDA 12.x，则 GPU 特定基准功能将被禁用*。
 
-ほとんどのユーザーに最適です。
+---
 
-- ウェブダッシュボードが含まれています。
-- REST APIエンドポイント。
-- リアルタイムチャート。
-- しかし、シミュレーションやベンチマークは含まれません。
+## 安装
 
-### 3. フル（標準 + シミュレーション）
+工具支持模块化安装以适应您的需求：
 
-開発とストレステストに最適です。
+### 1. 最小（仅命令行界面）
 
-- シミュレーションが含まれています。
-- PyTorch/CuPy依存関係によるベンチマーク。
+适合无头服务器或后台监控。
 
-### クイックスタート
+- 命令行界面。
+- 基本系统和 GPU 指标。
 
-1. **ダウンロード**: 最新リリースをダウンロードするか、リポジトリをクローンします。
-2. **セットアップ実行**:
+### 2. 标准（命令行 + Web UI）
 
-   [[PB_0]]
+适合大多数用户。
 
-3. **起動**:
+- 包括网络仪表板。
+- REST API 端点。
+- 实时图表。
+- 无模拟或基准测试功能。
 
-   [[PB_1]]
+### 3. 完整（标准 + 可视化）
 
-## ライセンス
+适合开发和压力测试。
 
-MITライセンス。[LICENSE](../LICENSE)で詳細をご確認ください。
+- 包括模拟。
+- PyTorch/CuPy 依赖用于基准测试。
+
+---
+
+## 许可证
+
+MIT 许可证。请参阅 [LICENSE](../LICENSE) 了解详细信息。

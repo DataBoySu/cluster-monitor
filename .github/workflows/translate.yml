@@ -10,14 +10,14 @@ permissions:
   contents: write
 
 jobs:
-  # GROUP 1: German, French
-  translate-group-1:
-    name: Group 1 (${{ matrix.lang }})
+  # JOB 1: Western Languages (Faster, ~11 mins)
+  translate-western:
+    name: Western (${{ matrix.lang }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false # If one language fails, let the others finish
       matrix:
-        lang: [de, fr]
+        lang: [de, fr, es, pt] # German, French, Spanish, Portuguese
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -48,37 +48,37 @@ jobs:
           wget -O models/aya-expanse-8b-q4_k_s.gguf https://huggingface.co/matrixportalx/aya-expanse-8b-Q4_K_S-GGUF/resolve/main/aya-expanse-8b-q4_k_s.gguf
 
       - name: Run Translation Script
-        run: python scripts/translate.py --lang ${{ matrix.lang }}
+        run: python scripts/translate_western.py --lang ${{ matrix.lang }}
 
       - name: Upload Translation Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: readme-group-1-${{ matrix.lang }}
+          name: western-readme-${{ matrix.lang }}
           path: locales/README.${{ matrix.lang }}.md
 
-  commit-group-1:
-    needs: translate-group-1
+  commit-western:
+    needs: translate-western
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Download Group 1 Translations
+      - name: Download Western Translations
         uses: actions/download-artifact@v4
         with:
-          pattern: readme-group-1-*
+          pattern: western-readme-*
           path: locales
           merge-multiple: true
 
-      - name: Commit and Push (Group 1)
+      - name: Commit and Push (Western)
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add locales/*.md
-          git commit -m "docs: update group 1 translations (DE, FR)" || echo "No changes to commit"
+          git commit -m "docs: update western translations (DE, FR, ES, PT)" || echo "No changes to commit"
           
           # Retry logic to handle race conditions if Eastern finishes at the same time
-          for i in {1..10}; do
+          for i in {1..5}; do
             git pull --rebase
             if git push; then exit 0; fi
             echo "Push failed, retrying in 5s..."
@@ -86,14 +86,14 @@ jobs:
           done
           exit 1
 
-  # GROUP 2: Spanish, Portuguese
-  translate-group-2:
-    name: Group 2 (${{ matrix.lang }})
+  # JOB 2: Eastern/Complex Languages (Slower, ~17 mins)
+  translate-eastern:
+    name: Eastern (${{ matrix.lang }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        lang: [es, pt]
+        lang: [ja, zh, ko, hi] # Japanese, Chinese, Korean, Hindi
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -120,161 +120,33 @@ jobs:
           wget -O models/aya-expanse-8b-q4_k_s.gguf https://huggingface.co/matrixportalx/aya-expanse-8b-Q4_K_S-GGUF/resolve/main/aya-expanse-8b-q4_k_s.gguf
       
       - name: Run Translation Script
-        run: python scripts/translate.py --lang ${{ matrix.lang }}
+        run: python scripts/translate_eastern.py --lang ${{ matrix.lang }}
 
       - name: Upload Translation Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: readme-group-2-${{ matrix.lang }}
+          name: eastern-readme-${{ matrix.lang }}
           path: locales/README.${{ matrix.lang }}.md
 
-  commit-group-2:
-    needs: translate-group-2
+  commit-eastern:
+    needs: translate-eastern
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-      - name: Download Group 2 Translations
+      - name: Download Eastern Translations
         uses: actions/download-artifact@v4
         with:
-          pattern: readme-group-2-*
+          pattern: eastern-readme-*
           path: locales
           merge-multiple: true
-      - name: Commit and Push (Group 2)
+      - name: Commit and Push (Eastern)
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add locales/*.md
-          git commit -m "docs: update group 2 translations (ES, PT)" || echo "No changes to commit"
-          for i in {1..10}; do
-            git pull --rebase
-            if git push; then exit 0; fi
-            echo "Push failed, retrying in 5s..."
-            sleep 5
-          done
-          exit 1
-
-  # GROUP 3: Japanese, Chinese
-  translate-group-3:
-    name: Group 3 (${{ matrix.lang }})
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        lang: [ja, zh]
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-      - name: Cache Model Weights
-        id: cache-model
-        uses: actions/cache@v4
-        with:
-          path: ./models
-          key: aya-expanse-8b-q4ks-v4
-      - name: Install Dependencies
-        run: |
-          pip install llama-cpp-python
-          mkdir -p models
-      - name: Download Aya Expanse TL Model
-        if: steps.cache-model.outputs.cache-hit != 'true'
-        run: wget -O models/aya-expanse-8b-q4_k_s.gguf https://huggingface.co/matrixportalx/aya-expanse-8b-Q4_K_S-GGUF/resolve/main/aya-expanse-8b-q4_k_s.gguf
-      - name: Run Translation Script
-        run: python scripts/translate.py --lang ${{ matrix.lang }}
-      - name: Upload Translation Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: readme-group-3-${{ matrix.lang }}
-          path: locales/README.${{ matrix.lang }}.md
-
-  commit-group-3:
-    needs: translate-group-3
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-      - name: Download Group 3 Translations
-        uses: actions/download-artifact@v4
-        with:
-          pattern: readme-group-3-*
-          path: locales
-          merge-multiple: true
-      - name: Commit and Push (Group 3)
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add locales/*.md
-          git commit -m "docs: update group 3 translations (JA, ZH)" || echo "No changes to commit"
-          for i in {1..10}; do
-            git pull --rebase
-            if git push; then exit 0; fi
-            echo "Push failed, retrying in 5s..."
-            sleep 5
-          done
-          exit 1
-
-  # GROUP 4: Korean, Hindi
-  translate-group-4:
-    name: Group 4 (${{ matrix.lang }})
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        lang: [ko, hi]
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-      - name: Cache Model Weights
-        id: cache-model
-        uses: actions/cache@v4
-        with:
-          path: ./models
-          key: aya-expanse-8b-q4ks-v4
-      - name: Install Dependencies
-        run: |
-          pip install llama-cpp-python
-          mkdir -p models
-      - name: Download Aya Expanse TL Model
-        if: steps.cache-model.outputs.cache-hit != 'true'
-        run: wget -O models/aya-expanse-8b-q4_k_s.gguf https://huggingface.co/matrixportalx/aya-expanse-8b-Q4_K_S-GGUF/resolve/main/aya-expanse-8b-q4_k_s.gguf
-      - name: Run Translation Script
-        run: python scripts/translate.py --lang ${{ matrix.lang }}
-      - name: Upload Translation Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: readme-group-4-${{ matrix.lang }}
-          path: locales/README.${{ matrix.lang }}.md
-
-  commit-group-4:
-    needs: translate-group-4
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-      - name: Download Group 4 Translations
-        uses: actions/download-artifact@v4
-        with:
-          pattern: readme-group-4-*
-          path: locales
-          merge-multiple: true
-      - name: Commit and Push (Group 4)
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add locales/*.md
-          git commit -m "docs: update group 4 translations (KO, HI)" || echo "No changes to commit"
-          for i in {1..10}; do
+          git commit -m "docs: update eastern translations (JA, ZH, KO, HI)" || echo "No changes to commit"
+          for i in {1..5}; do
             git pull --rebase
             if git push; then exit 0; fi
             echo "Push failed, retrying in 5s..."
