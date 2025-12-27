@@ -16,7 +16,7 @@
 </div>
 <!-- HTML_BLOCK:... -->
 
-> *MyGPU : Outil de gestion de GPU léger : un wrapper compact pour `nvidia-smi` avec un tableau de bord web élégant.*
+> *MyGPU : Outil de gestion GPU léger : un wrapper compact pour `nvidia-smi` avec un tableau de bord web élégant.*
 
 <!-- HTML_BLOCK: no change to url; output entire as it is... -->
 ![Licence](https://img.shields.io/badge/licence-MIT-blue.svg)
@@ -28,9 +28,13 @@
 ## Galerie
 
 <details>
-  <summary>Tableau de bord web</summary>
+
+  <summary>
+  Tableau de bord web
+  </summary>
+
   <div style="display:flex; overflow-x:auto; gap:10px; padding:12px 0; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;">
-    <!-- Utilisez le rapport d'aspect 1624/675 pour la frame de diapositive; les images s'ajustent automatiquement avec object-fit:contain -->
+    <!-- Utilisez le rapport d'aspect 1624/675 pour la première image afin de créer un cadre de diaporama; les images s'ajustent automatiquement avec object-fit:contain -->
     <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
       <img src="../monitor/api/static/web1.png" style="width:100%; height:100%; object-fit:contain;" />
     </div>
@@ -44,6 +48,7 @@
       <img src="../monitor/api/static/web4.png" style="width:100%; height:100%; object-fit:contain;" />
     </div>
   </div>
+
 </details>
 <details>
   <summary>CLI</summary>
@@ -68,10 +73,10 @@
 
 ### Pourquoi l'utiliser ?
 
-- **Léger** : empreinte ressource minimale.
-- **Polyvalent** : fonctionne en tant qu'outil CLI, ou avec un tableau de bord web complet.
-- **Orienté administration** : inclut des fonctionnalités comme **la limitation de la VRAM** (arrêt automatique des processus dépassant les limites) et les **listes de surveillance**.
-- **Amical pour les développeurs** : inclut des outils de test de stabilité et de stress (GEMM, physique des particules) intégrés.
+- **Légèreté** : empreinte ressource minimale.
+- **Flexibilité** : disponible en version CLI, ou avec un tableau de bord web complet.
+- **Administration centrée** : inclut des fonctionnalités comme **l'enforcement de la VRAM** (arrêt automatique des processus dépassant les limites) et les **listes de surveillance**.
+- **Amical pour les développeurs** : intégration de tests de stabilité et de simulation physique (GEMM, physique des particules) pour valider la stabilité du système.
 
 ---
 
@@ -82,32 +87,32 @@
   - Métriques système (CPU, RAM, etc.).
 
 - **Administration et application de règles** :
-  - **Limites de VRAM** : définissez des limites dures sur l'utilisation de la VRAM par GPU.
-  - **Arrêt automatique** : arrêtez automatiquement les processus qui violent les politiques de VRAM (seul l'administrateur a accès).
+  - **Limites de VRAM** : définissez des limites de VRAM par GPU.
+  - **Arrêt automatique** : arrêtez automatiquement les processus qui violent les règles de VRAM (administrateur uniquement).
   - **Listes de surveillance** : surveillez des PIDs ou des noms de processus spécifiques.
 
-- **Benchmarking et simulation** :
-  - **Tests de stress** : configurez des charges de travail GEMM pour tester la throttling thermique et la stabilité.
-  - **Simulation visuelle** : simulation interactive de physique des particules pour visualiser la charge GPU.
+- **Tests et simulation** :
+  - **Tests de stress** : configurez des charges de travail GEMM pour tester la thermolage et la stabilité.
+  - **Simulation physique** : visualisez la charge GPU avec une simulation physique interactive de particules.
 
 ---
 
-## Roadmap et travaux futurs
+## Roadmap et travail futur
 
 Les contributions sont les bienvenues ! Les points principaux à couvrir seraient :
 
 - **Support multi-GPU** : gestion améliorée des configurations multi-cartes et des topologies NVLink.
-- **Conteneurisation** : support officiel pour Docker pour un déploiement facile dans des environnements conteneurisés.
-- **Accès à distance** : intégration du tunnel SSH et de la gestion sécurisée à distance.
-- **Cross-Platform** :
+- **Conteneurisation** : support officiel pour Docker afin de faciliter le déploiement dans des environnements conteneurisés.
+- **Accès à distance** : intégration du tunnel SSH et de la gestion à distance sécurisée.
+- **Compatibilité multi-plateforme** :
   - [ ] Support Ubuntu/Debian pour Linux.
-  - [ ] Support Apple Silicon pour la surveillance.
-- **Hardware Agnostic** :
+  - [ ] Support Apple Silicon pour la surveillance de la température.
+- **Support matériel agnostique** :
   - [ ] Support AMD ROCm.
   - [ ] Support Intel Arc.
 - ~~**Documentation multi-langues** : prise en charge des langues les plus populaires sur GitHub.~~
 
-Consultez [CONTRIBUTING.md](../CONTRIBUTING.md) pour savoir comment participer.
+Consultez [CONTRIBUTING.md](../CONTRIBUTING.md) pour savoir comment contribuer.
 
 ---
 
@@ -116,53 +121,53 @@ Consultez [CONTRIBUTING.md](../CONTRIBUTING.md) pour savoir comment participer.
 - **OS** : Windows 10/11
 - **Python** : 3.10+
 - **Matériel** : GPU NVIDIA avec pilotes installés.
-- **CUDA** : Version 12.x (strictement requise pour les fonctionnalités de benchmarking/simulation).
-  - *Note : Si CUDA 12.x n'est pas détecté, les fonctionnalités de benchmarking seront désactivées.*
+- **CUDA** : Version 12.x (strictement requise pour les tests de performance/simulation).
+  - *Remarque : Si CUDA 12.x n'est pas détecté, les fonctionnalités de test et de simulation seront désactivées.*
 
 ---
 
 ## Installation
 
-L'outil offre plusieurs options d'installation pour répondre à vos besoins :
+L'outil offre plusieurs options d'installation :
 
 ### 1. Installation minimale (CLI uniquement)
 
 Idéale pour les serveurs sans tête ou la surveillance en arrière-plan.
 
 - Interface en ligne de commande.
-- Surveillance de base du système et des GPU.
+- Surveillance et métriques système/GPU de base.
 
 ### 2. Installation standard (CLI + Tableau de bord web)
 
 Idéale pour la plupart des utilisateurs.
 
 - Inclut le tableau de bord web.
-- Endpoints API REST.
+- API REST.
 - Graphiques en temps réel.
-- Mais sans simulation ni benchmarking.
+- Mais sans simulation ni tests de performance.
 
 ### 3. Installation complète (Standard + Visualisation)
 
-Idéale pour le développement et les tests de stress.
+Idéale pour le développement et les tests de performance.
 
 - Inclut la simulation.
-- Dépendances PyTorch/CuPy pour le benchmarking.
+- Dépendances PyTorch/CuPy pour les tests de performance.
 
 ### Démarrage rapide
 
 1. **Téléchargez** la dernière version ou clonez le dépôt.
-2. **Exécutez l'installation** :
+2. **Configuration** :
 
   ```powershell
   .\setup.ps1
   ```
 
-3. **Lancez** :
+3. **Lancement** :
 
 ```powershell
-# Démarrez le tableau de bord web (Standard/Complete)
+# Démarrage du tableau de bord web (Standard/Complete)
 python health_monitor.py web
 
-# Lancez le CLI
+# Démarrage de l'interface CLI
 python health_monitor.py cli
 ```
