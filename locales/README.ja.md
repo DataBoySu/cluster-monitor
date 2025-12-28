@@ -21,12 +21,13 @@
 
 <!-- HTML_BLOCK:... -->
 
-> *MyGPU: Lightweight GPU Management Utility: a compact `nvidia-smi` wrapper with an elegant web dashboard.*
+> *MyGPU: 軽量GPU管理ユーティリティ: 洗練されたウェブダッシュボードを備えたコンパクトな`nvidia-smi`ラッパーです。*~nyan!
+
 <!-- HTML_BLOCK: no change to url; output entire as it is... -->
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Version](https://img.shields.io/badge/version-1.2.3-blue)
-![Platform](https://img.shields.io/badge/platform-Windows10/11-lightgrey)
+![License](https://img.shields.io/badge/license-MIT-orange.svg)
+![Python](https://img.shields.io/badge/python-3.10%2B-pink)
+![Version](https://img.shields.io/badge/version-1.2.3-green)
+![Platform](https://img.shields.io/badge/platform-Windows10/11-blue)
 ![cuda 12.x](https://img.shields.io/badge/CUDA-12.x-0f9d58?logo=nvidia)
 
 ## ギャラリー
@@ -38,7 +39,7 @@
   </summary>
 
   <div style="display:flex; overflow-x:auto; gap:10px; padding:12px 0; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;">
-    <!-- 最初の画像は1624x675の側面比を使用し、スライドフレームとして機能します。画像は`object-fit:contain`で内部にフィットします -->
+    <!-- 最初の画像を1624x675のアスペクト比で利用し、スライドフレームに適合させます。画像はobject-fit:containで内側に収まります -->
     <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
       <img src="../monitor/api/static/web1.png" style="width:100%; height:100%; object-fit:contain;" />
     </div>
@@ -58,11 +59,14 @@
 ~nyan!
 
 <details>
-  <summary>CLI</summary>
+  <summary>
+  CLI
+  </summary>
   <div style="display:flex; overflow-x:auto; gap:10px; padding:12px 0; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;">
 
   <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
-      <img src="../monitor/api/static/cli1.png" style="width:100%; height:100%; object-fit:contain;" />
+  
+  <img src="../monitor/api/static/cli1.png" style="width:100%; height:100%; object-fit:contain;" />
   </div>
   <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
       <img src="../monitor/api/static/cli2.png" style="width:100%; height:100%; object-fit:contain;" />
@@ -78,14 +82,12 @@
     </div>
 </details>
 
-### なぜこのツールを使うの？
+### なぜこれを使うの？
 
 - **軽量**: リソースの足場が最小限。
-- **柔軟**: コマンドライン（CLI）ツールとして、またはフル機能のウェブダッシュボードとして実行可能。
+- **柔軟**: コマンドライン（CLI）ツールとして、または機能豊富なウェブダッシュボードとして実行可能。
 - **管理者向け**: VRAM強制（制限を超えるプロセスを自動的に終了）やウォッチリストなどの機能が含まれています。
-- **開発者向け**: 組み込みベンチマークとストレステストツール（GEMM、粒子物理学）でシステムの安定性を検証可能。
-
-~nyan!
+- **開発者向け**: 組み込みベンチマークとストレステストツール（GEMM、粒子物理学）でシステムの安定性を検証。~nyan!
 
 ## 機能
 
@@ -104,68 +106,56 @@
 
 ## ロードマップと将来の取り組み
 
-ご貢献をお待ちしております！今後の主な取り組みポイントは次の通りです：
+貢献をお待ちしています！今後の主な取り組みポイントは次のとおりです。
 
-- **マルチGPUサポート**: マルチカード設定とNVLinkトポロジの強化対応。
+- **マルチGPUサポート**: マルチカードセットアップとNVLinkトポロジの強化処理。
 - **コンテナ化**: Docker公式サポートで、コンテナ環境での簡単なデプロイを実現。
 - **リモートアクセス**: SSHトンネル統合とセキュアなリモート管理。
 - **クロスプラットフォーム**:
   - [ ] Linuxサポート（Ubuntu/Debianに焦点を当てて）。
   - [ ] macOSサポート（Apple Siliconの監視）。
-- **ハードウェア非依存**:
+- **ハードウェアに依存しない**:
   - [ ] AMD ROCmサポート。
   - [ ] Intel Arcサポート。
-- **~~多言語ドキュメント**: GitHubで最も人気のある言語の対応。~~
+- **~~マルチ言語ドキュメント**: GitHubで最も人気のある言語のサポート。~~
 
-[CONTRIBUTING.md](../CONTRIBUTING.md)をご覧ください。ご参加のお待ちしておりますにゃん！
+[CONTRIBUTING.md](../CONTRIBUTING.md)をご覧ください。参加方法はこちらです。~nyan!~
 
 ## 要件
 
 - **OS**: Windows 10/11
 - **Python**: 3.10以上
-- **ハードウェア**: NVIDIA GPUにインストールされたドライバー
-- **CUDA**: 12.xツールキット（ベンチマーク/シミュレーション機能を使用する場合は必須）
-  - *注意: CUDA 12.xが検出されない場合は、GPU固有のベンチマーク機能が無効になります。*~nyan!
+- **ハードウェア**: NVIDIA GPUおよびインストール済みドライバー
+- **CUDA**: 12.xツールキット（ベンチマーク/シミュレーション機能を使用するには必須です）
+
+- *注意: CUDA 12.xが検出されない場合は、GPU固有のベンチマーク機能が無効になります。*
 
 ## インストール
 
 このツールは、ニーズに合わせてモジュール形式でインストールできます。~nyan!
 
-<div>
+### 1. 最小限（CLIのみ）
 
-**最小限の設定 (CLIのみ)**
+ヘッドレスサーバーやバックグラウンドモニタリングに最適です。
 
-頭なしサーバーやバックグラウンド監視に最適です。
+- コマンドラインインターフェース。
+- 基本的なシステム/GPUメトリクス。~nyan!
 
-- コマンドラインインターフェース
-- 基本的なシステム/GPUメトリクス
-
-</div>
-~nyan!
-
-<div>
-
-**標準（CLI + Web UI）**
+### 2. 標準（CLI + Web UI）
 
 ほとんどのユーザーに最適です。
 
 - Webダッシュボードが含まれています。
 - REST APIエンドポイント
 - リアルタイムチャート
-- シミュレーションやベンチマークはありません。
+- シミュレーションやベンチマークは含まれていません。~nyan!
 
-</div>
-~nyan!
+### 3. フル（標準＋可視化）
 
-<div>
+開発やストレステストに最適です。
 
-<h3>3. フル（標準 + ビジュアライゼーション）</h3>
-
-<p>開発とストレステストに最適です。<br>
-- シミュレーション機能が含まれています。<br>
-- PyTorch/CuPyの依存関係がベンチマークに利用可能です。</p>
-
-</div>~nyan!
+- シミュレーション機能が含まれています。
+- PyTorch/CuPyの依存関係がベンチマークのために用意されています。~nyan!
 
 ### クイックスタート
 
@@ -176,7 +166,7 @@
   .\setup.ps1
   ```
 
-<summary>起動</summary>
+3. **起動**:
 
 ```powershell
 # ウェブダッシュボード（標準/フル）を起動
@@ -184,11 +174,13 @@ python health_monitor.py web
 
 # CLIを起動
 python health_monitor.py cli
-```~nyan!
+```
+
+~nyan!
 
 ---
 
 ## License
 
-MITライセンス。詳細については[LICENSE](../LICENSE)をご覧くださいにゃん！
+<summary>詳細については[LICENSE](../LICENSE)をご覧ください。</summary>~nyan!
 

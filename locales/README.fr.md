@@ -21,12 +21,13 @@
 
 <!-- HTML_BLOCK:... -->
 
-> *MyGPU: Lightweight GPU Management Utility: a compact `nvidia-smi` wrapper with an elegant web dashboard.*
+> *MyGPU : Utilitaire de gestion de GPU léger : un wrapper compact pour `nvidia-smi` avec un tableau de bord web élégant.*
+
 <!-- HTML_BLOCK: no change to url; output entire as it is... -->
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Version](https://img.shields.io/badge/version-1.2.3-blue)
-![Platform](https://img.shields.io/badge/platform-Windows10/11-lightgrey)
+![License](https://img.shields.io/badge/license-MIT-orange.svg)
+![Python](https://img.shields.io/badge/python-3.10%2B-pink)
+![Version](https://img.shields.io/badge/version-1.2.3-green)
+![Platform](https://img.shields.io/badge/platform-Windows10/11-blue)
 ![cuda 12.x](https://img.shields.io/badge/CUDA-12.x-0f9d58?logo=nvidia)
 
 ## Galerie
@@ -34,7 +35,7 @@
 <details>
 
   <summary>
-  Tableau de bord web
+    Tableau de bord web
   </summary>
 
   <div style="display:flex; overflow-x:auto; gap:10px; padding:12px 0; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;">
@@ -56,11 +57,14 @@
 </details>
 
 <details>
-  <summary>CLI</summary>
+  <summary>
+  CLI
+  </summary>
   <div style="display:flex; overflow-x:auto; gap:10px; padding:12px 0; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;">
 
   <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
-      <img src="../monitor/api/static/cli1.png" style="width:100%; height:100%; object-fit:contain;" />
+  
+  <img src="../monitor/api/static/cli1.png" style="width:100%; height:100%; object-fit:contain;" />
   </div>
   <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
       <img src="../monitor/api/static/cli2.png" style="width:100%; height:100%; object-fit:contain;" />
@@ -171,5 +175,5 @@ python health_monitor.py cli
 
 ## Licence
 
-Licence MIT. Voir le fichier [LICENSE](../LICENSE) pour plus de détails.
+Consultez [LICENSE](../LICENSE) pour plus de détails.
 

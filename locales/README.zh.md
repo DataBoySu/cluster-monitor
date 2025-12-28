@@ -21,12 +21,13 @@
 
 <!-- HTML_BLOCK:... -->
 
-> *MyGPU: Lightweight GPU Management Utility: a compact `nvidia-smi` wrapper with an elegant web dashboard.*
+> *MyGPU：轻量级GPU管理工具：一个紧凑的`nvidia-smi`包装器，配有一个优雅的网络仪表盘。*
+
 <!-- HTML_BLOCK: no change to url; output entire as it is... -->
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Version](https://img.shields.io/badge/version-1.2.3-blue)
-![Platform](https://img.shields.io/badge/platform-Windows10/11-lightgrey)
+![License](https://img.shields.io/badge/license-MIT-orange.svg)
+![Python](https://img.shields.io/badge/python-3.10%2B-pink)
+![Version](https://img.shields.io/badge/version-1.2.3-green)
+![Platform](https://img.shields.io/badge/platform-Windows10/11-blue)
 ![cuda 12.x](https://img.shields.io/badge/CUDA-12.x-0f9d58?logo=nvidia)
 
 ## 画廊
@@ -34,11 +35,11 @@
 <details>
 
   <summary>
-  网络仪表盘
+    网络仪表盘
   </summary>
 
   <div style="display:flex; overflow-x:auto; gap:10px; padding:12px 0; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;">
-    <!-- 使用第一张图片的 1624x675 宽高作为滑块框架；图片使用 `object-fit: contain` 适应框架内 -->
+    <!-- 使用第一张图片的 1624x675 宽高作为滑块框架；图片使用 `object-fit: contain` 适应框架 -->
     <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
       <img src="../monitor/api/static/web1.png" style="width:100%; height:100%; object-fit:contain;" />
     </div>
@@ -56,11 +57,14 @@
 </details>
 
 <details>
-  <summary>CLI</summary>
+  <summary>
+  CLI
+  </summary>
   <div style="display:flex; overflow-x:auto; gap:10px; padding:12px 0; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;">
 
   <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
-      <img src="../monitor/api/static/cli1.png" style="width:100%; height:100%; object-fit:contain;" />
+  
+  <img src="../monitor/api/static/cli1.png" style="width:100%; height:100%; object-fit:contain;" />
   </div>
   <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
       <img src="../monitor/api/static/cli2.png" style="width:100%; height:100%; object-fit:contain;" />
@@ -95,7 +99,7 @@
   - **监控列表**：监控特定 PIDs 或进程名称。
 
 - **基准测试与模拟**：
-  - **压力测试**：可配置的 GEMM 工作负载，用于测试热量限制和稳定性。
+  - **压力测试**：可配置的 GEMM 工作负载用于测试热量限制和稳定性。
   - **可视化模拟**：交互式 3D 粒子物理模拟，用于可视化 GPU 加载。
 
 ## 路线图与未来工作
@@ -119,7 +123,7 @@
 
 - **操作系统**: Windows 10/11
 - **Python**: 3.10+
-- **硬件**: 配备已安装驱动程序的 NVIDIA GPU。
+- **硬件**: 配备有已安装驱动程序的 NVIDIA GPU。
 - **CUDA**: 12.x 工具包（用于基准测试/模拟功能的严格要求）。
   - *注意：如果未检测到 CUDA 12.x，则 GPU 特定基准功能将被禁用。*
 
@@ -127,12 +131,12 @@
 
 该工具支持模块化安装，以满足您的需求：
 
-### 1. 最小化（仅命令行界面）
+### 1. 最小化（仅命令行）
 
 适用于无头服务器或后台监控。
 
-- 命令行界面
-- 基本系统/GPU指标
+- 命令行界面。
+- 基本系统/GPU指标。
 
 ### 2. 标准版 (命令行界面 + 网页用户界面)
 
@@ -141,9 +145,9 @@
 - 包含网页仪表盘。
 - REST API 端点。
 - 实时图表。
-- 但无模拟或基准测试。
+- 但无模拟或基准测试功能。
 
-### 3. 完整（标准+可视化）
+### 3. 完整（标准 + 可视化）
 
 最适合开发和压力测试。
 
@@ -159,7 +163,7 @@
   .\setup.ps1
   ```
 
-3. **启动**：
+**启动**
 
 ```powershell
 # 启动网络仪表盘（标准/完整）
@@ -171,5 +175,5 @@ python health_monitor.py cli
 
 ## 许可证
 
-MIT 许可证。详细信息见 [LICENSE](../LICENSE)。
+请参阅 [LICENSE](../LICENSE) 了解详细信息。
 

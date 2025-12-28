@@ -21,12 +21,13 @@
 
 <!-- HTML_BLOCK:... -->
 
-> *MyGPU: Lightweight GPU Management Utility: a compact `nvidia-smi` wrapper with an elegant web dashboard.*
+> *MyGPU: Легковесное утилита управления GPU: компактный оболочку для `nvidia-smi` с элегантным веб-дашбордом.*
+
 <!-- HTML_BLOCK: no change to url; output entire as it is... -->
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Version](https://img.shields.io/badge/version-1.2.3-blue)
-![Platform](https://img.shields.io/badge/platform-Windows10/11-lightgrey)
+![License](https://img.shields.io/badge/license-MIT-orange.svg)
+![Python](https://img.shields.io/badge/python-3.10%2B-pink)
+![Version](https://img.shields.io/badge/version-1.2.3-green)
+![Platform](https://img.shields.io/badge/platform-Windows10/11-blue)
 ![cuda 12.x](https://img.shields.io/badge/CUDA-12.x-0f9d58?logo=nvidia)
 
 ## Галерея
@@ -34,11 +35,11 @@
 <details>
 
   <summary>
-  Панель мониторинга
+  Веб-дашборд
   </summary>
 
   <div style="display:flex; overflow-x:auto; gap:10px; padding:12px 0; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;">
-    <!-- Используйте первый образ с соотношением сторон 1624x675 для рамки слайда; изображения вписываются с помощью object-fit:contain -->
+    <!-- Используйте первый образец аспекта 1624x675 для рамки слайда; изображения вписываются с помощью object-fit:contain -->
     <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
       <img src="../monitor/api/static/web1.png" style="width:100%; height:100%; object-fit:contain;" />
     </div>
@@ -56,11 +57,14 @@
 </details>
 
 <details>
-  <summary>CLI</summary>
+  <summary>
+  CLI
+  </summary>
   <div style="display:flex; overflow-x:auto; gap:10px; padding:12px 0; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;">
 
   <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
-      <img src="../monitor/api/static/cli1.png" style="width:100%; height:100%; object-fit:contain;" />
+  
+  <img src="../monitor/api/static/cli1.png" style="width:100%; height:100%; object-fit:contain;" />
   </div>
   <div style="flex:0 0 100%; scroll-snap-align:center; aspect-ratio:1624/675; display:flex; align-items:center; justify-content:center;">
       <img src="../monitor/api/static/cli2.png" style="width:100%; height:100%; object-fit:contain;" />
@@ -100,11 +104,11 @@
 
 ## План развития & Будущая работа
 
-Вклады приветствуются! Основные будущие направления включают:
+Вклады приветствуются! Основные будущие направления, которые необходимо охватить:
 
 - **Поддержка многоGPU**: Улучшенное управление конфигурациями с несколькими картами и топологиями NVLink.
 - **Контейнеризация**: Официальная поддержка Docker для легкого развертывания в контейнеризованных средах.
-- **Удаленный доступ**: Интеграция SSH-туннелирования и безопасного удаленного управления.
+- **Удаленный доступ**: Интеграция SSH-туннелирования и безопасное удаленное управление.
 - **Кросс-платформенность**:
   - [ ] Поддержка Linux (фокус на Ubuntu/Debian).
   - [ ] Поддержка macOS (мониторинг Apple Silicon).
@@ -121,7 +125,7 @@
 - **Python**: 3.10+
 - **Аппаратное обеспечение**: Видеокарта NVIDIA с установленными драйверами.
 - **CUDA**: Toolkit 12.x (Строго требуется для функций тестирования/симуляции).
-  - *Примечание: Если не обнаружен CUDA 12.x, будут отключены функции тестирования, зависящие от GPU.*
+  - *Примечание: Если не обнаружен CUDA 12.x, будут отключены функции тестирования, специфичные для GPU.*
 
 ## Установка
 
@@ -169,9 +173,7 @@ python health_monitor.py web
 python health_monitor.py cli
 ```
 
----
+## Лицензия
 
-## License
-
-Лицензия MIT. Подробности см. в файле [LICENSE](../LICENSE).
+См. [Лицензия](../LICENSE) для подробностей.
 
