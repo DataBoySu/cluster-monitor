@@ -26,8 +26,8 @@
 <!-- HTML_BLOCK: no change to url; output entire as it is... -->
 ![License](https://img.shields.io/badge/license-MIT-orange.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-pink)
-![Version](https://img.shields.io/badge/version-1.2.3-green)
-![Platform](https://img.shields.io/badge/platform-Windows10/11-blue)
+![Version](https://img.shields.io/badge/version-1.3.0-green)
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)
 ![cuda 12.x](https://img.shields.io/badge/CUDA-12.x-0f9d58?logo=nvidia)
 
 ## ギャラリー
@@ -106,29 +106,28 @@
 
 ## ロードマップと将来の取り組み
 
-貢献をお待ちしています！今後の主な取り組みポイントは次のとおりです。
+ご貢献をお待ちしております！今後の主な取り組みポイントは次の通りです：
 
 - **マルチGPUサポート**: マルチカードセットアップとNVLinkトポロジの強化処理。
-- **コンテナ化**: Docker公式サポートで、コンテナ環境での簡単なデプロイを実現。
+- **コンテナ化**: Docker公式サポートで、コンテナ環境への簡単なデプロイを実現。
 - **リモートアクセス**: SSHトンネル統合とセキュアなリモート管理。
 - **クロスプラットフォーム**:
-  - [ ] Linuxサポート（Ubuntu/Debianに焦点を当てて）。
-  - [ ] macOSサポート（Apple Siliconの監視）。
-- **ハードウェアに依存しない**:
-  - [ ] AMD ROCmサポート。
-  - [ ] Intel Arcサポート。
-- **~~マルチ言語ドキュメント**: GitHubで最も人気のある言語のサポート。~~
+  - [完了] Linuxサポート（Ubuntu/Debianに焦点を当てて）。
+  - [完了] macOSサポート（Apple Siliconの監視）。
+- **ハードウェア非依存**:
+  - [未着手] AMD ROCmサポート。
+  - [未着手] Intel Arcサポート。
+- **~~多言語ドキュメント**: GitHubで最も人気のある言語のサポート。~~
 
-[CONTRIBUTING.md](../CONTRIBUTING.md)をご覧ください。参加方法はこちらです。~nyan!~
+[CONTRIBUTING.md](../CONTRIBUTING.md)をご覧ください。ご参加のお待ちしておりますにゃん！
 
 ## 要件
 
-- **OS**: Windows 10/11
+- **OS**: Windows 10/11、Linux、macOS
 - **Python**: 3.10以上
-- **ハードウェア**: NVIDIA GPUおよびインストール済みドライバー
-- **CUDA**: 12.xツールキット（ベンチマーク/シミュレーション機能を使用するには必須です）
-
-- *注意: CUDA 12.xが検出されない場合は、GPU固有のベンチマーク機能が無効になります。*
+- **ハードウェア**: NVIDIA GPU（すべてのプラットフォーム）、Apple Silicon（macOS）、またはCPUのみ
+- **CUDA**: 12.xツールキット（NVIDIAでのベンチマーク/シミュレーションに推奨）
+  - *注意: CUDA/MPSが検出されない場合は、一部のベンチマーク機能が無効になる場合があります。*
 
 ## インストール
 
@@ -159,16 +158,27 @@
 
 ### クイックスタート
 
-1. **ダウンロード** 最新バージョンまたはリポジトリをクローンしてください。
-2. **セットアップを実行**してにゃん！
+1. **リポジトリをダウンロード** またはクローンしてください。
+2. **セットアップを実行** します。
+
+   **Windows**: ドライバーをインストールし、モニタリングを開始してにゃん！
 
 ```powershell
-  .\setup.ps1
-  ```
+   .\setup.ps1
+   ```
+
+**Linux/macOS**:
+
+「setup.sh」に実行権限を付与してにゃん！
+
+```bash
+chmod +x setup.sh
+./setup.sh
+```~nyan!
 
 3. **起動**:
 
-```powershell
+```bash
 # ウェブダッシュボード（標準/フル）を起動
 python health_monitor.py web
 

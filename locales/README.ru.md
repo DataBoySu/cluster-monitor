@@ -26,8 +26,8 @@
 <!-- HTML_BLOCK: no change to url; output entire as it is... -->
 ![License](https://img.shields.io/badge/license-MIT-orange.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-pink)
-![Version](https://img.shields.io/badge/version-1.2.3-green)
-![Platform](https://img.shields.io/badge/platform-Windows10/11-blue)
+![Version](https://img.shields.io/badge/version-1.3.0-green)
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)
 ![cuda 12.x](https://img.shields.io/badge/CUDA-12.x-0f9d58?logo=nvidia)
 
 ## Галерея
@@ -108,10 +108,10 @@
 
 - **Поддержка многоGPU**: Улучшенное управление конфигурациями с несколькими картами и топологиями NVLink.
 - **Контейнеризация**: Официальная поддержка Docker для легкого развертывания в контейнеризованных средах.
-- **Удаленный доступ**: Интеграция SSH-туннелирования и безопасное удаленное управление.
+- **Удаленный доступ**: Интеграция SSH-туннелирования и безопасного удаленного управления.
 - **Кросс-платформенность**:
-  - [ ] Поддержка Linux (фокус на Ubuntu/Debian).
-  - [ ] Поддержка macOS (мониторинг Apple Silicon).
+  - [x] Поддержка Linux (фокус на Ubuntu/Debian).
+  - [x] Поддержка macOS (мониторинг Apple Silicon).
 - **Аппаратно-независимый**:
   - [ ] Поддержка AMD ROCm.
   - [ ] Поддержка Intel Arc.
@@ -121,11 +121,11 @@
 
 ## Требования
 
-- **Операционная система**: Windows 10/11
+- **Операционная система**: Windows 10/11, Linux, macOS
 - **Python**: 3.10+
-- **Аппаратное обеспечение**: Видеокарта NVIDIA с установленными драйверами.
-- **CUDA**: Toolkit 12.x (Строго требуется для функций тестирования/симуляции).
-  - *Примечание: Если не обнаружен CUDA 12.x, будут отключены функции тестирования, специфичные для GPU.*
+- **Аппаратное обеспечение**: NVIDIA GPU (все платформы), Apple Silicon (macOS) или только CPU.
+- **CUDA**: Toolkit 12.x (Рекомендуется для тестирования/симуляции на NVIDIA).
+  - *Примечание: Если CUDA/MPS не обнаруживается, некоторые функции тестирования могут быть отключены.*
 
 ## Установка
 
@@ -156,16 +156,25 @@
 
 ### Быстрый старт
 
-1. **Скачайте** последнюю версию или клонируйте репозиторий.
+1. **Скачайте** или клонируйте репозиторий.
 2. **Запустите настройку**:
 
-```powershell
-  .\setup.ps1
-  ```
-
-# Запуск:
+   **Windows**:
 
 ```powershell
+   .\setup.ps1
+   ```
+
+**Линукс/МакОС**:
+
+```bash
+chmod +x setup.sh
+./setup.sh
+```
+
+3. **Запуск**:
+
+```bash
 # Запуск веб-дашборда (Стандартный/Полный)
 python health_monitor.py web
 

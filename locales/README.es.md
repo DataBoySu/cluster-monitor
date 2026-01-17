@@ -26,8 +26,8 @@
 <!-- HTML_BLOCK: no change to url; output entire as it is... -->
 ![License](https://img.shields.io/badge/license-MIT-orange.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-pink)
-![Version](https://img.shields.io/badge/version-1.2.3-green)
-![Platform](https://img.shields.io/badge/platform-Windows10/11-blue)
+![Version](https://img.shields.io/badge/version-1.3.0-green)
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)
 ![cuda 12.x](https://img.shields.io/badge/CUDA-12.x-0f9d58?logo=nvidia)
 
 ## Galería
@@ -107,12 +107,12 @@
 ¡Las contribuciones son bienvenidas! Los puntos futuros principales a cubrir serían:
 
 - **Soporte Multi-GPU**: Manejo mejorado para configuraciones de múltiples tarjetas y topologías NVLink.
-- **Contenedorización**: Soporte oficial para Docker para una fácil implementación en entornos contenedorizados.
+- **Contenedorización**: Soporte oficial para Docker para facilitar la implementación en entornos contenedorizados.
 - **Acceso Remoto**: Integración de túneles SSH y gestión remota segura.
 - **Plataformas Cruzadas**:
 
-  - [ ] Soporte para Linux (foco en Ubuntu/Debian).
-  - [ ] Soporte para macOS (monitoreo de Apple Silicon).
+  - [x] Soporte para Linux (enfocado en Ubuntu/Debian).
+  - [x] Soporte para macOS (monitoreo de Apple Silicon).
 
 - **Agnóstico de Hardware**:
 
@@ -125,11 +125,11 @@ Consulte [CONTRIBUTING.md](../CONTRIBUTING.md) para saber cómo involucrarse.
 
 ## Requisitos
 
-- **Sistema Operativo**: Windows 10/11
+- **Sistema Operativo**: Windows 10/11, Linux, macOS
 - **Python**: 3.10+
-- **Hardware**: Tarjeta gráfica NVIDIA con controladores instalados.
-- **CUDA**: Toolkit 12.x (Requerido estrictamente para las características de Benchmarking/Simulación).
-  - *Nota: Si no se detecta CUDA 12.x, se desactivarán las características de benchmarking específicas de la GPU.*
+- **Hardware**: NVIDIA GPU (todas las plataformas), Apple Silicon (macOS) o solo CPU.
+- **CUDA**: Toolkit 12.x (Recomendado para Benchmarking/Simulación en NVIDIA).
+  - *Nota: Si CUDA/MPS no se detecta, algunas características de benchmarking podrían estar deshabilitadas.*
 
 ## Instalación
 
@@ -160,16 +160,25 @@ Ideal para desarrollo y pruebas de estrés.
 
 ### Inicio Rápido
 
-1. **Descargar** la última versión o clonar el repositorio.
+1. **Descargar** o clonar el repositorio.
 2. **Ejecutar Configuración**:
 
+   **Windows**:
+
 ```powershell
-  .\setup.ps1
-  ```
+   .\setup.ps1
+   ```
+
+**Linux/macOS**:
+
+```bash
+chmod +x setup.sh
+./setup.sh
+```
 
 3. **Lanzamiento**:
 
-```powershell
+```bash
 # Iniciar el panel web (Estándar/Completo)
 python health_monitor.py web
 

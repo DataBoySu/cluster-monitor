@@ -26,8 +26,8 @@
 <!-- HTML_BLOCK: no change to url; output entire as it is... -->
 ![License](https://img.shields.io/badge/license-MIT-orange.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-pink)
-![Version](https://img.shields.io/badge/version-1.2.3-green)
-![Platform](https://img.shields.io/badge/platform-Windows10/11-blue)
+![Version](https://img.shields.io/badge/version-1.3.0-green)
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)
 ![cuda 12.x](https://img.shields.io/badge/CUDA-12.x-0f9d58?logo=nvidia)
 
 ## Galerie
@@ -108,10 +108,10 @@ Beiträge sind willkommen! Die Hauptpunkte, die in Zukunft angegangen werden sol
 
 - **Mehrfach-GPU-Unterstützung**: Verbesserte Handhabung von Mehrkarten-Einrichtungen und NVLink-Topologien.
 - **Containerisierung**: Offizielle Docker-Unterstützung für einfache Bereitstellung in Container-Umgebungen.
-- **Remote-Zugriff**: Integration von SSH-Tunneln und sicherem Remote-Management.
+- **Remote-Zugriff**: Integration von SSH-Tunneln und sicherer Fernverwaltung.
 - **Plattformübergreifend**:
-  - [ ] Linux-Unterstützung (Ubuntu/Debian-Fokus).
-  - [ ] macOS-Unterstützung (Apple Silicon-Überwachung).
+  - [x] Linux-Unterstützung (Ubuntu/Debian-Fokus).
+  - [x] macOS-Unterstützung (Apple Silicon-Überwachung).
 - **Hardwareunabhängig**:
   - [ ] AMD ROCm-Unterstützung.
   - [ ] Intel Arc-Unterstützung.
@@ -121,11 +121,11 @@ Siehe [CONTRIBUTING.md](../CONTRIBUTING.md) für Informationen, wie du dich einb
 
 ## Anforderungen
 
-- **Betriebssystem**: Windows 10/11
+- **Betriebssysteme**: Windows 10/11, Linux, macOS
 - **Python**: 3.10+
-- **Hardware**: NVIDIA-GPU mit installierten Treibern.
-- **CUDA**: Toolkit 12.x (Streng erforderlich für Leistungsanalyse/Simulationsfunktionen).
-  - *Hinweis: Wird CUDA 12.x nicht erkannt, werden die GPU-spezifischen Leistungsanalysefunktionen deaktiviert.*
+- **Hardware**: NVIDIA-GPU (alle Plattformen), Apple Silicon (macOS) oder CPU-nur.
+- **CUDA**: Toolkit 12.x (Empfohlen für Benchmarking/Simulation auf NVIDIA).
+  - *Hinweis: Wenn CUDA/MPS nicht erkannt wird, können einige Benchmark-Funktionen deaktiviert sein.*
 
 ## Installation
 
@@ -156,20 +156,29 @@ Am besten für Entwicklung und Stresstests geeignet.
 
 ### Schnelle Einführung
 
-1. **Lade** die neueste Version herunter oder klone das Repository.
-2. **Führe die Einrichtung aus**:
+1. **Repository herunterladen** oder klonen.
+2. **Einrichten** ausführen:
+
+   **Windows**: Führe das Einrichtungsskript aus.
 
 ```powershell
-  .\setup.ps1
-  ```
+   .\setup.ps1
+   ```
+
+**Linux/macOS:**
+
+```bash
+Berechtige die Datei: `chmod +x setup.sh`
+Führe die Installation aus: `./setup.sh`
+```
 
 **Starten**:
 
-```powershell
+```bash
 # Starten Sie die Web-Benutzeroberfläche (Standard/Voll)
 python health_monitor.py web
 
-# Starten Sie die Befehlszeilen-Schnittstelle
+# Starten Sie die CLI-Schnittstelle
 python health_monitor.py cli
 ```
 

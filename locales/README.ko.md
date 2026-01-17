@@ -26,8 +26,8 @@
 <!-- HTML_BLOCK: no change to url; output entire as it is... -->
 ![License](https://img.shields.io/badge/license-MIT-orange.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-pink)
-![Version](https://img.shields.io/badge/version-1.2.3-green)
-![Platform](https://img.shields.io/badge/platform-Windows10/11-blue)
+![Version](https://img.shields.io/badge/version-1.3.0-green)
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)
 ![cuda 12.x](https://img.shields.io/badge/CUDA-12.x-0f9d58?logo=nvidia)
 
 ## 갤러리
@@ -104,28 +104,26 @@
 
 ## 로드맵 및 미래 작업
 
-기여는 환영합니다! 주요 다룰 미래 포인트는 다음과 같습니다:
+기여는 환영합니다! 주요 다가올 포인트는 다음과 같습니다:
 
 - **다중 GPU 지원**: 다중 카드 설정과 NVLink 토폴로지에 대한 향상된 처리.
 - **컨테이너화**: 공식 Docker 지원으로 컨테이너 환경에서의 쉬운 배포.
-- **원격 액세스**: SSH 터널링 통합 및 보안 원격 관리.
+- **원격 액세스**: SSH 터널링 통합 및 안전한 원격 관리.
 - **크로스 플랫폼**:
-  - [ ] 리눅스 지원 (Ubuntu/Debian 중심).
-  - [ ] macOS 지원 (Apple Silicon 모니터링).
+  - [완료] Linux 지원 (Ubuntu/Debian 집중).
+  - [완료] macOS 지원 (Apple Silicon 모니터링).
 - **하드웨어 무관**:
-  - [ ] AMD ROCm 지원.
-  - [ ] Intel Arc 지원.
-- ~~**다국어 문서화**: GitHub에서 가장 인기 있는 언어 지원.~~
-
-기여 방법은 [CONTRIBUTING.md](../CONTRIBUTING.md)를 참조하세요.
+  - [진행 중] AMD ROCm 지원.
+  - [진행 중] Intel Arc 지원.
+- **다국어 문서화**: [CONTRIBUTING.md](../CONTRIBUTING.md)를 참조하여 참여 방법 확인.
 
 ## 요구 사항
 
-- **운영 체제**: Windows 10/11
+- **운영 체제**: Windows 10/11, Linux, macOS
 - **Python**: 3.10 이상
-- **하드웨어**: NVIDIA GPU 및 설치 드라이버
-- **CUDA**: 12.x 툴킷 (벤치마크/시뮬레이션 기능 사용 시 필수).
-  - *참고: CUDA 12.x가 감지되지 않으면 GPU 관련 벤치마크 기능이 비활성화됩니다.*
+- **하드웨어**: NVIDIA GPU (모든 플랫폼), Apple Silicon (macOS), 또는 CPU 전용.
+- **CUDA**: 12.x 툴킷 (NVIDIA에서 벤치마크/시뮬레이션을 위한 권장 사항).
+  - *참고: CUDA/MPS가 감지되지 않으면 일부 벤치마크 기능이 비활성화될 수 있습니다.*
 
 ## 설치
 
@@ -154,19 +152,28 @@
 - 시뮬레이션 포함
 - PyTorch/CuPy 벤치마크 의존성
 
-### 신속 시작
+### 빠른 시작
 
-1. **다운로드** 최신 릴리스 또는 리포지토리를 클론하세요.
+1. **저장소**를 다운로드하거나 클론하십시오.
 2. **설정 실행**:
 
+   **윈도우**:
+
 ```powershell
-  .\setup.ps1
-  ```
+   .\setup.ps1
+   ```
+
+**Linux/macOS**:
+
+```bash
+chmod +x setup.sh
+./setup.sh
+```
 
 # 실행
 
 
-```powershell
+```bash
 # 웹 대시보드 시작 (표준/완전)
 python health_monitor.py web
 

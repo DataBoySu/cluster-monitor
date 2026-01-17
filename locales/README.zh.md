@@ -26,8 +26,8 @@
 <!-- HTML_BLOCK: no change to url; output entire as it is... -->
 ![License](https://img.shields.io/badge/license-MIT-orange.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-pink)
-![Version](https://img.shields.io/badge/version-1.2.3-green)
-![Platform](https://img.shields.io/badge/platform-Windows10/11-blue)
+![Version](https://img.shields.io/badge/version-1.3.0-green)
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)
 ![cuda 12.x](https://img.shields.io/badge/CUDA-12.x-0f9d58?logo=nvidia)
 
 ## 画廊
@@ -95,7 +95,7 @@
 
 - **管理与强制执行**：
   - **显存上限**：为每个 GPU 设置显存使用量的硬性限制。
-  - **自动终止**：（仅管理员可操作）自动终止违反显存政策的进程。
+  - **自动终止**：（仅管理员可操作）自动终止违反显存策略的进程。
   - **监控列表**：监控特定 PIDs 或进程名称。
 
 - **基准测试与模拟**：
@@ -110,22 +110,22 @@
 - **容器化**：官方 Docker 支持，便于在容器化环境中部署。
 - **远程访问**：集成 SSH 隧道和安全远程管理。
 - **跨平台**：
-  - [ ] Linux 支持（Ubuntu/Debian 重点关注）。
-  - [ ] macOS 支持（Apple Silicon 监控）。
+  - [已完成] Linux 支持（Ubuntu/Debian 重点）。
+  - [已完成] macOS 支持（Apple Silicon 监控）。
 - **硬件无关**：
-  - [ ] AMD ROCm 支持。
-  - [ ] Intel Arc 支持。
-- **~~多语言文档**：支持 GitHub 上最受欢迎的语言。~~
+  - [待完成] AMD ROCm 支持。
+  - [待完成] Intel Arc 支持。
+- **多语言文档**（已删除）：支持 GitHub 上最受欢迎的语言。
 
 请参阅 [CONTRIBUTING.md](../CONTRIBUTING.md) 了解如何参与进来。
 
 ## 要求
 
-- **操作系统**: Windows 10/11
-- **Python**: 3.10+
-- **硬件**: 配备有已安装驱动程序的 NVIDIA GPU。
-- **CUDA**: 12.x 工具包（用于基准测试/模拟功能的严格要求）。
-  - *注意：如果未检测到 CUDA 12.x，则 GPU 特定基准功能将被禁用。*
+- **操作系统**：Windows 10/11、Linux、macOS
+- **Python**：3.10+
+- **硬件**：NVIDIA GPU（所有平台）、Apple Silicon（macOS）或仅 CPU。
+- **CUDA**：12.x 工具包（NVIDIA 平台的基准测试/模拟推荐）。
+  - *注意：如果未检测到 CUDA/MPS，某些基准测试功能可能无法启用。*
 
 ## 安装
 
@@ -138,14 +138,14 @@
 - 命令行界面。
 - 基本系统/GPU指标。
 
-### 2. 标准版 (命令行界面 + 网页用户界面)
+### 2. 标准版 (命令行界面 + Web 用户界面)
 
 大多数用户的最佳选择。
 
-- 包含网页仪表盘。
+- 包含 Web 仪表盘。
 - REST API 端点。
 - 实时图表。
-- 但无模拟或基准测试功能。
+- 但无模拟或基准测试。
 
 ### 3. 完整（标准 + 可视化）
 
@@ -156,16 +156,25 @@
 
 ### 快速入门
 
-1. **下载** 最新版本或克隆仓库。
+1. **下载** 或克隆仓库。
 2. **运行设置**：
 
+   **Windows**:
+
 ```powershell
-  .\setup.ps1
-  ```
+   .\setup.ps1
+   ```
+
+**Linux/macOS**:
+
+```bash
+chmod +x setup.sh
+./setup.sh
+```
 
 **启动**
 
-```powershell
+```bash
 # 启动网络仪表盘（标准/完整）
 python health_monitor.py web
 
