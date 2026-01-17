@@ -26,8 +26,8 @@
 <!-- HTML_BLOCK: no change to url; output entire as it is... -->
 ![License](https://img.shields.io/badge/license-MIT-orange.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-pink)
-![Version](https://img.shields.io/badge/version-1.2.3-green)
-![Platform](https://img.shields.io/badge/platform-Windows10/11-blue)
+![Version](https://img.shields.io/badge/version-1.3.0-green)
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)
 ![cuda 12.x](https://img.shields.io/badge/CUDA-12.x-0f9d58?logo=nvidia)
 
 ## Galerie
@@ -110,8 +110,8 @@ Les contributions sont les bienvenues ! Les principaux points futurs à aborder 
 - **Conteneurisation** : Prise en charge officielle de Docker pour un déploiement facile dans des environnements conteneurisés.
 - **Accès à distance** : Intégration du tunnel SSH et gestion à distance sécurisée.
 - **Cross-Platform** :
-  - [ ] Support Linux (Ubuntu/Debian à la priorité).
-  - [ ] Support macOS (suivi des Apple Silicon).
+  - [x] Support Linux (Ubuntu/Debian à l'accent).
+  - [x] Support macOS (surveillance Apple Silicon).
 - **Indépendant du matériel** :
   - [ ] Support AMD ROCm.
   - [ ] Support Intel Arc.
@@ -121,11 +121,11 @@ Consultez [CONTRIBUTING.md](../CONTRIBUTING.md) pour savoir comment participer.
 
 ## Exigences
 
-- **Système d'exploitation** : Windows 10/11
+- **Système d'exploitation** : Windows 10/11, Linux, macOS
 - **Python** : 3.10+
-- **Matériel** : GPU NVIDIA avec pilotes installés.
-- **CUDA** : Toolkit 12.x (Strictement requis pour les fonctionnalités de Benchmarking/Simulation).
-  - *Note* : Si CUDA 12.x n'est pas détecté, les fonctionnalités de benchmarking spécifiques au GPU seront désactivées.
+- **Matériel** : GPU NVIDIA (tous les systèmes), Apple Silicon (macOS), ou uniquement CPU.
+- **CUDA** : Toolkit 12.x (Recommandé pour le benchmark/la simulation sur NVIDIA).
+  - *Note : Si CUDA/MPS n'est pas détecté, certaines fonctionnalités de benchmark pourraient être désactivées.*
 
 ## Installation
 
@@ -156,16 +156,25 @@ Idéal pour le développement et les tests de stress.
 
 ### Démarrage Rapide
 
-1. **Télécharger** la dernière version ou cloner le dépôt.
-2. **Exécuter l'installation** :
+1. **Télécharger** ou cloner le dépôt.
+2. **Exécuter l'installation**:
+
+   **Windows**:
 
 ```powershell
-  .\setup.ps1
-  ```
+   .\setup.ps1
+   ```
+
+**Linux/macOS** :
+
+```bash
+   chmod +x setup.sh
+   ./setup.sh
+```
 
 3. **Lancement** :
 
-```powershell
+```bash
 # Démarrer le tableau de bord web (Standard/Complet)
 python health_monitor.py web
 

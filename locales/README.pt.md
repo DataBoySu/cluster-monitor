@@ -26,8 +26,8 @@
 <!-- HTML_BLOCK: no change to url; output entire as it is... -->
 ![License](https://img.shields.io/badge/license-MIT-orange.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-pink)
-![Version](https://img.shields.io/badge/version-1.2.3-green)
-![Platform](https://img.shields.io/badge/platform-Windows10/11-blue)
+![Version](https://img.shields.io/badge/version-1.3.0-green)
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)
 ![cuda 12.x](https://img.shields.io/badge/CUDA-12.x-0f9d58?logo=nvidia)
 
 ## Galeria
@@ -111,25 +111,25 @@ Contribuições são bem-vindas! Os principais pontos futuros a serem abordados 
 - **Acesso Remoto**: Integração de túnel SSH e gerenciamento remoto seguro.
 - **Cross-Platform**:
 
-  - [ ] Suporte a Linux (foco em Ubuntu/Debian).
-  - [ ] Suporte a macOS (monitoramento de Apple Silicon).
+  - [x] Suporte a Linux (foco em Ubuntu/Debian).
+  - [x] Suporte a macOS (monitoramento de Apple Silicon).
 
 - **Agnóstico de Hardware**:
 
   - [ ] Suporte a AMD ROCm.
   - [ ] Suporte a Intel Arc.
 
-- **Documentação Multi-Linguagem**: (Removido)
+- **Documentação Multi-Linguagem**: (Removido da lista)
 
 Consulte o [CONTRIBUTING.md](../CONTRIBUTING.md) para saber como participar.
 
 ## Requisitos
 
-- **Sistema Operacional**: Windows 10/11
+- **Sistema Operacional**: Windows 10/11, Linux, macOS
 - **Python**: 3.10+
-- **Hardware**: Placa de vídeo NVIDIA com drivers instalados.
-- **CUDA**: Toolkit 12.x (Estritamente necessário para recursos de Benchmarking/Simulação).
-  - *Observação: Se o CUDA 12.x não for detectado, as funcionalidades de benchmarking específicas para GPU serão desativadas.*
+- **Hardware**: GPU NVIDIA (todos os sistemas), Apple Silicon (macOS) ou apenas CPU.
+- **CUDA**: Toolkit 12.x (Recomendado para Benchmarking/Simulação em NVIDIA).
+  - *Observação: Se CUDA/MPS não for detectado, algumas funcionalidades de benchmarking podem estar desabilitadas.*
 
 ## Instalação
 
@@ -160,20 +160,29 @@ Ideal para desenvolvimento e testes de estresse.
 
 ### Início Rápido
 
-1. **Baixe** a última versão ou clone o repositório.
+1. **Baixe** ou clone o repositório.
 2. **Execute a Configuração**:
 
+   **Windows**:
+
 ```powershell
-  .\setup.ps1
-  ```
+   .\setup.ps1
+   ```
+
+**Linux/macOS:**
+
+```bash
+  chmod +x setup.sh
+  ./setup.sh
+```
 
 **Lançamento:**
 
-```powershell
+```bash
 # Inicie o painel web (Padrão/Completo)
 python health_monitor.py web
 
-# Inicie o CLI
+# Inicie o modo CLI
 python health_monitor.py cli
 ```
 
