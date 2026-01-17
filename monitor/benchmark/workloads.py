@@ -159,9 +159,6 @@ class GPUStressWorker:
                     self.workload_type = f"Bounce Simulation ({n:,} particles, torch)"
                 else:
                     self.workload_type = f"Bounce Simulation ({n:,} particles, torch)"
-            backend_mult = self.config.backend_multiplier
-            self._backend_stress.initialize('torch', torch, n, backend_mult)
-            
             self._initial_particle_count = n
             self._active_count = self._counters['active_count']
             self._small_ball_count = self._counters['small_ball_count']
