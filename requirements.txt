@@ -13,8 +13,8 @@ fastapi>=0.104.0
 uvicorn[standard]>=0.24.0
 websockets>=12.0
 win10toast
-winrt.windows.ui.notifications
-winrt.windows.data.xml.dom
+winrt-Windows.UI.Notifications
+winrt-Windows.Data.Xml.Dom
 
 # VISUALIZATION (optional)
 pygame>=2.5.0

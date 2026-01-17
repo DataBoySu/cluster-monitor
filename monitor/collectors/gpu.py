@@ -292,6 +292,7 @@ class GPUCollector:
             system = platform.system()
             if system == 'Windows':
                 # Use WMI via PowerShell to get the process owner
+                # This is a fallback when psutil is not available
                 cmd = [
                     'powershell', '-NoProfile', '-NonInteractive',
                     '-Command',
@@ -299,15 +300,17 @@ class GPUCollector:
                 ]
                 proc = subprocess.run(cmd, capture_output=True, text=True, timeout=3)
                 out = (proc.stdout or '').strip()
-                if out:
-                    return out
-            else:
-                # POSIX: use ps to get the user for a PID
+                return out if out else ''
+            elif system == 'Darwin':
+                # macOS: use ps -o user= -p PID
                 cmd = ['ps', '-o', 'user=', '-p', str(pid)]
                 proc = subprocess.run(cmd, capture_output=True, text=True, timeout=2)
-                out = (proc.stdout or '').strip()
-                if out:
-                    return out
+                return (proc.stdout or '').strip()
+            else:
+                # Linux/POSIX: use ps -o user= -p PID
+                cmd = ['ps', '-o', 'user=', '-p', str(pid)]
+                proc = subprocess.run(cmd, capture_output=True, text=True, timeout=2)
+                return (proc.stdout or '').strip()
         except Exception:
             pass
         return ''

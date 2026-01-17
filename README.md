@@ -22,8 +22,8 @@
 <!-- HTML_BLOCK: no change to url; output entire as it is... -->
 ![License](https://img.shields.io/badge/license-MIT-orange.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-pink)
-![Version](https://img.shields.io/badge/version-1.2.3-green)
-![Platform](https://img.shields.io/badge/platform-Windows10/11-blue)
+![Version](https://img.shields.io/badge/version-1.3.0-green)
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)
 ![cuda 12.x](https://img.shields.io/badge/CUDA-12.x-0f9d58?logo=nvidia)
 
 ## Gallery
@@ -109,8 +109,8 @@ Contributions are welcome! Main future points to cover would be:
 - **Containerization**: Official Docker support for easy deployment in containerized environments.
 - **Remote Access**: SSH tunneling integration and secure remote management.
 - **Cross-Platform**:
-  - [ ] Linux Support (Ubuntu/Debian focus).
-  - [ ] macOS Support (Apple Silicon monitoring).
+  - [x] Linux Support (Ubuntu/Debian focus).
+  - [x] macOS Support (Apple Silicon monitoring).
 - **Hardware Agnostic**:
   - [ ] AMD ROCm support.
   - [ ] Intel Arc support.
@@ -122,11 +122,11 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for how to get involved.
 
 ## Requirements
 
-- **OS**: Windows 10/11
+- **OS**: Windows 10/11, Linux, macOS
 - **Python**: 3.10+
-- **Hardware**: NVIDIA GPU with installed drivers.
-- **CUDA**: Toolkit 12.x (Strictly required for Benchmarking/Simulation features).
-  - *Note: If CUDA 12.x is not detected, GPU-specific benchmarking features will be disabled.*
+- **Hardware**: NVIDIA GPU (all platforms), Apple Silicon (macOS), or CPU-only.
+- **CUDA**: Toolkit 12.x (Recommended for Benchmarking/Simulation on NVIDIA).
+  - *Note: If CUDA/MPS is not detected, some benchmarking features may be disabled.*
 
 ---
 
@@ -159,16 +159,23 @@ Best for development and stress testing.
 
 ### Quick Start
 
-1. **Download** the latest release or clone the repo.
+1. **Download** or clone the repository.
 2. **Run Setup**:
 
-  ```powershell
-  .\setup.ps1
-  ```
+   **Windows**:
+   ```powershell
+   .\setup.ps1
+   ```
+
+   **Linux/macOS**:
+   ```bash
+   chmod +x setup.sh
+   ./setup.sh
+   ```
 
 3. **Launch**:
 
-```powershell
+```bash
 # Start the web dashboard (Standard/Full)
 python health_monitor.py web
 

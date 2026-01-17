@@ -14,6 +14,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: translate-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   prepare-matrix:
     name: Prepare Translation Matrix
@@ -86,6 +90,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Download All Translations
         uses: actions/download-artifact@v4
@@ -95,17 +101,28 @@ jobs:
           merge-multiple: true
 
       - name: Commit and Push
+        env:
+          BRANCH: ${{ github.ref_name }}
         run: |
           git config --global user.name "DataBoySu's Readme Translator"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Ensure we're on the correct branch and have full history
+          git fetch origin "$BRANCH"
+          git checkout "$BRANCH"
+
           git add locales/*.md
           git commit -m "docs: update translations" || echo "No changes to commit"
-          
-          # Retry logic for concurrent pushes
-          for i in {1..5}; do
-            git pull --rebase
-            if git push; then exit 0; fi
-            echo "Push failed, retrying in 5s..."
+
+          # Retry logic for pushes that fail due to remote updates
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin "$BRANCH" || true
+            if git push origin "$BRANCH"; then
+              echo "Push succeeded"
+              exit 0
+            fi
+            echo "Push failed (attempt $i), retrying in 5s..."
             sleep 5
           done
+          echo "Push failed after retries"
           exit 1

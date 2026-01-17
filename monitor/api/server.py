@@ -33,11 +33,20 @@ def create_app(config: Dict[str, Any]) -> FastAPI:
     # Determine if the process is running with admin/elevated rights or was started with --admin
     try:
         import sys
-        try:
-            import ctypes
-            is_elev = bool(ctypes.windll.shell32.IsUserAnAdmin())
-        except Exception:
-            is_elev = False
+        import platform
+        import os
+        is_elev = False
+        if platform.system() == 'Windows':
+            try:
+                import ctypes
+                is_elev = bool(ctypes.windll.shell32.IsUserAnAdmin())
+            except Exception:
+                is_elev = False
+        else:
+            try:
+                is_elev = os.getuid() == 0
+            except Exception:
+                is_elev = False
 
         started_with_flag = '--admin' in (sys.argv[1:] if len(sys.argv) > 1 else [])
         app.state.is_admin = bool(is_elev or started_with_flag)
@@ -391,26 +400,57 @@ def create_app(config: Dict[str, Any]) -> FastAPI:
     async def websocket_simulation(websocket: WebSocket):
         await websocket.accept()
         sim_runner = None
-        sim_thread = None
+        update_task = None
+        
+        async def send_status_updates():
+            while sim_runner and sim_runner.running:
+                try:
+                    status = sim_runner.get_status()
+                    if sim_runner.stress_worker:
+                        positions, masses, colors, glows = sim_runner.stress_worker.get_particle_sample(max_samples=500)
+                        if positions is not None:
+                            particles_data = []
+                            for i in range(len(positions)):
+                                particles_data.append({
+                                    'x': float(positions[i][0]),
+                                    'y': float(positions[i][1]),
+                                    'mass': float(masses[i]),
+                                    'color': [float(colors[i][0]), float(colors[i][1]), float(colors[i][2])],
+                                    'glow': float(glows[i]),
+                                    'radius': 36.0 if masses[i] > 100 else 8.0
+                                })
+                            await websocket.send_json({
+                                'type': 'frame',
+                                'fps': status.get('fps', 0),
+                                'gpu': status.get('gpu_util', 0),
+                                'active_particles': status.get('iterations', 0) if sim_runner.stress_worker else 0,
+                                'iterations': status.get('iterations', 0),
+                                'particles': particles_data
+                            })
+                except Exception:
+                    break
+                await asyncio.sleep(0.033)
         
         try:
             while True:
                 data = await websocket.receive_json()
                 
                 if data['type'] == 'start':
-                    particle_count = data.get('particles', 100000)
+                    if sim_runner and sim_runner.running:
+                        continue
+
+                    num_particles = data.get('particles', 100000)
                     backend_mult = data.get('backend', 1)
                     
                     config = benchmark_config.BenchmarkConfig(
                         benchmark_type='particle',
-                        duration_seconds=3600,  # Long duration, will be stopped manually
+                        duration_seconds=3600,
                         sample_interval_ms=100,
-                        particle_count=particle_count,
+                        num_particles=num_particles,
                         backend_multiplier=backend_mult
                     )
                     
                     sim_runner = benchmark_runner.get_benchmark_instance()
-                    
                     sim_thread = threading.Thread(
                         target=sim_runner.run,
                         args=(config, True),
@@ -418,34 +458,9 @@ def create_app(config: Dict[str, Any]) -> FastAPI:
                     )
                     sim_thread.start()
                     
-                    while sim_runner.running:
-                        status = sim_runner.get_status()
-                        
-                        if sim_runner.stress_worker:
-                            positions, masses, colors, glows = sim_runner.stress_worker.get_particle_sample(max_samples=500)
-                            
-                            if positions is not None:
-                                particles_data = []
-                                for i in range(len(positions)):
-                                    particles_data.append({
-                                        'x': float(positions[i][0]),
-                                        'y': float(positions[i][1]),
-                                        'mass': float(masses[i]),
-                                        'color': [float(colors[i][0]), float(colors[i][1]), float(colors[i][2])],
-                                        'glow': float(glows[i]),
-                                        'radius': 36.0 if masses[i] > 100 else 8.0
-                                    })
-                                
-                                await websocket.send_json({
-                                    'type': 'frame',
-                                    'fps': status.get('fps', 0),
-                                    'gpu': status.get('gpu_util', 0),
-                                    'active_particles': status.get('iterations', 0) if sim_runner.stress_worker else 0,
-                                    'iterations': status.get('iterations', 0),
-                                    'particles': particles_data
-                                })
-                        
-                        await asyncio.sleep(0.033)  # ~30 FPS update rate
+                    if update_task:
+                        update_task.cancel()
+                    update_task = asyncio.create_task(send_status_updates())
                 
                 elif data['type'] == 'spawn' and sim_runner and sim_runner.stress_worker:
                     x = data.get('x', 500)
@@ -463,18 +478,21 @@ def create_app(config: Dict[str, Any]) -> FastAPI:
                 elif data['type'] == 'stop':
                     if sim_runner:
                         sim_runner.running = False
+                        sim_runner.stop()
+                    if update_task:
+                        update_task.cancel()
                     break
         
         except WebSocketDisconnect:
-            if sim_runner:
-                sim_runner.running = False
+            pass
         except Exception as e:
             print(f"WebSocket error: {e}")
-            if sim_runner:
-                sim_runner.running = False
         finally:
             if sim_runner:
                 sim_runner.running = False
+                sim_runner.stop()
+            if update_task:
+                update_task.cancel()
     
     @app.get("/api/status")
     async def get_status():

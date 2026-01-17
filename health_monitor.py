@@ -388,56 +388,60 @@ async def run_cli_monitor(config: dict):
 def _run_app(config_path, port, nodes, once, web_mode=False, cli_mode=False):
     """Helper to run main application logic."""
     # If the user requested admin mode via --admin in argv, and the process is not elevated,
-    # attempt to relaunch elevated (Windows UAC). This project targets Windows only,
+    # attempt to relaunch elevated.
     try:
         import sys
         import platform
         import os
+        import subprocess
+
         def _is_elevated():
-            try:
-                import ctypes
-                return bool(ctypes.windll.shell32.IsUserAnAdmin())
-            except Exception:
-                return False
+            if platform.system() == 'Windows':
+                try:
+                    import ctypes
+                    return bool(ctypes.windll.shell32.IsUserAnAdmin())
+                except Exception:
+                    return False
+            else:
+                return os.getuid() == 0
 
         if '--admin' in (sys.argv[1:] if len(sys.argv) > 1 else []) and not _is_elevated():
-            # Attempt relaunch elevated on Windows using ShellExecuteW or PowerShell Start-Process
-            try:
-                import ctypes
-                import subprocess
-                params = '"' + os.path.abspath(sys.argv[0]) + '"'
-                other_args = [a for a in sys.argv[1:]]
-                if other_args:
-                    params += ' ' + ' '.join(str(a) for a in other_args)
-
+            if platform.system() == 'Windows':
+                # Attempt relaunch elevated on Windows
                 try:
+                    import ctypes
+                    params = '"' + os.path.abspath(sys.argv[0]) + '"'
+                    other_args = [a for a in sys.argv[1:]]
+                    if other_args:
+                        params += ' ' + ' '.join(str(a) for a in other_args)
+
                     ret = ctypes.windll.shell32.ShellExecuteW(None, 'runas', sys.executable, params, None, 1)
-                    try:
-                        ok = int(ret) > 32
-                    except Exception:
-                        ok = False
-                    if ok:
-                        print('Relaunching elevated, exiting original process')
-                        try: os._exit(0)
-                        except Exception: pass
+                    if int(ret) > 32:
+                        os._exit(0)
                 except Exception:
-                    def _ps_quote(s):
-                        return "'" + str(s).replace("'", "''") + "'"
-                    ps_args = [os.path.abspath(sys.argv[0])] + list(sys.argv[1:])
-                    arglist_literal = ','.join(_ps_quote(a) for a in ps_args)
-                    ps_cmd = [
-                        'powershell', '-NoProfile', '-NonInteractive', '-Command',
-                        f"Start-Process -FilePath '{sys.executable}' -ArgumentList {arglist_literal} -Verb RunAs"
-                    ]
+                    # Fallback to powershell if ShellExecuteW fails
                     try:
-                        proc = subprocess.run(ps_cmd, capture_output=True, text=True, timeout=15)
-                        if proc.returncode == 0:
-                            try: os._exit(0)
-                            except Exception: pass
+                        def _ps_quote(s):
+                            return "'" + str(s).replace("'", "''") + "'"
+                        ps_args = [os.path.abspath(sys.argv[0])] + list(sys.argv[1:])
+                        arglist_literal = ','.join(_ps_quote(a) for a in ps_args)
+                        ps_cmd = [
+                            'powershell', '-NoProfile', '-NonInteractive', '-Command',
+                            f"Start-Process -FilePath '{sys.executable}' -ArgumentList {arglist_literal} -Verb RunAs"
+                        ]
+                        subprocess.run(ps_cmd, capture_output=True, text=True, timeout=15)
+                        os._exit(0)
                     except Exception:
                         pass
-            except Exception:
-                pass
+            else:
+                # POSIX relaunch with sudo
+                try:
+                    args = ['sudo', sys.executable, os.path.abspath(sys.argv[0])] + sys.argv[1:]
+                    # Ensure we don't end up in an infinite loop if sudo fails or doesn't grant root
+                    if 'SUDO_COMMAND' not in os.environ:
+                        os.execvp('sudo', args)
+                except Exception:
+                    pass
     except Exception:
         pass
 
@@ -484,42 +488,43 @@ def _run_app(config_path, port, nodes, once, web_mode=False, cli_mode=False):
 @click.pass_context
 def cli(ctx, config, port, update, admin):
     """MyGPU: Real-time GPU and system health monitoring."""
-    # If the user requested admin mode, attempt to relaunch this process elevated
-    # on platforms that support elevation (Windows -> UAC, POSIX -> sudo).
+    # If admin requested and not already elevated, attempt to relaunch elevated
     def _is_elevated():
-        try:
-            import ctypes
-            return bool(ctypes.windll.shell32.IsUserAnAdmin())
-        except Exception:
-            return False
+        import platform
+        import os
+        if platform.system() == 'Windows':
+            try:
+                import ctypes
+                return bool(ctypes.windll.shell32.IsUserAnAdmin())
+            except Exception:
+                return False
+        else:
+            try:
+                return os.getuid() == 0
+            except Exception:
+                return False
 
     def _relaunch_elevated():
-        try:
-            import sys
-            import os
-            import subprocess
-            script = os.path.abspath(sys.argv[0])
-            args = sys.argv[1:]
-            if '--admin' not in args:
-                args = args + ['--admin']
+        import sys
+        import os
+        import platform
+        import subprocess
+        script = os.path.abspath(sys.argv[0])
+        args = sys.argv[1:]
+        if '--admin' not in args:
+            args = args + ['--admin']
 
+        if platform.system() == 'Windows':
             try:
                 import ctypes
                 params = '"' + script + '"'
                 if args:
                     params += ' ' + ' '.join(str(a) for a in args)
                 ret = ctypes.windll.shell32.ShellExecuteW(None, 'runas', sys.executable, params, None, 1)
-                try:
-                    ok = int(ret) > 32
-                except Exception:
-                    ok = False
-                if ok:
-                    print('Relaunching elevated, exiting original process')
-                    try: os._exit(0)
-                    except SystemExit: raise
-                    except Exception: pass
-            except Exception as e:
-                # PowerShell fallback if ShellExecuteW is not possible
+                if int(ret) > 32:
+                    os._exit(0)
+            except Exception:
+                # PowerShell fallback
                 try:
                     def _ps_quote(s):
                         return "'" + str(s).replace("'", "''") + "'"
@@ -529,17 +534,19 @@ def cli(ctx, config, port, update, admin):
                         'powershell', '-NoProfile', '-NonInteractive', '-Command',
                         f"Start-Process -FilePath '{sys.executable}' -ArgumentList {arglist_literal} -Verb RunAs"
                     ]
-                    proc = subprocess.run(ps_cmd, capture_output=True, text=True, timeout=15)
-                    if proc.returncode == 0:
-                        try: os._exit(0)
-                        except Exception: pass
+                    subprocess.run(ps_cmd, capture_output=True, text=True, timeout=15)
+                    os._exit(0)
                 except Exception:
                     pass
+        else:
+            # POSIX relaunch with sudo
+            try:
+                sudo_args = ['sudo', sys.executable, script] + args
+                if 'SUDO_COMMAND' not in os.environ:
+                    os.execvp('sudo', sudo_args)
+            except Exception as e:
+                print(f'Relaunch elevation error: {e}')
 
-        except Exception as e:
-            print('Relaunch elevation error:', e)
-
-    # If admin requested and not already elevated, attempt to relaunch elevated
     try:
         if admin and not _is_elevated():
             _relaunch_elevated()
