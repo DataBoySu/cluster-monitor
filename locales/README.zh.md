@@ -26,7 +26,7 @@
 <!-- HTML_BLOCK: no change to url; output entire as it is... -->
 ![License](https://img.shields.io/badge/license-MIT-orange.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-pink)
-![Version](https://img.shields.io/badge/version-1.3.0-green)
+![Version](https://img.shields.io/badge/version-1.4.0-green)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)
 ![cuda 12.x](https://img.shields.io/badge/CUDA-12.x-0f9d58?logo=nvidia)
 
@@ -95,7 +95,7 @@
 
 - **管理与强制执行**：
   - **显存上限**：为每个 GPU 设置显存使用量的硬性限制。
-  - **自动终止**：（仅管理员可操作）自动终止违反显存策略的进程。
+  - **自动终止**：（仅管理员可操作）自动终止违反显存政策的进程。
   - **监控列表**：监控特定 PIDs 或进程名称。
 
 - **基准测试与模拟**：
@@ -138,14 +138,14 @@
 - 命令行界面。
 - 基本系统/GPU指标。
 
-### 2. 标准版 (命令行界面 + Web 用户界面)
+### 2. 标准版 (命令行界面 + 网页用户界面)
 
 大多数用户的最佳选择。
 
-- 包含 Web 仪表盘。
+- 包含网页仪表盘。
 - REST API 端点。
 - 实时图表。
-- 但无模拟或基准测试。
+- 但无模拟或基准测试功能。
 
 ### 3. 完整（标准 + 可视化）
 

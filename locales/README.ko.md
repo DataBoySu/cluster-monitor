@@ -26,7 +26,7 @@
 <!-- HTML_BLOCK: no change to url; output entire as it is... -->
 ![License](https://img.shields.io/badge/license-MIT-orange.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-pink)
-![Version](https://img.shields.io/badge/version-1.3.0-green)
+![Version](https://img.shields.io/badge/version-1.4.0-green)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)
 ![cuda 12.x](https://img.shields.io/badge/CUDA-12.x-0f9d58?logo=nvidia)
 
@@ -104,18 +104,18 @@
 
 ## 로드맵 및 미래 작업
 
-기여는 환영합니다! 주요 다가올 포인트는 다음과 같습니다:
+기여는 환영합니다! 주요 미래 개발 사항은 다음과 같습니다:
 
-- **다중 GPU 지원**: 다중 카드 설정과 NVLink 토폴로지에 대한 향상된 처리.
-- **컨테이너화**: 공식 Docker 지원으로 컨테이너 환경에서의 쉬운 배포.
-- **원격 액세스**: SSH 터널링 통합 및 안전한 원격 관리.
+- **다중 GPU 지원**: 다중 카드 설정 및 NVLink 토폴로지에 대한 향상된 처리.
+- **컨테이너화**: 공식 Docker 지원으로 컨테이너 환경에서 간편한 배포.
+- **원격 액세스**: SSH 터널링 통합 및 보안 원격 관리.
 - **크로스 플랫폼**:
-  - [완료] Linux 지원 (Ubuntu/Debian 집중).
-  - [완료] macOS 지원 (Apple Silicon 모니터링).
+  - [완료] Linux 지원 (Ubuntu/Debian 중심).
+  - [진행 중] macOS 지원 (Apple Silicon 모니터링).
 - **하드웨어 무관**:
   - [진행 중] AMD ROCm 지원.
-  - [진행 중] Intel Arc 지원.
-- **다국어 문서화**: [CONTRIBUTING.md](../CONTRIBUTING.md)를 참조하여 참여 방법 확인.
+  - [미정] Intel Arc 지원.
+- **다국어 문서화**: [기여 가이드](../CONTRIBUTING.md)를 참조하세요.
 
 ## 요구 사항
 
@@ -154,10 +154,10 @@
 
 ### 빠른 시작
 
-1. **저장소**를 다운로드하거나 클론하십시오.
+1. **저장소 다운로드** 또는 복제.
 2. **설정 실행**:
 
-   **윈도우**:
+   **Windows**:
 
 ```powershell
    .\setup.ps1

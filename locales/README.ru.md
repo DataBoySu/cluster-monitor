@@ -26,7 +26,7 @@
 <!-- HTML_BLOCK: no change to url; output entire as it is... -->
 ![License](https://img.shields.io/badge/license-MIT-orange.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-pink)
-![Version](https://img.shields.io/badge/version-1.3.0-green)
+![Version](https://img.shields.io/badge/version-1.4.0-green)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)
 ![cuda 12.x](https://img.shields.io/badge/CUDA-12.x-0f9d58?logo=nvidia)
 
